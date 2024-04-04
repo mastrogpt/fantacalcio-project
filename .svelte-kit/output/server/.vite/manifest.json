@@ -1,0 +1,155 @@
+{
+  ".svelte-kit/generated/server/internal.js": {
+    "file": "internal.js",
+    "imports": [
+      "_internal.js"
+    ],
+    "isEntry": true,
+    "src": ".svelte-kit/generated/server/internal.js"
+  },
+  "_Loader.js": {
+    "file": "chunks/Loader.js",
+    "imports": [
+      "_ssr.js"
+    ]
+  },
+  "_internal.js": {
+    "file": "chunks/internal.js",
+    "imports": [
+      "_ssr.js"
+    ]
+  },
+  "_public.js": {
+    "file": "chunks/public.js"
+  },
+  "_ssr.js": {
+    "file": "chunks/ssr.js"
+  },
+  "node_modules/@sveltejs/kit/src/runtime/server/index.js": {
+    "file": "index.js",
+    "imports": [
+      "_internal.js",
+      "_ssr.js"
+    ],
+    "isEntry": true,
+    "src": "node_modules/@sveltejs/kit/src/runtime/server/index.js"
+  },
+  "src/lib/assets/football.png": {
+    "file": "_app/immutable/assets/football.8bd74c0c.png",
+    "src": "src/lib/assets/football.png"
+  },
+  "src/lib/assets/footballVertical.png": {
+    "file": "_app/immutable/assets/footballVertical.be149ba5.png",
+    "src": "src/lib/assets/footballVertical.png"
+  },
+  "src/lib/assets/logoMastroGPT.svg": {
+    "file": "_app/immutable/assets/logoMastroGPT.e3fc6d03.svg",
+    "src": "src/lib/assets/logoMastroGPT.svg"
+  },
+  "src/routes/+error.svelte": {
+    "file": "entries/pages/_error.svelte.js",
+    "imports": [
+      "_ssr.js"
+    ],
+    "isEntry": true,
+    "src": "src/routes/+error.svelte"
+  },
+  "src/routes/+layout.css": {
+    "file": "_app/immutable/assets/_layout.ce979173.css",
+    "src": "src/routes/+layout.css"
+  },
+  "src/routes/+layout.svelte": {
+    "assets": [
+      "_app/immutable/assets/logoMastroGPT.e3fc6d03.svg"
+    ],
+    "css": [
+      "_app/immutable/assets/_layout.ce979173.css"
+    ],
+    "file": "entries/pages/_layout.svelte.js",
+    "imports": [
+      "_ssr.js"
+    ],
+    "isEntry": true,
+    "src": "src/routes/+layout.svelte"
+  },
+  "src/routes/+layout.ts": {
+    "file": "entries/pages/_layout.ts.js",
+    "isEntry": true,
+    "src": "src/routes/+layout.ts"
+  },
+  "src/routes/+page.svelte": {
+    "assets": [
+      "_app/immutable/assets/football.8bd74c0c.png",
+      "_app/immutable/assets/footballVertical.be149ba5.png"
+    ],
+    "file": "entries/pages/_page.svelte.js",
+    "imports": [
+      "_ssr.js",
+      "_Loader.js"
+    ],
+    "isEntry": true,
+    "src": "src/routes/+page.svelte"
+  },
+  "src/routes/all/+page.svelte": {
+    "file": "entries/pages/all/_page.svelte.js",
+    "imports": [
+      "_ssr.js",
+      "_Loader.js"
+    ],
+    "isEntry": true,
+    "src": "src/routes/all/+page.svelte"
+  },
+  "src/routes/comparator/+page.svelte": {
+    "file": "entries/pages/comparator/_page.svelte.js",
+    "imports": [
+      "_ssr.js",
+      "_Loader.js"
+    ],
+    "isEntry": true,
+    "src": "src/routes/comparator/+page.svelte"
+  },
+  "src/routes/lineup/+page.svelte": {
+    "file": "entries/pages/lineup/_page.svelte.js",
+    "imports": [
+      "_ssr.js",
+      "_Loader.js"
+    ],
+    "isEntry": true,
+    "src": "src/routes/lineup/+page.svelte"
+  },
+  "src/routes/panchinari/+page.svelte": {
+    "file": "entries/pages/panchinari/_page.svelte.js",
+    "imports": [
+      "_ssr.js"
+    ],
+    "isEntry": true,
+    "src": "src/routes/panchinari/+page.svelte"
+  },
+  "src/routes/stats/[playerId]/+page.svelte": {
+    "file": "entries/pages/stats/_playerId_/_page.svelte.js",
+    "imports": [
+      "_ssr.js",
+      "_public.js",
+      "_Loader.js"
+    ],
+    "isEntry": true,
+    "src": "src/routes/stats/[playerId]/+page.svelte"
+  },
+  "src/routes/stats/[playerId]/+page.ts": {
+    "file": "entries/pages/stats/_playerId_/_page.ts.js",
+    "imports": [
+      "_public.js"
+    ],
+    "isEntry": true,
+    "src": "src/routes/stats/[playerId]/+page.ts"
+  },
+  "src/routes/unavailable/+page.svelte": {
+    "file": "entries/pages/unavailable/_page.svelte.js",
+    "imports": [
+      "_ssr.js",
+      "_Loader.js"
+    ],
+    "isEntry": true,
+    "src": "src/routes/unavailable/+page.svelte"
+  }
+}

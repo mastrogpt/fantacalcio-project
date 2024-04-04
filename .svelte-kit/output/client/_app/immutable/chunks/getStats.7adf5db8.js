@@ -1,0 +1,1 @@
+import{a as o,g as n}from"./public.ca8536a6.js";function s(){return o.get(n).then(t=>t.data.players).catch(t=>{throw console.error(t),t})}async function c(t){try{const a=(await s()).find(e=>e.id==t);if(a)return a;throw new Error(`Player with ID ${t} not found.`)}catch(r){throw console.error(r),r}}export{c as g};
