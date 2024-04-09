@@ -1,16 +1,10 @@
 {
 	"name": "fantacalcio-fantamaster",
-	"image": "ghcr.io/nuvolaris/devcontainer:3.1.0-mastrogpt.2403171925",
-	"mounts": [
-		"source=/var/run/docker.sock,target=/var/run/docker-host.sock,type=bind"
-	],
+	"image": "ghcr.io/nuvolaris/devcontainer:3.1.0-mastrogpt.2404092235",
 	"remoteUser": "nuvolaris",
 	"overrideCommand": false,
-	"runArgs": [
-		"--network=host"
-	],
 	"hostRequirements": {
-		"cpus": 4
+	    "cpus": 4
 	},
 	"customizations": {
 		"vscode": {
