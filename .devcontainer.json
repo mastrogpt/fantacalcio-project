@@ -9,6 +9,9 @@
 	"runArgs": [
 		"--network=host"
 	],
+	"hostRequirements": {
+		"cpus": 4
+	},
 	"customizations": {
 		"vscode": {
 			"extensions": [
