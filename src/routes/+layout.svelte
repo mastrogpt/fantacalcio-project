@@ -7,6 +7,7 @@
 <body>
 	<Header />
 	<Divider />
+	
 	<div class="p-2">
 		<slot />
 	</div>

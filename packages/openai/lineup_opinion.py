@@ -6,6 +6,7 @@
 from openai import AzureOpenAI
 
 ROLE = """
+
 The main goal is to optimize decisions regarding 
 players, taking into account variables such as players past performances, 
 injury probabilities, current form, upcoming opponents, and gameplay strategies. 

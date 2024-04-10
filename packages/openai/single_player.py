@@ -3,9 +3,11 @@
 #--param OPENAI_API_KEY $OPENAI_API_KEY
 #--kind python:default
 
+
 from openai import AzureOpenAI
 
 ROLE = """
+
 The main goal is to optimize decisions regarding team formation, 
 player transfers, and sales, taking into account variables such as players' past performances, 
 injury probabilities, current form, upcoming opponents, and gameplay strategies. 

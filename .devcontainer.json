@@ -1,9 +1,6 @@
 {
 	"name": "fantacalcio-fantamaster",
 	"image": "ghcr.io/nuvolaris/devcontainer:3.1.0-mastrogpt.2404092341",
-	"hostRequirements": {
-	    "cpus": 4
-	},
 	"customizations": {
 		"vscode": {
 			"extensions": [
