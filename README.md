@@ -6,6 +6,8 @@
 
 To assist us in enhancing this demo project, kindly fork this repository in your GitHub Codespace.
 
+To devel with this project -> rename `.env.example` in `.env` 
+
 ## Acknowledgements
 
 Special thanks to Fantamaster for providing their APIs, significantly enhancing the functionality of this project.
