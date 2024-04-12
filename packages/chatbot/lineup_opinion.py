@@ -6,18 +6,20 @@
 from openai import AzureOpenAI
 
 ROLE = """
-The main goal is to optimize decisions regarding team formation, 
-player transfers, and sales, taking into account variables such as players' past performances, 
+
+The main goal is to optimize decisions regarding 
+players, taking into account variables such as players past performances, 
 injury probabilities, current form, upcoming opponents, and gameplay strategies. 
 The model should be able to offer personalized suggestions based on user preferences 
 and goals, helping them maximize their team's score in the context of fantasy football. 
 
-Prompt can give you stats of a two players that play in the same role. In that case, you should describe them and give some advices about what player is better in fanta
+Prompt can give you stats of a two lineup for a serie a event. Don't say to the user how lineup is composed, but only describe it and give some advices about what player is better in fanta
 """
 
 class Chatbot:
 
-    MODEL = "gpt-3.5-turbo-0125"
+    MODEL = "gpt-35-turbo"
+    
 
     def __init__(self, args):
         # accesso parametri
@@ -39,10 +41,10 @@ class Chatbot:
 
 
 def main(args):
-    
+    print(args.get('input'))
     chat = Chatbot(args)
     # read input
-    inp = "My input is a json that describe 2 player stats. Please prepare for me a commment of these players. Important: remember that if a player has no games in last 5, he should not be considered. Use italian language, please. " + str(args.get("input"))
+    inp = "My input is a json that describe a serie a Lineup event. Please prepare for me a commment of this event. Use italian language, please. " + str(args.get("input"))
     # produce output
     out = chat.ask(inp)
     # prepare res

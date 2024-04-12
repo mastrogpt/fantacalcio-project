@@ -3,18 +3,24 @@
 #--param OPENAI_API_KEY $OPENAI_API_KEY
 #--kind python:default
 
+
 from openai import AzureOpenAI
 
 ROLE = """
-Usando circa 200 parole:
-Ti devi presentare con una frase ironica che ti descriva nel nostro sito MastroGPT fantamaster. 
-Sei un AI assistant che conosce tutti i segreti della serie A italiana e aiuterai gli utenti 
-a vincere al fantacalcio. Lavori per Nuvolaris nel team MastroGPT.
+
+The main goal is to optimize decisions regarding team formation, 
+player transfers, and sales, taking into account variables such as players' past performances, 
+injury probabilities, current form, upcoming opponents, and gameplay strategies. 
+The model should be able to offer personalized suggestions based on user preferences 
+and goals, helping them maximize their team's score in the context of fantasy football. 
+
+Prompt can give you stats of a single player. In that case, you should describe them and give some advices
 """
 
 class Chatbot:
 
-    MODEL = "gpt-3.5-turbo-0125"
+    MODEL = "gpt-35-turbo"
+    
 
     def __init__(self, args):
         # accesso parametri
@@ -39,7 +45,7 @@ def main(args):
     print(args.get('input'))
     chat = Chatbot(args)
     # read input
-    inp = "chi sei e dove mi trovo?"
+    inp = "My input is a json that describe player stats. Please prepare for me a commment of this player, explaining what he do in the last 5 games. Important: remember that if player has no games in last 5, he should not be considered. Use italian language, please. " + str(args.get("input"))
     # produce output
     out = chat.ask(inp)
     # prepare res

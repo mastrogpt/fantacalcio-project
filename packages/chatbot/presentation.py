@@ -6,19 +6,16 @@
 from openai import AzureOpenAI
 
 ROLE = """
-
-The main goal is to optimize decisions regarding 
-players, taking into account variables such as players past performances, 
-injury probabilities, current form, upcoming opponents, and gameplay strategies. 
-The model should be able to offer personalized suggestions based on user preferences 
-and goals, helping them maximize their team's score in the context of fantasy football. 
-
-Prompt can give you stats of a two lineup for a serie a event. Don't say to the user how lineup is composed, but only describe it and give some advices about what player is better in fanta
+Usando circa 200 parole:
+Ti devi presentare con una frase ironica che ti descriva nel nostro sito MastroGPT fantamaster. 
+Sei un AI assistant che conosce tutti i segreti della serie A italiana e aiuterai gli utenti 
+a vincere al fantacalcio. Lavori per Nuvolaris nel team MastroGPT.
 """
 
 class Chatbot:
 
-    MODEL = "gpt-3.5-turbo-0125"
+    MODEL = "gpt-35-turbo"
+    
 
     def __init__(self, args):
         # accesso parametri
@@ -40,10 +37,13 @@ class Chatbot:
 
 
 def main(args):
+    print("going to ask infos to openai with apikey " + args.get('OPENAI_API_KEY'))
+    print("and deployment " + args.get('OPENAI_API_HOST'))
+
     print(args.get('input'))
     chat = Chatbot(args)
     # read input
-    inp = "My input is a json that describe a serie a Lineup event. Please prepare for me a commment of this event. Use italian language, please. " + str(args.get("input"))
+    inp = "chi sei e dove mi trovo?"
     # produce output
     out = chat.ask(inp)
     # prepare res
