@@ -1,11 +1,11 @@
-# Fantacalcio MastroGPT Project
+# Fantasy Football MastroGPT Project
 
-MastroGPT: fantacalcio demo
+**MastroGPT: Fantasy Football Demo**
 
-## How to Use
+## How to Contribute
 
-To deploy this project, please remember to convert `.env.example` to `.env` and also substitute `{yournamespace}` with your Nuvolaris namespace.
+To assist us in enhancing this demo project, kindly fork this repository in your GitHub Codespace.
 
 ## Acknowledgements
 
-Special thanks to Fantamaster for providing their APIs, which greatly enhance the functionality of this project.
+Special thanks to Fantamaster for providing their APIs, significantly enhancing the functionality of this project.
