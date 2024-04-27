@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { PUBLIC_URL_STATS  } from '$env/static/public';
+import { PUBLIC_URL_API_FANTAMASTER  } from '$env/static/public';
 
 
 /*
@@ -46,9 +46,9 @@ export interface StatsData {
 
 export function getStatsData(): Promise<PlayersStats[]> {
     return axios
-        .get<StatsData>(PUBLIC_URL_STATS)
+        .get(PUBLIC_URL_API_FANTAMASTER, {params: {"action": "playersstats"}})
         .then((response) => {
-            return response.data.players;
+            return response.data.data.players as PlayersStats[];
         })
         .catch((error) => {
             console.error(error);
