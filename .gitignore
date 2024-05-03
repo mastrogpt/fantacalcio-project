@@ -2,3 +2,4 @@ node_modules/
 .svelte-kit/
 web/*
 packages/**/*.zip
+.vscode/
