@@ -12,6 +12,7 @@ export interface AiOutput {
 export function getAiComparison(input: object): Promise<string> {
     return axios
         .post<AiOutput>(PUBLIC_URL_AI_COMPARATOR, {
+            
             'input': input
         })
         .then((response) => {

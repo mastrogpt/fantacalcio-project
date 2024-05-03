@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { PUBLIC_URL_API_FANTAMASTER, PUBLIC_URL_PLAYERS, PUBLIC_URL_UNAVAILABLE_PLAYERS } from '$env/static/public';
+import { PUBLIC_URL_API_BASEURL } from '$env/static/public';
 
 
 /*
@@ -18,7 +18,7 @@ export interface PlayersList extends Array<Player> {}
 
 export function getPlayersList(): Promise<PlayersList> {
     return axios
-        .get(PUBLIC_URL_API_FANTAMASTER,{params: {"action": "playerslist"}})
+        .get(PUBLIC_URL_API_BASEURL,{params: {"module": "fantamaster", "action": "playerslist"}})
         .then((response) => {
             return response.data.data.players.map((player: any) => ({
                 id: player.id,
@@ -56,9 +56,9 @@ export interface UnavailabilityInfo {
 
 export function getUnavailablePlayers(): Promise<UnavailablePlayers[]> {
     return axios
-        .get(PUBLIC_URL_UNAVAILABLE_PLAYERS)
+        .get(PUBLIC_URL_API_BASEURL,{params: {"module": "fantamaster", "action": "unavailable"}})
         .then((response) => {
-            return response.data.unavailable.map((player: any) => ({
+            return response.data.data.unavailable.map((player: any) => ({
                 team: player.team,
                 role: player.role,
                 desc: player.desc,
