@@ -2,6 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
-body{
-    font-family: 'Courier New', Courier, monospace;
+body {
+    font-family: 'Quattrocento Sans', 'Roboto', sans-serif;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Quattrocento', 'Roboto Serif', serif;
+    font-weight: bold;
 }

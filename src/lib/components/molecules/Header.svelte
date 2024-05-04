@@ -162,14 +162,14 @@
 		</div>
 	</div>
 	<div>
-		<h1 class="text-xl mt-2 md:text-7xl text-center text-primary font-semibold tracking-widest">
+		<h1 class="font-serif text-xl mt-2 md:text-7xl text-center text-primary tracking-widest">
 			AI Fantamaster
 			<div class="text-primary text-xl md:text-3xl flex items-center justify-center">
 				<a href="https://nuvolaris.io">
 					<span class="mr-2 text-m"> by MastroGPT</span>
 
 					<div class="inline-block align-middle">
-						<img src={logoMastroGPT} alt="Nuvolaris Logo" class="h-6 md:h-10 lg:h-12 xl:h-14" />
+						<img src={logoMastroGPT} alt="Nuvolaris Logo" class="h-10 md:h-10 lg:h-16 xl:h-20" />
 					</div>
 				</a>
 			</div>

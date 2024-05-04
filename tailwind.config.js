@@ -5,10 +5,21 @@ export default {
   theme: {
     extend: {
       colors: {
-        primary: "#1b81a5",
-        secondary: "#ffa944",
-        light:"#5aaadb"
-      },
+        //text: coal
+        'text': '#0a0e15',
+        //background: light gray 
+        'light': '#fafafa',
+        //primary: manticore wing  (similar)
+        'primary': '#E18012',
+        //secondary: persian green
+        'secondary': '#28af60',
+        //acceent: casandora yellow 
+        'accent': '#feca57'
+       },
+    },
+    fontFamily: {
+      'sans': ['Quattrocento Sans', 'Roboto', 'sans-serif'],
+      'serif': ['Quattrocento', 'Roboto Serif', 'serif'],
     },
   },
   plugins: []
