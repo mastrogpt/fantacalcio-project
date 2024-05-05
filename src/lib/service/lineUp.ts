@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { PUBLIC_URL_LINEUP } from '$env/static/public';
+import { PUBLIC_URL_API_BASEURL } from '$env/static/public';
 
 export interface PlayerInjured {
     desc: string;
@@ -88,9 +88,9 @@ export interface FootballMatch {
 
 export function getLineUp(): Promise<FootballMatch> {
     return axios
-        .get(PUBLIC_URL_LINEUP)
+        .get(PUBLIC_URL_API_BASEURL, {params: {"module":"fantamaster", "action": "lineups"}})
         .then((response) => {
-            return response.data})
+            return response.data.data})
         .catch((error) => {
             console.error(error);
             throw error;
