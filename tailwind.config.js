@@ -18,8 +18,9 @@ export default {
        },
     },
     fontFamily: {
-      'sans': ['Quattrocento Sans', 'Roboto', 'sans-serif'],
-      'serif': ['Quattrocento', 'Roboto Serif', 'serif'],
+      'sans': ['Noto Sans', 'sans-serif'],
+      'francois': ['Francois One', 'sans-serif'],
+       /*'serif': ['Quattrocento', 'Roboto Serif', 'serif'],*/
     },
   },
   plugins: []

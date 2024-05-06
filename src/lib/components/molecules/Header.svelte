@@ -162,7 +162,7 @@
 		</div>
 	</div>
 	<div>
-		<h1 class="font-serif text-xl mt-2 md:text-7xl text-center text-primary tracking-widest">
+		<h1 class="text-xl mt-2 md:text-7xl text-center text-primary tracking-wider">
 			AI Fantamaster
 			<div class="text-primary text-xl md:text-3xl flex items-center justify-center">
 				<a href="https://nuvolaris.io">
