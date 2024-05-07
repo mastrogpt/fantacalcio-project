@@ -1,12 +1,41 @@
+@import url('https://fonts.googleapis.com/css2?family=Francois+One&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+
 body {
-    font-family: 'Quattrocento Sans', 'Roboto', sans-serif;
+    @apply font-sans;
 }
 
-h1, h2, h3, h4, h5, h6 {
-    font-family: 'Quattrocento', 'Roboto Serif', serif;
-    font-weight: bold;
-}
+@layer base {
+    h1, h2, h3, h4, h5, h6 {
+        @apply font-francois font-bold;
+    }
+    
+    h1 {
+      @apply text-4xl;
+    }
+  
+    h2 {
+      @apply text-3xl;
+    }
+  
+    h3 {
+      @apply text-2xl;
+    }
+  
+    h4 {
+      @apply text-xl;
+    }
+  
+    h5 {
+      @apply text-lg;
+    }
+  
+    h6 {
+      @apply text-base;
+    }
+  }
