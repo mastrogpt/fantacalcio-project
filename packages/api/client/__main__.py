@@ -1,3 +1,15 @@
+#--param FANTAMASTER_BASE_URL $FANTAMASTER_BASE_URL
+#--param FANTAMASTER_TOOL_BASE_URL $FANTAMASTER_TOOL_BASE_URL
+#--param ENDPOINT_PLAYERS $ENDPOINT_PLAYERS
+#--param ENDPOINT_PLAYERS_LIST $ENDPOINT_PLAYERS_LIST
+#--param ENDPOINT_PLAYERS_UNAVAILABLE $ENDPOINT_PLAYERS_UNAVAILABLE
+#--param ENDPOINT_RATINGS $ENDPOINT_RATINGS
+#--param ENDPOINT_RATING_BY_DAY $ENDPOINT_RATING_BY_DAY
+#--param ENDPOINT_PROBABLE_LINEUPS $ENDPOINT_PROBABLE_LINEUPS
+#--param ENDPOINT_SYNTHETIC_STATS_THIS_SEASON $ENDPOINT_SYNTHETIC_STATS_THIS_SEASON
+#--param DETAIL_STATS_URL $DETAIL_STATS_URL
+#--param DETAIL_PLAYERS_LIST $DETAIL_PLAYERS_LIST
+
 #--kind python:default
 #--web true
 
@@ -18,7 +30,7 @@ def main(args):
     sys.path.insert(0, curpath)
     api_lib = importlib.import_module(module_name)
     class_ = getattr(api_lib, "Api")
-    api = class_()
+    api = class_(args)
     
     resp = None
 
