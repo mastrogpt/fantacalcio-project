@@ -18,6 +18,7 @@ import os.path
 import sys
 
 def main(args):
+  print("test")
   module_name = args.get("module")
   action = args.get("action")
 
