@@ -1,6 +1,5 @@
 from abc import ABC, abstractmethod
 import requests
-#import validators
 
 class Client(ABC):
 
@@ -31,17 +30,6 @@ class Client(ABC):
     if tool_api_url is None or tool_api_url.isspace():
       raise ValueError("Empty Url")
     else: self.tool_api_url = tool_api_url
-
-    #if valid: 
-    #  self.public_api_url = public_api_url
-    #else:
-    #   raise Exception("Url invalid")
-
-    #valid= validators.url(tool_api_url)
-    #if valid: 
-    #  self.tool_api_url = tool_api_url
-    #else:
-    #   raise Exception("Url invalid")
 
   # Lista Giocatori attualmente in Serie A e utilizzabili per il fantacalcio
   @abstractmethod

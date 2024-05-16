@@ -12,8 +12,7 @@ class Api(Client):
       tool_api_url = args.get("FANTAMASTER_TOOL_BASE_URL")
     
     super().__init__(public_api_url, tool_api_url)
-    #self.public_api_url = public_api_url
-    #self.tool_api_url = tool_api_url
+
     self.ENDPOINT_PLAYERS_LIST = args.get("ENDPOINT_PLAYERS_LIST")
     self.ENDPOINT_PLAYERS_UNAVAILABLE = args.get("ENDPOINT_PLAYERS_UNAVAILABLE")
     self.ENDPOINT_SYNTHETIC_STATS_THIS_SEASON = args.get("ENDPOINT_SYNTHETIC_STATS_THIS_SEASON")
