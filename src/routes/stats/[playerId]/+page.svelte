@@ -44,7 +44,7 @@
 <div class="grid grid-cols-1 gap-4 lg:gap-8 mx-auto justify-center">
 	<div class="h-32 rounded-lg bg-gray-200 lg:col-span-2">
 		<div class="bg-gradient-to-r from-primary from-10% via-gray-200 via-30% to-gray-100 to-65%">
-			<h2 class="text-2xl text-primary font-bold text-center mb-5">
+			<h2 class="text-center mb-5">
 				<strong>{data.playerData.name}</strong> -
 				<strong class="text-primary">{data.playerData.team}</strong>
 			</h2>
