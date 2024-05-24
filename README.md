@@ -3,7 +3,6 @@
 Build easily AI applications with MastroGPT!
 
 # Setup
-
 You can run Nuvolaris Starter: 
 - Online with Codespace 
 - Locally with Docker

@@ -1,0 +1,13 @@
+{
+  "workbench.colorCustomizations": {
+    "commandCenter.border": "#e7e7e799",
+    "sash.hoverBorder": "#00afe9",
+    "titleBar.activeBackground": "#0089b6",
+    "titleBar.activeForeground": "#e7e7e7",
+    "titleBar.inactiveBackground": "#0089b699",
+    "titleBar.inactiveForeground": "#e7e7e799"
+  },
+  "conventionalCommits.scopes": [
+    "api"
+  ]
+}

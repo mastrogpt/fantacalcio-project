@@ -39,8 +39,7 @@
 	}
 </script>
 
-<body>
-	<div class="flex items-center justify-center">
+<div class="flex items-center justify-center">
 		<div class="mx-auto">
 			{#if !fMatch}
 				<Loader />
@@ -160,4 +159,3 @@
 			</div>
 		</div>
 	{/if}
-</body>
