@@ -57,7 +57,7 @@
 <div class="grid grid-cols-1 gap-2 lg:gap-8 mx-auto justify-center sm:w-auto">
 	<div class="h-32 rounded-lg lg:col-span-2">
 		<div class="overflow-x-auto rounded-t-lg">
-			<h2 class="text-2xl text-primary font-bold text-center mb-5">Gli indisponibili</h2>
+			<h2 class="text-center mb-5">Gli indisponibili</h2>
 			<div>
 				{#if unavailabilityInfo && unavailabilityInfo.length > 0}
 					<div class="overflow-x-auto">

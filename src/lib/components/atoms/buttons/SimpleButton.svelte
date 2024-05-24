@@ -15,7 +15,7 @@
 </script>
 
 <a
-	class="group inline-block rounded-full bg-gradient-to-r from-primary via-secondary to-light p-[2px] hover:text-white focus:outline-none focus:ring active:text-opacity-75"
+	class="group inline-block rounded-full bg-gradient-to-r from-primary via-dark to-light p-[2px] hover:text-white focus:outline-none focus:ring active:text-opacity-75"
 	{href}
 	on:click={() => handleClick()}
 >
