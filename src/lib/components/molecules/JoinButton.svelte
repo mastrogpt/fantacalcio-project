@@ -46,7 +46,7 @@
 	<div class="fixed z-10 inset-0 flex items-center justify-center bg-black bg-opacity-50">
 		<section class="relative rounded-3xl shadow-2xl w-4/5 bg-white">
 			<div class="p-6 text-center sm:p-4">
-				<h2 class="mt-2 text-l text-primary font-bold">
+				<h2 class="mt-2">
 					Vuoi unirti al progetto? Inserisci la tua la mail e ti contatteremo al più presto!
 				</h2>
 				<div>
