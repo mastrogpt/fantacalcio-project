@@ -5,10 +5,31 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+	--black: 0, 0, 0;
+	--white: 255, 255, 255;
+	--dark: 26, 38, 58;
+	--light: 253, 253, 253;
+	--primary: 16, 152, 125;
+	--accent: 255, 215, 0;
+}
 
 body {
+	position: relative;
 	font-family: 'Inter', 'Roboto', sans-serif;
 	font-size: 16px;
+	background: linear-gradient(
+		200deg,
+		rgb(var(--primary)) 0%,
+		rgb(var(--primary)) 25%,
+		rgb(var(--accent)) 80%
+	);
+}
+
+header {
+	position: sticky;
+	top: 0;
+	z-index: 100;
 }
 
 /****************
@@ -28,7 +49,7 @@ h1 {
 h2 {
 	font-family: 'Francois One', sans-serif;
 	font-size: 3.1875rem; /* 51px */
-	line-height: 4.5rem; /* 72px */
+	line-height: 3rem; /* 72px */
 	letter-spacing: 0;
 	font-weight: 400; /* Regular */
 }
