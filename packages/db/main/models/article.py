@@ -33,6 +33,7 @@ class Article(Base):
     
     @staticmethod
     def handler(engine, args):
+        Base.metadata.create_all(engine)
         query_type = args.get("query")
         
       
