@@ -86,7 +86,7 @@
 		<div class="p-5">
 			<div class="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-8">
 				<div class="h-70 rounded-lg">
-					<h2 class="text-2xl font-bold text-secondary">
+					<h2 class="text-dark">
 						Formazione di casa: {fMatch.lineups[selectedLineUp].home}
 					</h2>
 					<div class="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-8">
@@ -105,7 +105,7 @@
 					</div>
 				</div>
 				<div class="h-70 rounded-lg">
-					<h2 class="text-2xl font-bold text-secondary">
+					<h2 class="text-dark">
 						Formazione ospite: {fMatch.lineups[selectedLineUp].away}
 					</h2>
 					<div class="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-8">

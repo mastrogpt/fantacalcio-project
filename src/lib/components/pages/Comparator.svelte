@@ -100,7 +100,7 @@
 
 <div class="grid grid-cols-1 gap-4 lg:gap-8 mx-auto justify-center sm:w-auto">
 	<div class="h-32 rounded-lg lg:col-span-2">
-		<h2 class="text-2xl text-primary font-bold text-center mb-5">Tutti i giocatori</h2>
+		<h2 class="text-center mb-5">Tutti i giocatori</h2>
 		{#if players}
 			<div class="overflow-x-auto">
 				<table class="min-w-full divide-y-2 divide-gray-200 bg-white text-sm">
