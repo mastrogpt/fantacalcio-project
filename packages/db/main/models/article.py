@@ -48,7 +48,6 @@ class Article(Base):
         else:
             return Article.get_handler(engine, args)
     
-    @staticmethod
     def get_handler(engine, args):
         if 'id' in args:
             article = Article.get_article_by_id(engine, args['id'])
@@ -56,14 +55,13 @@ class Article(Base):
         else:
             return {"body": Article.get_all_articles(engine)}
 
-    @staticmethod
     def delete_handler(engine, args):
         if 'id' in args:
             return {"body": Article.delete_by_id(engine, args['id'])}
         else:
             return {"body": Article.delete_all(engine)}
 
-    @staticmethod
+    
     def get_all_articles(engine):
         Session = sessionmaker(bind=engine)
         session = Session()
@@ -76,7 +74,6 @@ class Article(Base):
         finally:
             session.close()
 
-    @staticmethod
     def delete_all(engine):
         Session = sessionmaker(bind=engine)
         session = Session()
@@ -91,7 +88,6 @@ class Article(Base):
         finally:
             session.close()
 
-    @staticmethod
     def delete_by_id(engine, article_id):
         Session = sessionmaker(bind=engine)
         session = Session()
@@ -110,7 +106,6 @@ class Article(Base):
         finally:
             session.close()
 
-    @staticmethod
     def save_articles(engine, articles):
         Session = sessionmaker(bind=engine)
         session = Session()
@@ -134,7 +129,6 @@ class Article(Base):
         finally:
             session.close()
 
-    @staticmethod
     def get_article_by_id(engine, article_id):
         Session = sessionmaker(bind=engine)
         session = Session()

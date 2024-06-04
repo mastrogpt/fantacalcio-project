@@ -18,7 +18,6 @@ def main(args):
         "body": "model and/or query not present"
     }
    
-@dataclass
 class DbConnection:
     engine = None
     session = None
