@@ -7,35 +7,153 @@
 
 
 body {
-    @apply font-sans;
+	font-family: 'Inter', 'Roboto', sans-serif;
+	font-size: 16px;
 }
 
-@layer base {
-    h1, h2, h3, h4, h5, h6 {
-        @apply font-francois font-bold;
-    }
-    
-    h1 {
-      @apply text-4xl;
-    }
-  
-    h2 {
-      @apply text-3xl;
-    }
-  
-    h3 {
-      @apply text-2xl;
-    }
-  
-    h4 {
-      @apply text-xl;
-    }
-  
-    h5 {
-      @apply text-lg;
-    }
-  
-    h6 {
-      @apply text-base;
-    }
-  }
+/****************
+** Headings
+****************/
+
+/* Headline 1 */
+h1 {
+	font-family: 'Francois One', sans-serif;
+	font-size: 6rem; /* 96px */
+	line-height: 6.5rem; /* 104px */
+	letter-spacing: 0;
+	font-weight: 400; /* Regular */
+}
+
+/* Headline 2 */
+h2 {
+	font-family: 'Francois One', sans-serif;
+	font-size: 3.1875rem; /* 51px */
+	line-height: 4.5rem; /* 72px */
+	letter-spacing: 0;
+	font-weight: 400; /* Regular */
+}
+
+/* Headline 3 */
+h3 {
+	font-family: 'Inter', sans-serif;
+	font-size: 2.25rem; /* 36px */
+	line-height: 3rem; /* 48px */
+	letter-spacing: 0;
+	font-weight: 400; /* Regular */
+}
+
+/* Headline 4 */
+h4 {
+	font-family: 'Inter', sans-serif;
+	font-size: 1.5625rem; /* 25px */
+	line-height: 2rem; /* 32px */
+	letter-spacing: 0;
+	font-weight: 400; /* Regular */
+}
+
+/* Headline 5 / Form label / Active pagination item / Active filtering item */
+h5,
+.form-label,
+.active-pagination-item,
+.active-filtering-item {
+	font-family: 'Inter', sans-serif;
+	font-size: 1.125rem; /* 18px */
+	line-height: 1.5rem; /* 24px */
+	letter-spacing: 0;
+	font-weight: 700; /* Bold */
+}
+
+/* Headline 6 / Menu item / Default link / Button label */
+h6,
+.menu-item,
+.default-link,
+.button-label {
+	font-family: 'Francois One', sans-serif;
+	font-size: 1rem; /* 16px */
+	line-height: 1.5rem; /* 24px */
+	letter-spacing: 0.1em; /* 10% */
+	font-weight: 400; /* Regular */
+}
+
+/****************
+** Links
+****************/
+
+/* Filtering link */
+.filtering-link {
+	font-family: 'Inter', sans-serif;
+	font-size: 1.125rem; /* 18px */
+	line-height: 1.5rem; /* 24px */
+	letter-spacing: 0;
+	font-weight: 700; /* Bold */
+}
+
+/* Regular link */
+.regular-link {
+	font-family: 'Inter', sans-serif;
+	font-size: 1.125rem; /* 18px */
+	line-height: 1.5rem; /* 24px */
+	letter-spacing: 0;
+	font-weight: 700; /* Bold */
+}
+
+/* Special link */
+.special-link {
+	font-family: 'Inter', sans-serif;
+	font-size: 0.875rem; /* 14px */
+	line-height: 1.5rem; /* 24px */
+	letter-spacing: 0.04em; /* 4% */
+	font-weight: 700; /* Bold */
+}
+
+/**********************
+** Paragraphs & Misc
+**********************/
+
+/* Paragraph */
+p {
+	font-family: 'Inter', sans-serif;
+	font-size: 1.125rem; /* 18px */
+	line-height: 1.5rem; /* 24px */
+	letter-spacing: 0;
+	font-weight: 400; /* Regular */
+}
+
+/* Muted text */
+.muted-text {
+	font-family: 'Inter', sans-serif;
+	font-size: 1.125rem; /* 18px */
+	line-height: 1.5rem; /* 24px */
+	letter-spacing: 0;
+	font-weight: 500; /* Medium */
+	font-style: italic;
+}
+
+/* Caption / Helper text */
+.caption,
+.helper-text {
+	font-family: 'Inter', sans-serif;
+	font-size: 0.875rem; /* 14px */
+	line-height: 1.5rem; /* 24px */
+	letter-spacing: 0;
+	font-weight: 500; /* Medium */
+	font-style: italic;
+}
+
+/* Breadcrumbs */
+.breadcrumbs {
+	font-family: 'Inter', sans-serif;
+	font-size: 0.875rem; /* 14px */
+	line-height: 1.5rem; /* 24px */
+	letter-spacing: 0;
+	font-weight: 500; /* Medium */
+}
+
+/* Micro */
+.micro {
+	font-family: 'Inter', sans-serif;
+	font-size: 0.625rem; /* 10px */
+	line-height: 1rem; /* 16px */
+	letter-spacing: 0.04em; /* 4% */
+	font-weight: 700; /* Bold */
+}
