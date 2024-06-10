@@ -12,6 +12,8 @@
 	--light: 253, 253, 253;
 	--primary: 16, 152, 125;
 	--accent: 255, 215, 0;
+	--swiper-pagination-color: rgb(var(--accent));
+	--swiper-pagination-bullet-inactive-color: rgb(var(--accent));
 }
 
 body {

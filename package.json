@@ -37,6 +37,8 @@
 	},
 	"type": "module",
 	"dependencies": {
+		"@tanstack/match-sorter-utils": "^8.15.1",
+		"@tanstack/svelte-table": "^8.17.3",
 		"animejs": "^3.2.2",
 		"axios": "^1.6.2",
 		"esbuild": "^0.20.1",

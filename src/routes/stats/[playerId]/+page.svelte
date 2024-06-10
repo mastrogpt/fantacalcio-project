@@ -49,7 +49,7 @@
 				<strong class="text-primary">{data.playerData.team}</strong>
 			</h2>
 			<div class="flex justify-end">
-				<BackButton href="/all" text="Indietro" />
+				<BackButton href="/players" text="Indietro" />
 				{#if !aiOpinion && !isLoading}
 					<GreenButton text="AIpinion" clickAction={getAiOpinion} />
 				{:else if isLoading || aiOpinion}
