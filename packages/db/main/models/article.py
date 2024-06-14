@@ -3,13 +3,14 @@ from sqlalchemy import Column, Integer, String, Text, ARRAY, DateTime
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.sql import delete
+from models.base import Base
 
 from datetime import datetime
 
-Base = declarative_base()
+#Base = declarative_base()
 
 class Article(Base):
-    __tablename__ = 'Articles'
+    __tablename__ = 'articles'
 
     id = Column(Integer, primary_key=True)
     uuid = Column(String(36), nullable=False)
@@ -33,7 +34,7 @@ class Article(Base):
     
     @staticmethod
     def handler(engine, args):
-        Base.metadata.create_all(engine)
+        #Base.metadata.create_all(engine)
         query_type = args.get("query")
         
       

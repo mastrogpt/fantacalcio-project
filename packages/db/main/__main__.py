@@ -5,14 +5,22 @@ from dataclasses import dataclass
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from models.article import Article
+from models.team import Team
+from models.utils import create_tables, drop_tables
 
 def main(args):
+
+    db_url = args.get("POSTGRES_URL")
    
     db = DbConnection()
-    db.connect_to_db(args.get("POSTGRES_URL"))
+    db.connect_to_db(db_url)
+    # drop_tables(db_url)
+    # create_tables(db_url)
     
     if(args.get("model") == "article"):
         return Article.handler(db.engine, args)
+    elif(args.get("model") == "team"):
+        return Team.handler(db.engine, args)    
     else: 
         return {
         "body": "model and/or query not present"
