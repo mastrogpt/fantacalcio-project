@@ -15,13 +15,13 @@ class Team(Base):
     team_founded = Column(Integer)
     team_logo_url = Column(String(255))
     current_in_serie_a = Column(Boolean)
-    footballapi_id = Column(Integer, unique=True)
+    apifootball_id = Column(Integer, unique=True)
 
     # players = relationship("Player", back_populates="team")
     # details = relationship("TeamDetails", back_populates="team")
     # team_name_mappings = relationship("TeamNameMapping", back_populates="team")
 
-    def __init__(self, team_name, team_code, team_country, team_founded, team_logo_url, current_in_serie_a, footballapi_id):
+    def __init__(self, team_name, team_code, team_country, team_founded, team_logo_url, current_in_serie_a, apifootball_id):
         #self.uuid = uuid
         self.team_name = team_name
         self.team_code = team_code
@@ -29,46 +29,45 @@ class Team(Base):
         self.team_founded = team_founded
         self.team_logo_url = team_logo_url
         self.current_in_serie_a = current_in_serie_a
-        self.footballapi_id = footballapi_id
+        self.apifootball_id = apifootball_id
         
     def __repr__(self):
-        return f"<Team(id={self.id}, team_name='{self.team_name}', team_code='{self.team_code}', team_country='{self.team_country}', team_founded={self.team_founded}, team_logo_url='{self.team_logo_url}', current_in_serie_a={self.current_in_serie_a}, footballapi_id={self.footballapi_id})>"
+        return f"<Team(id={self.id}, team_name='{self.team_name}', team_code='{self.team_code}', team_country='{self.team_country}', team_founded={self.team_founded}, team_logo_url='{self.team_logo_url}', current_in_serie_a={self.current_in_serie_a}, apifootball_id={self.apifootball_id})>"
 
     @staticmethod
-    def handler(engine, args):
-        #Base.metadata.create_all(engine)
+    def handler(session, args):
+
         query_type = args.get("query")
       
         if query_type == "delete":
-            return Team.delete_handler(engine, args)
+            return Team.delete_handler(session, args)
         elif query_type == "new":
             if 'teams' in args:
-                success = Team.save_teams(engine, args['teams'])
+                success = Team.save_teams(session, args['teams'])
                 return {"body": "Teams saved successfully" if success else "Failed to save teams"}
             else:
                 return {"body": "No teams provided in the payload"}
         else:
-            return Team.get_handler(engine, args)
+            return Team.get_handler(session, args)
 
     @staticmethod
-    def get_handler(engine, args):
+    def get_handler(session, args):
         if 'id' in args:
-            team = Team.get_team_by_id(engine, args['id'])
+            team = Team.get_team_by_id(session, args['id'])
             return {"body": team if team else "Team not found"}
         else:
-            return {"body": Team.get_all_teams(engine)}
+            return {"body": Team.get_all_teams(session)}
 
     @staticmethod
-    def delete_handler(engine, args):
+    def delete_handler(session, args):
         if 'id' in args:
-            return {"body": Team.delete_by_id(engine, args['id'])}
+            return {"body": Team.delete_by_id(session, args['id'])}
         else:
-            return {"body": Team.delete_all(engine)}
+            return {"body": Team.delete_all(session)}
 
     @staticmethod
-    def get_all_teams(engine):
-        Session = sessionmaker(bind=engine)
-        session = Session()
+    def get_all_teams(session):
+
         try:
             teams = session.query(Team).all()
             return [team._to_dict() for team in teams]
@@ -79,9 +78,8 @@ class Team(Base):
             session.close()
 
     @staticmethod
-    def delete_all(engine):
-        Session = sessionmaker(bind=engine)
-        session = Session()
+    def delete_all(session):
+
         try:
             session.execute(delete(Team))
             session.commit()
@@ -94,9 +92,8 @@ class Team(Base):
             session.close()
 
     @staticmethod
-    def delete_by_id(engine, team_id):
-        Session = sessionmaker(bind=engine)
-        session = Session()
+    def delete_by_id(session, team_id):
+
         try:
             team = session.query(Team).get(team_id)
             if team:
@@ -113,9 +110,8 @@ class Team(Base):
             session.close()
 
     @staticmethod
-    def save_teams(engine, teams):
-        Session = sessionmaker(bind=engine)
-        session = Session()
+    def save_teams(session, teams):
+
         try:
             for team in teams:
                 new_team = Team(
@@ -126,7 +122,7 @@ class Team(Base):
                     team_founded=team['team_founded'],
                     team_logo_url=team['team_logo_url'],
                     current_in_serie_a=team['current_in_serie_a'],
-                    footballapi_id=team['footballapi_id']
+                    apifootball_id=team['apifootball_id']
                 )
                 session.add(new_team)
             print("Teams saved successfully: ", [team['team_name'] for team in teams]) 
@@ -140,9 +136,7 @@ class Team(Base):
             session.close() 
 
     @staticmethod
-    def get_team_by_id(engine, team_id):
-        Session = sessionmaker(bind=engine)
-        session = Session()
+    def get_team_by_id(session, team_id):
         try:
             team = session.query(Team).get(team_id)
             return team._to_dict() if team else None
@@ -162,6 +156,6 @@ class Team(Base):
             'team_founded': self.team_founded,
             'team_logo_url': self.team_logo_url,
             'current_in_serie_a': self.current_in_serie_a,
-            'footballapi_id': self.footballapi_id
+            'apifootball_id': self.apifootball_id
         }    
     

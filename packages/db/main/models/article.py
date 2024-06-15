@@ -43,33 +43,31 @@ class Article(Base):
         
       
         if query_type == "delete":
-            return Article.delete_handler(engine, args)
+            return Article.delete_handler(session, args)
         elif query_type == "new":
             if 'articles' in args:
-                success = Article.save_articles(engine, args['articles'])
+                success = Article.save_articles(session, args['articles'])
                 return {"body": "Articles saved successfully" if success else "Failed to save articles"}
             else:
                 return {"body": "No articles provided in the payload"}
         else:
-            return Article.get_handler(engine, args)
+            return Article.get_handler(session, args)
     
-    def get_handler(engine, args):
+    def get_handler(session, args):
         if 'id' in args:
-            article = Article.get_article_by_id(engine, args['id'])
+            article = Article.get_article_by_id(session, args['id'])
             return {"body": article if article else "Article not found"}
         else:
-            return {"body": Article.get_all_articles(engine)}
+            return {"body": Article.get_all_articles(session)}
 
-    def delete_handler(engine, args):
+    def delete_handler(session, args):
         if 'id' in args:
-            return {"body": Article.delete_by_id(engine, args['id'])}
+            return {"body": Article.delete_by_id(session, args['id'])}
         else:
-            return {"body": Article.delete_all(engine)}
+            return {"body": Article.delete_all(session)}
 
     
-    def get_all_articles(engine):
-        Session = sessionmaker(bind=engine)
-        session = Session()
+    def get_all_articles(session):
         try:
             articles = session.query(Article).all()
             return [article.to_dict() for article in articles]
@@ -79,9 +77,7 @@ class Article(Base):
         finally:
             session.close()
 
-    def delete_all(engine):
-        Session = sessionmaker(bind=engine)
-        session = Session()
+    def delete_all(session):
         try:
             session.execute(delete(Article))
             session.commit()
@@ -93,9 +89,7 @@ class Article(Base):
         finally:
             session.close()
 
-    def delete_by_id(engine, article_id):
-        Session = sessionmaker(bind=engine)
-        session = Session()
+    def delete_by_id(session, article_id):
         try:
             article = session.query(Article).get(article_id)
             if article:
@@ -111,9 +105,7 @@ class Article(Base):
         finally:
             session.close()
 
-    def save_articles(engine, articles):
-        Session = sessionmaker(bind=engine)
-        session = Session()
+    def save_articles(session, articles):
         try:
             for article in articles:
                 new_article = Article(
@@ -136,9 +128,7 @@ class Article(Base):
         finally:
             session.close()
 
-    def get_article_by_id(engine, article_id):
-        Session = sessionmaker(bind=engine)
-        session = Session()
+    def get_article_by_id(session, article_id):
         try:
             article = session.query(Article).get(article_id)
             return article.to_dict() if article else None
