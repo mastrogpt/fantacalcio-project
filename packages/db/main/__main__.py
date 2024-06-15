@@ -14,13 +14,14 @@ def main(args):
    
     db = DbConnection()
     db.connect_to_db(db_url)
+
     # drop_tables(db_url)
     # create_tables(db_url)
     
     if(args.get("model") == "article"):
-        return Article.handler(db.engine, args)
+        return Article.handler(db.session, args)
     elif(args.get("model") == "team"):
-        return Team.handler(db.engine, args)    
+        return Team.handler(db.session, args)    
     else: 
         return {
         "body": "model and/or query not present"
