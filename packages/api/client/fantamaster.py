@@ -4,15 +4,15 @@ from client import Client
 
 class Api(Client):
   def __init__(self, args, public_api_url=None, tool_api_url=None) -> None:
-
+    
     if public_api_url is None:
       public_api_url = args.get("FANTAMASTER_BASE_URL")
 
     if tool_api_url is None:
       tool_api_url = args.get("FANTAMASTER_TOOL_BASE_URL")
+    
+    super().__init__(public_api_url, tool_api_url)
 
-    self.public_api_url = public_api_url
-    self.tool_api_url = tool_api_url
     self.ENDPOINT_PLAYERS_LIST = args.get("ENDPOINT_PLAYERS_LIST")
     self.ENDPOINT_PLAYERS_UNAVAILABLE = args.get("ENDPOINT_PLAYERS_UNAVAILABLE")
     self.ENDPOINT_SYNTHETIC_STATS_THIS_SEASON = args.get("ENDPOINT_SYNTHETIC_STATS_THIS_SEASON")
@@ -20,6 +20,9 @@ class Api(Client):
     self.ENDPOINT_PROBABLE_LINEUPS = args.get("ENDPOINT_PROBABLE_LINEUPS")
     self.ENDPOINT_PLAYERS = args.get("ENDPOINT_PLAYERS")
 
+  def get_available_apis(self, kind=""):
+    return {}
+  
   # Lista Giocatori attualmente in Serie A e utilizzabili per il fantacalcio
   # https://publicapi.fantamaster.it/playerslist/
   def playerslist(self, args={}):
