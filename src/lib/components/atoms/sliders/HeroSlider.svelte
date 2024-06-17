@@ -1,9 +1,44 @@
 <script lang="ts">
 	import { fade } from 'svelte/transition';
 	import { register } from 'swiper/element/bundle';
-	import Button from '../button/button.svelte';
+	import HeroSliderSlide from './partials/HeroSliderSlide.svelte';
 
 	register();
+
+	const data = [
+		{
+			title: 'Titolo 1',
+			description: 'Descrzione 1',
+			buttonLabel: 'Bottone 1',
+			buttonOnClick: () => console.log,
+			imageUrl: 'asd',
+			imageAlt: 'img 1'
+		},
+		{
+			title: 'Titolo 2',
+			description: 'Descrzione 2',
+			buttonLabel: 'Bottone 2',
+			buttonOnClick: () => console.log,
+			imageUrl: 'asd',
+			imageAlt: 'img 2'
+		},
+		{
+			title: 'Titolo 3',
+			description: 'Descrzione 3',
+			buttonLabel: 'Bottone 3',
+			buttonOnClick: () => console.log,
+			imageUrl: 'asd',
+			imageAlt: 'img 3'
+		},
+		{
+			title: 'Titolo 4',
+			description: 'Descrzione 4',
+			buttonLabel: 'Bottone 4',
+			buttonOnClick: () => console.log,
+			imageUrl: 'asd',
+			imageAlt: 'img 4'
+		}
+	];
 </script>
 
 <swiper-container
@@ -29,12 +64,16 @@
 	}}
 	transition:fade
 >
-	<swiper-slide class="max-[600px]:flex-col-reverse">
+	{#each data as sliderData}
+		<HeroSliderSlide {sliderData} />
+	{/each}
+
+	<!-- <swiper-slide class="max-[600px]:flex-col-reverse">
 		<div class="flex flex-col text-left justify-start hero-text gap-10">
 			<div class="flex flex-col gap-4">
 				<h2>
 					Benvenuto su br
-					<b class="text-accent">fantaqualcoa</b>
+					<b class="text-accent">FantaAICalcio</b>
 				</h2>
 
 				<p>Il tuo assistente AI per il fantacalcio.</p>
@@ -44,66 +83,9 @@
 		</div>
 
 		<div class="hero-image">
-			<img src="https://swiperjs.com/demos/images/nature-3.jpg" loading="lazy" />
+			<img src="https://swiperjs.com/demos/images/nature-3.jpg" alt="descrizione" loading="lazy" />
 		</div>
-	</swiper-slide>
-
-	<swiper-slide class="max-[600px]:flex-col-reverse">
-		<div class="flex flex-col text-left justify-start hero-text gap-10">
-			<div class="flex flex-col gap-4">
-				<h2>
-					Benvenuto su br
-					<b class="text-accent">fantaqualcoa</b>
-				</h2>
-
-				<p>Il tuo assistente AI per il fantacalcio.</p>
-			</div>
-
-			<Button label="scopri Chi siamo!" onClick={console.log} variant="accent" />
-		</div>
-
-		<div class="hero-image">
-			<img src="https://swiperjs.com/demos/images/nature-3.jpg" loading="lazy" />
-		</div>
-	</swiper-slide>
-
-	<swiper-slide class="max-[600px]:flex-col-reverse">
-		<div class="flex flex-col text-left justify-start hero-text gap-10">
-			<div class="flex flex-col gap-4">
-				<h2>
-					Benvenuto su br
-					<b class="text-accent">fantaqualcoa</b>
-				</h2>
-
-				<p>Il tuo assistente AI per il fantacalcio.</p>
-			</div>
-
-			<Button label="scopri Chi siamo!" onClick={console.log} variant="accent" />
-		</div>
-
-		<div class="hero-image">
-			<img src="https://swiperjs.com/demos/images/nature-3.jpg" loading="lazy" />
-		</div>
-	</swiper-slide>
-
-	<swiper-slide class="max-[600px]:flex-col-reverse">
-		<div class="flex flex-col text-left justify-start hero-text gap-10">
-			<div class="flex flex-col gap-4">
-				<h2>
-					Benvenuto su br
-					<b class="text-accent">fantaqualcoa</b>
-				</h2>
-
-				<p>Il tuo assistente AI per il fantacalcio.</p>
-			</div>
-
-			<Button label="scopri Chi siamo!" onClick={console.log} variant="accent" />
-		</div>
-
-		<div class="hero-image">
-			<img src="https://swiperjs.com/demos/images/nature-3.jpg" loading="lazy" />
-		</div>
-	</swiper-slide>
+	</swiper-slide> -->
 </swiper-container>
 
 <style>
@@ -115,35 +97,5 @@
 	swiper-container {
 		width: 100%;
 		padding-bottom: 50px;
-	}
-
-	swiper-slide {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		width: 100%;
-		border-radius: 20px;
-		overflow: hidden;
-		background-position: center;
-		background-size: cover;
-		padding: 0 2rem;
-	}
-
-	swiper-slide .hero-text,
-	swiper-slide .hero-image {
-		display: flex;
-		flex: 1;
-	}
-
-	swiper-slide .hero-image {
-		align-items: center;
-		justify-content: center;
-	}
-
-	swiper-slide img {
-		display: block;
-		object-fit: cover;
-		height: 450px;
-		border-radius: 20px;
 	}
 </style>

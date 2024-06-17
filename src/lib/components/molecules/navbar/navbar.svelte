@@ -16,7 +16,7 @@
 
 <nav class="relative flex items-center justify-between p-4">
 	<a href="/" class="md:hidden text-white text-2xl font-bold z-20">
-		<h2>FANTAQUALCOA</h2>
+		<h2>FantaAICalcio</h2>
 	</a>
 
 	<button
@@ -38,7 +38,7 @@
 
 			<li class="flex items-center menu-item px-12">
 				<a href="/" class="text-white text-2xl font-bold z-20">
-					<h2>FANTAQUALCOA</h2>
+					<h2>FantaAICalcio</h2>
 				</a>
 			</li>
 

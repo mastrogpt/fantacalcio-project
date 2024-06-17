@@ -1,8 +1,8 @@
 <script lang="ts">
-	import type { PageData } from './$types';
+	import type { PlayersStats } from '$lib/service/getStats';
 
-	export let data: PageData;
+	export let data: PlayersStats;
 </script>
 
-<h1>{data.title}</h1>
-<div>{@html data.content}</div>
+<h1>{data.name}</h1>
+<div>{data.team}</div>

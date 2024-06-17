@@ -4,6 +4,7 @@
 
 	export let variant: 'primary' | 'accent' = 'primary';
 	export let label: string;
+	export let type: 'button' | 'reset' | 'submit' | null | undefined = 'button';
 	export let onClick: () => void;
 
 	let button: HTMLButtonElement;
@@ -22,7 +23,7 @@
 		anime({
 			targets: button,
 			scale: 1.05,
-			duration: 250,
+			duration: 25,
 			easing: 'easeOutExpo'
 		});
 	}
@@ -31,18 +32,32 @@
 		anime({
 			targets: button,
 			scale: 1,
-			duration: 250,
+			duration: 25,
 			easing: 'easeOutExpo'
 		});
+	}
+
+	function handleClick() {
+		if (!Boolean(onClick)) return;
+
+		anime({
+			targets: button,
+			scale: 0.95,
+			duration: 25,
+			easing: 'easeOutExpo'
+		});
+
+		return onClick();
 	}
 </script>
 
 <button
 	bind:this={button}
 	class={`btn ${variant}`}
-	on:click={onClick}
+	on:click={handleClick}
 	on:mouseenter={handleMouseEnter}
 	on:mouseleave={handleMouseLeave}
+	{type}
 	aria-label={label}
 >
 	<h6>

@@ -1,7 +1,7 @@
 <div class="footer">
 	<div class="footer-content">
 		<div class="footer-section">
-			<h2 class="footer-title text-primary">FANTAQUALCOA</h2>
+			<h2 class="footer-title text-primary">FantaAICalcio</h2>
 			<a href="mailto:email@gmail.com" class="footer-email">email@gmail.com</a>
 		</div>
 		<div class="footer-section">
@@ -29,7 +29,7 @@
 		</div>
 
 		<div class="text-center">
-			<p>A product of <br /> <span class="footer-brand">FANTAQUALCOA</span></p>
+			<p>A product of <br /> <span class="footer-brand">FantaAICalcio</span></p>
 		</div>
 
 		<div>

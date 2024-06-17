@@ -1,6 +1,9 @@
 <script lang="ts">
 	import { register } from 'swiper/element/bundle';
 	import { fade } from 'svelte/transition';
+	import ArticleSliderSlide from './partials/ArticleSliderSlide.svelte';
+	import { getArticlesList } from '$lib/service/getArticles';
+	import Loader from '../Loader.svelte';
 
 	register();
 
@@ -10,38 +13,90 @@
 		'slides-per-view': 'auto',
 		loop: true,
 		autoplay: {
-			delay: 3500,
+			delay: 3000,
 			disableOnInteraction: true,
 			pauseOnMouseEnter: true
 		}
 	};
+
+	const slider1Slides = [
+		{
+			title: 'slide 1',
+			subtitle: 'slide 1'
+		},
+		{
+			title: 'slide 2',
+			subtitle: 'slide 2'
+		},
+		{
+			title: 'slide 3',
+			subtitle: 'slide 3'
+		},
+		{
+			title: 'slide 4',
+			subtitle: 'slide 4'
+		},
+		{
+			title: 'slide 5',
+			subtitle: 'slide 5'
+		}
+	];
+
+	const slider2Slides = [
+		{
+			title: 'slide 1',
+			subtitle: 'slide 1'
+		},
+		{
+			title: 'slide 2',
+			subtitle: 'slide 2'
+		},
+		{
+			title: 'slide 3',
+			subtitle: 'slide 3'
+		},
+		{
+			title: 'slide 4',
+			subtitle: 'slide 4'
+		},
+		{
+			title: 'slide 5',
+			subtitle: 'slide 5'
+		}
+	];
 </script>
 
-<div class="flex flex-col gap-[50px]">
-	<swiper-container class="articles-slider-up" {...sliderContainerCommonProps} transition:fade>
-		<swiper-slide>Slide 1</swiper-slide>
-		<swiper-slide>Slide 2</swiper-slide>
-		<swiper-slide>Slide 3</swiper-slide>
-		<swiper-slide>Slide 4</swiper-slide>
-		<swiper-slide>Slide 5</swiper-slide>
-		<swiper-slide>Slide 6</swiper-slide>
-		<swiper-slide>Slide 7</swiper-slide>
-		<swiper-slide>Slide 8</swiper-slide>
-		<swiper-slide>Slide 9</swiper-slide>
-	</swiper-container>
+{#await getArticlesList()}
+	<Loader />
+{:then articles}
+	<div class="flex flex-col gap-[50px]">
+		<swiper-container class="articles-slider-up" {...sliderContainerCommonProps} transition:fade>
+			{#each articles as { title, subtitle }, idx}
+				<ArticleSliderSlide
+					sliderData={{
+						title,
+						subtitle,
+						imageUrl: `https://picsum.photos/id/${234 + idx}/400/500`
+					}}
+				/>
+			{/each}
+		</swiper-container>
 
-	<swiper-container class="articles-slider-bottom" {...sliderContainerCommonProps} transition:fade>
-		<swiper-slide>Slide 1</swiper-slide>
-		<swiper-slide>Slide 2</swiper-slide>
-		<swiper-slide>Slide 3</swiper-slide>
-		<swiper-slide>Slide 4</swiper-slide>
-		<swiper-slide>Slide 5</swiper-slide>
-		<swiper-slide>Slide 6</swiper-slide>
-		<swiper-slide>Slide 7</swiper-slide>
-		<swiper-slide>Slide 8</swiper-slide>
-		<swiper-slide>Slide 9</swiper-slide>
-	</swiper-container>
-</div>
+		<!-- <swiper-container
+			class="articles-slider-bottom"
+			{...sliderContainerCommonProps}
+			autoplay={{
+				...sliderContainerCommonProps.autoplay,
+				reverseDirection: true
+			}}
+			transition:fade
+		>
+			{#each slider2Slides as sliderData}
+				<ArticleSliderSlide {sliderData} />
+			{/each}
+		</swiper-container> -->
+	</div>
+{/await}
 
 <style>
 	swiper-container {
@@ -49,17 +104,7 @@
 		height: 100%;
 	}
 
-	swiper-slide {
-		text-align: center;
-		font-size: 18px;
-		background: #fff;
-		display: flex;
-		justify-content: center;
-		align-items: center;
-		width: 350px;
-		height: 300px;
-		border: solid 1px;
-		border-radius: 20px;
-		overflow: hidden;
+	.swiper-wrapper {
+		transition-timing-function: linear;
 	}
 </style>
