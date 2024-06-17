@@ -47,9 +47,14 @@ class Article(Base):
         elif query_type == "new":
             if 'articles' in args:
                 success = Article.save_articles(session, args['articles'])
-                return {"body": "Articles saved successfully" if success else "Failed to save articles"}
+    
+                if success:
+                    return {"statusCode": 200, "body": "Articles saved successfully"}
+                else:
+                    return {"statusCode": 500, "body": "Failed to save articles"}
             else:
-                return {"body": "No articles provided in the payload"}
+                return {"statusCode": 400, "body": "No articles provided in the payload"}
+
         else:
             return Article.get_handler(session, args)
     

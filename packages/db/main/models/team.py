@@ -44,9 +44,13 @@ class Team(Base):
         elif query_type == "new":
             if 'teams' in args:
                 success = Team.save_teams(session, args['teams'])
-                return {"body": "Teams saved successfully" if success else "Failed to save teams"}
+
+                if success:
+                    return {"statusCode": 200, "body": "Teams saved successfully"}
+                else:
+                    return {"statusCode": 500, "body": "Failed to save teams"}
             else:
-                return {"body": "No teams provided in the payload"}
+                return {"statusCode": 400, "body": "No teams provided in the payload"}
         else:
             return Team.get_handler(session, args)
 
