@@ -20,17 +20,20 @@ class Article(Base):
     content = Column(Text, nullable=False)
     tag = Column(ARRAY(String(100)))
     category = Column(ARRAY(String(100)))
+    author = Column(String(100))
 
-    def __init__(self, uuid, title, subtitle, content, tag=None, category=None):
+    def __init__(self, uuid, title, subtitle, content, author, tag=None, category=None):
         self.uuid = uuid
         self.title = title
         self.subtitle = subtitle
         self.content = content
+        self.author = author
+
         self.tag = tag
         self.category = category
 
     def __repr__(self):
-        return f"<Article(uuid={self.uuid}, title='{self.title}', subtitle='{self.subtitle}', content='{self.content}', tag='{self.tag}', category='{self.category}')>"
+        return f"<Article(uuid={self.uuid}, title='{self.title}', subtitle='{self.subtitle}', content='{self.content}', tag='{self.tag}', category='{self.category}', author='{self.author}')>"
     
     @staticmethod
     def handler(engine, args):
@@ -117,6 +120,8 @@ class Article(Base):
                     title=article['title'],
                     subtitle=article['subtitle'],
                     content=article['content'],
+                    author = article['author'],
+
                     tag=article.get('tag', []),
                     category=article.get('category', [])
                 )
@@ -151,5 +156,6 @@ class Article(Base):
             'subtitle': self.subtitle,
             'content': self.content,
             'tag': self.tag,
-            'category': self.category
+            'category': self.category,
+            'author': self.author
         }
