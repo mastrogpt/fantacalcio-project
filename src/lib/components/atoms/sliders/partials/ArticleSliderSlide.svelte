@@ -5,9 +5,13 @@
 		title?: string;
 		subtitle?: string;
 	} = {};
+	export let onClick: () => void;
 </script>
 
-<swiper-slide>
+<!-- svelte-ignore a11y-no-static-element-interactions -->
+<!-- svelte-ignore a11y-click-events-have-key-events -->
+<!-- svelte-ignore a11y-click-events-have-key-events -->
+<swiper-slide on:click={onClick}>
 	<img src={sliderData?.imageUrl} alt={sliderData?.imageAlt} />
 
 	<div class="text-wrapper flex flex-col gap-2">

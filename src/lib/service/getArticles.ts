@@ -5,6 +5,7 @@ export interface IArticlesProps {
 	author: string;
 	content: string;
 	subtitle: string;
+	id: number;
 	title: string;
 	category: string[];
 	tag: string[];

@@ -9,8 +9,6 @@
 		imageUrl?: string;
 		imageAlt?: string;
 	};
-
-	console.log('🔎 [HeroSliderSlide][sliderData] =>', sliderData);
 </script>
 
 <swiper-slide class="max-[600px]:flex-col-reverse">

@@ -1,28 +1,15 @@
 <script lang="ts">
 	import Button from '$lib/components/atoms/button/button.svelte';
-	import Modal from '$lib/components/atoms/modal/Modal.svelte';
 	import ArticlesSlider from '$lib/components/atoms/sliders/ArticlesSlider.svelte';
 	import HeroSlider from '$lib/components/atoms/sliders/HeroSlider.svelte';
 	import Chatbot from '$lib/components/molecules/chatbot/Chatbot.svelte';
-	import Table from '$lib/components/molecules/table/table.svelte';
-	import PlayerDetails from '$lib/components/organisms/playerDetails/PlayerDetails.svelte';
-	import { getPlayersList } from '$lib/service/getPlayers.js';
+	import TableCard from '$lib/components/organisms/tableCard/TableCard.svelte';
 	import anime from 'animejs';
 	import { onMount } from 'svelte';
 
 	let heroTitle: HTMLHeadingElement;
 	let heroSubtitle: HTMLHeadingElement;
 	let heroSlider: HTMLDivElement;
-	let showModal = false;
-	let playerId: number | undefined = undefined;
-
-	const columns = [
-		{ accessorKey: 'name', header: 'Nome' },
-		{ accessorKey: 'playmaker', header: 'Playmaker' },
-		{ accessorKey: 'role', header: 'Ruolo' },
-		{ accessorKey: 'team', header: 'Squadra' },
-		{ accessorKey: 'value', header: 'Valore' }
-	];
 
 	onMount(async () => {
 		anime
@@ -51,10 +38,6 @@
 				offset: '-=500'
 			});
 	});
-
-	function toggleModal() {
-		showModal = !showModal;
-	}
 
 	function animateOnScroll(target: Element): void {
 		const observer: IntersectionObserver = new IntersectionObserver(
@@ -90,27 +73,10 @@
 	<h2 class="text-4xl font-semibold" use:animateOnScroll>Articoli più discussi</h2>
 
 	<ArticlesSlider />
-
-	<!-- <Button label="Scopri di più" onClick={console.log} /> -->
 </section>
 
 <section class="table-secction flex align-center justify-center text-center my-20 gap-10 py-20">
-	<div class="container flex flex-col align-center justify-center">
-		{#await getPlayersList()}
-			<p>loading</p>
-		{:then data}
-			<Table
-				{data}
-				{columns}
-				onRowClick={(row) => {
-					playerId = row.original.id;
-					toggleModal();
-				}}
-			/>
-		{:catch error}
-			<p style="color: red">{error.message}</p>
-		{/await}
-	</div>
+	<TableCard />
 </section>
 
 <section
@@ -133,18 +99,6 @@
 
 <Chatbot />
 
-{#if showModal}
-	<Modal
-		modalContent={PlayerDetails}
-		modalProps={{
-			playerId,
-			onCompare: console.log,
-			onChat: console.log
-		}}
-		{toggleModal}
-	/>
-{/if}
-
 <style>
 	.hero {
 		height: calc(100vh - 100px);
@@ -153,11 +107,5 @@
 	.hero-slider {
 		width: 100%;
 		max-width: 1200px;
-	}
-
-	.table-secction > div {
-		background: linear-gradient(#10987d, #80b644);
-		padding: 2rem;
-		border-radius: 1rem;
 	}
 </style>

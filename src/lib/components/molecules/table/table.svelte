@@ -10,9 +10,11 @@
 		getSortedRowModel
 	} from '@tanstack/svelte-table';
 	import { writable } from 'svelte/store';
+	import { selectedRows } from '../../../store/store';
 
-	export let data = [];
-	export let columns = [];
+	export let data: any[] = [];
+	export let columns: any[] = [];
+	export let selectableRows: boolean = false;
 	export let onRowClick: (data: any) => void;
 
 	const fuzzyFilter: FilterFn<any> = (row, columnId, value, addMeta) => {
@@ -69,8 +71,6 @@
 		$table.setGlobalFilter(String(e?.target?.value));
 	};
 
-	const selectedRows = writable(new Set());
-
 	const handleCheckboxChange = (rowId) => {
 		selectedRows.update((rows) => {
 			const newRows = new Set(rows);
@@ -115,8 +115,6 @@
 </script>
 
 <div class="p-2">
-	<h2 class="text-center text-2xl font-bold mb-4 text-black">Dettagli giocatore</h2>
-
 	<!-- Filtro globale -->
 	<div class="mb-4">
 		<input
@@ -135,7 +133,10 @@
 					<!-- Empty header for the compare icon -->
 					{#each headerGroup.headers as header}
 						<th class="px-4 py-2 text-left border border-gray-300" colSpan={header.colSpan}>
+							<!-- svelte-ignore a11y-click-events-have-key-events -->
+							<!-- svelte-ignore a11y-no-static-element-interactions -->
 							{#if !header.isPlaceholder}
+								<!-- svelte-ignore a11y-click-events-have-key-events -->
 								<div
 									class="cursor-pointer select-none"
 									on:click={header.column.getToggleSortingHandler()}
@@ -161,15 +162,17 @@
 				<tr class="odd:bg-light even:bg-white cursor-pointer" on:click={() => handleRowClick(row)}>
 					<!-- svelte-ignore a11y-click-events-have-key-events -->
 					<!-- svelte-ignore a11y-no-static-element-interactions -->
-					<td class="px-4 py-2 border text-black flex items-center" on:click|stopPropagation>
-						<input
-							type="checkbox"
-							on:change={() => handleCheckboxChange(row.id)}
-							checked={$selectedRows.has(row.id)}
-							disabled={$selectedRows.size >= 2 && !$selectedRows.has(row.id)}
-							class="mr-2"
-						/>
-					</td>
+					{#if selectableRows}
+						<td class="px-4 py-2 border text-black flex items-center" on:click|stopPropagation>
+							<input
+								type="checkbox"
+								on:change={() => handleCheckboxChange(row.id)}
+								checked={$selectedRows.has(row.id)}
+								disabled={$selectedRows.size >= 2 && !$selectedRows.has(row.id)}
+								class="mr-2"
+							/>
+						</td>
+					{/if}
 
 					{#each row.getVisibleCells() as cell}
 						<td class="px-4 py-2 border text-black">
@@ -235,25 +238,27 @@
 	</div>
 
 	<!-- Selected Rows -->
-	<div class="mt-4">
-		<h3 class="text-xl font-bold mb-2">Elementi selezionati:</h3>
-		{#if $selectedRows.size === 0}
-			<p>Nessun elemento selezionato.</p>
-		{:else}
-			<ul>
-				{#each Array.from($selectedRows) as rowId}
-					{#each $table.getRowModel().rows as row}
-						{#if row.id === rowId}
-							<li>{JSON.stringify(row.original)}</li>
-						{/if}
+	{#if selectableRows}
+		<div class="mt-4">
+			<h3 class="text-xl font-bold mb-2">Elementi selezionati:</h3>
+
+			{#if $selectedRows.size === 0}
+				<p>Nessun elemento selezionato.</p>
+			{:else}
+				<ul>
+					{#each Array.from($selectedRows) as rowId}
+						{#each $table.getRowModel().rows as row}
+							{#if row.id === rowId}
+								<li>{row.original.name}</li>
+							{/if}
+						{/each}
 					{/each}
-				{/each}
-			</ul>
-			<button class="mt-2 px-4 py-2 bg-red-500 text-white rounded" on:click={clearSelection}>
-				Pulisci selezione
-			</button>
-		{/if}
-	</div>
+				</ul>
+
+				<button class="mt-2 px-4 py-2" on:click={clearSelection}> Pulisci selezione </button>
+			{/if}
+		</div>
+	{/if}
 </div>
 
 <style>

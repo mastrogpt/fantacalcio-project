@@ -4,6 +4,7 @@
 	import ArticleSliderSlide from './partials/ArticleSliderSlide.svelte';
 	import { getArticlesList } from '$lib/service/getArticles';
 	import Loader from '../Loader.svelte';
+	import { goto } from '$app/navigation';
 
 	register();
 
@@ -18,61 +19,17 @@
 			pauseOnMouseEnter: true
 		}
 	};
-
-	const slider1Slides = [
-		{
-			title: 'slide 1',
-			subtitle: 'slide 1'
-		},
-		{
-			title: 'slide 2',
-			subtitle: 'slide 2'
-		},
-		{
-			title: 'slide 3',
-			subtitle: 'slide 3'
-		},
-		{
-			title: 'slide 4',
-			subtitle: 'slide 4'
-		},
-		{
-			title: 'slide 5',
-			subtitle: 'slide 5'
-		}
-	];
-
-	const slider2Slides = [
-		{
-			title: 'slide 1',
-			subtitle: 'slide 1'
-		},
-		{
-			title: 'slide 2',
-			subtitle: 'slide 2'
-		},
-		{
-			title: 'slide 3',
-			subtitle: 'slide 3'
-		},
-		{
-			title: 'slide 4',
-			subtitle: 'slide 4'
-		},
-		{
-			title: 'slide 5',
-			subtitle: 'slide 5'
-		}
-	];
 </script>
 
 {#await getArticlesList()}
 	<Loader />
 {:then articles}
 	<div class="flex flex-col gap-[50px]">
+		<!-- svelte-ignore a11y-no-static-element-interactions -->
 		<swiper-container class="articles-slider-up" {...sliderContainerCommonProps} transition:fade>
-			{#each articles as { title, subtitle }, idx}
+			{#each articles as { title, subtitle, id }, idx}
 				<ArticleSliderSlide
+					onClick={() => goto(`/articles/${id}`)}
 					sliderData={{
 						title,
 						subtitle,

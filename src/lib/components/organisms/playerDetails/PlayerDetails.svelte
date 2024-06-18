@@ -1,5 +1,5 @@
 <script lang="ts">
-	import Button from '$lib/components/atoms/button/button.svelte';
+	import PlayerCard from '$lib/components/atoms/playerCard/PlayerCard.svelte';
 	import { getAiOpinionFromBackend } from '$lib/service/aiOpinion';
 	import { getStatsDataById } from '$lib/service/getStats';
 	import { openChatWithMessage } from '$lib/store/store';
@@ -29,7 +29,9 @@
 		{#if !playerData}
 			<p>Caricamento...</p>
 		{:else if playerData}
-			<div class="header">
+			<PlayerCard {playerData} />
+
+			<!-- <div class="header">
 				<h2>{playerData?.name}</h2>
 			</div>
 
@@ -41,13 +43,14 @@
 				<p><strong>Fmarkavg:</strong> {playerData?.fmarkavg}</p>
 				<p><strong>Rcards:</strong> {playerData?.rcards}</p>
 				<p><strong>Ycards:</strong> {playerData?.ycards}</p>
+
 			</div>
 
 			<div class="actions gap-5">
 				<Button label="Compara" onClick={() => console.log('Compare clicked')} />
 
 				<Button label="Aipinion" onClick={openAIpinion} />
-			</div>
+			</div> -->
 		{/if}
 
 		<p>{opinion}</p>
