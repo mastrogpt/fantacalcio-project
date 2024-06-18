@@ -42,27 +42,32 @@ class Team(Base):
       
         if query_type == "delete":
             return Team.delete_handler(session, args)
-        elif query_type == "new":
-            if 'teams' in args:
-                success = Team.save_teams(session, args['teams'])
-
-                if success:
-                    return {"statusCode": 200, "body": "Teams saved successfully"}
-                else:
-                    return {"statusCode": 500, "body": "Failed to save teams"}
-            else:
-                return {"statusCode": 400, "body": "No teams provided in the payload"}
-
+        elif query_type == "insert":
+            return Team.insert_handler(session, args)
         elif query_type == "update":
             return Team.update_handler(session, args)
         else:
             return Team.get_handler(session, args)
 
     @staticmethod
+    def insert_handler(session, args):
+        try:
+            if 'teams' in args:
+                ret = Team.insert_if_not_exists(session, args['teams'])
+                if ret:
+                    return {"statusCode": 200, "body": "Teams saved successfully"}
+                else:
+                    return {"statusCode": 500, "body": "Failed to save teams"}
+            else:
+                return {"statusCode": 400, "body": "No teams provided in the payload"}
+        except Exception as e:
+            return {"statusCode": 500, "body": f"Error during update operation: {e}"}            
+
+    @staticmethod
     def update_handler(session, args):
         try:
             update_fields = args.get("update_fields", {})
-            print("update_fields: {update_fields}")
+
             if 'id' in args:
                 team_id = args['id']
                 ret = Team.update_team_by_id(session, team_id, update_fields)
@@ -142,7 +147,7 @@ class Team(Base):
             session.close()
 
     @staticmethod
-    def save_teams(session, teams):  
+    def insert_if_not_exists(session, teams):  
         try:
             for team in teams:
                 stmt = insert(Team).values(
@@ -194,7 +199,6 @@ class Team(Base):
         try:
             team = session.query(Team).filter_by(id=team_id).one()
             for field, value in update_fields.items():
-                print(f"field: {field}, value: {value}")
                 if hasattr(team, field):
                     setattr(team, field, value)
                 else:
