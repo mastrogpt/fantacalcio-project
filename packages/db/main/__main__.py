@@ -6,6 +6,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from models.article import Article
 from models.team import Team
+from models.team_details import TeamDetails
 from models.utils import create_tables, drop_tables
 
 def main(args):
@@ -21,7 +22,9 @@ def main(args):
     if(args.get("model") == "article"):
         return Article.handler(db.session, args)
     elif(args.get("model") == "team"):
-        return Team.handler(db.session, args)    
+        return Team.handler(db.session, args)
+    elif(args.get("model") == "team_details"):
+        return TeamDetails.handler(db.session, args)                
     else: 
         return {
         "body": "model and/or query not present"

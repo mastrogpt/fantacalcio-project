@@ -18,9 +18,8 @@ class Team(Base):
     current_in_serie_a = Column(Boolean)
     apifootball_id = Column(Integer, unique=True)
 
+    details = relationship("TeamDetails", back_populates="team", cascade="all, delete-orphan")
     # players = relationship("Player", back_populates="team")
-    # details = relationship("TeamDetails", back_populates="team")
-    # team_name_mappings = relationship("TeamNameMapping", back_populates="team")
 
     def __init__(self, team_name, team_code, team_country, team_founded, team_logo_url, current_in_serie_a, apifootball_id):
         #self.uuid = uuid
@@ -44,6 +43,8 @@ class Team(Base):
             return Team.delete_handler(session, args)
         elif query_type == "insert":
             return Team.insert_handler(session, args)
+        elif query_type == "upsert":
+            return Team.upsert_handler(session, args)            
         elif query_type == "update":
             return Team.update_handler(session, args)
         else:
@@ -64,6 +65,20 @@ class Team(Base):
             return {"statusCode": 500, "body": f"Error during update operation: {e}"}            
 
     @staticmethod
+    def upsert_handler(session, args):
+        try:
+            if 'teams' in args:
+                ret = Team.upsert(session, args['teams'])
+                if ret:
+                    return {"statusCode": 200, "body": "Teams saved successfully"}
+                else:
+                    return {"statusCode": 500, "body": "Failed to save teams"}
+            else:
+                return {"statusCode": 400, "body": "No teams provided in the payload"}
+        except Exception as e:
+            return {"statusCode": 500, "body": f"Error during update operation: {e}"}                     
+
+    @staticmethod
     def update_handler(session, args):
         try:
             update_fields = args.get("update_fields", {})
@@ -76,7 +91,7 @@ class Team(Base):
                 else:
                     return {"statusCode": 500, "body": f"Failed to update fields for team with ID: {team_id}"}
             else:
-                ret = Team.update_all_teams(session, update_fields)
+                ret = Team.update_all(session, update_fields)
                 if ret:
                     return {"statusCode": 200, "body": f"Updated fields successfully for all teams"}
                 else:
@@ -93,7 +108,7 @@ class Team(Base):
             team = Team.get_team_by_apifootball_id(session, args['apifootball_id'])
             return {"body": team if team else "Team not found"}
         else:
-            return {"body": Team.get_all_teams(session)}
+            return {"body": Team.get_all(session)}
 
     @staticmethod
     def delete_handler(session, args):
@@ -103,7 +118,7 @@ class Team(Base):
             return {"body": Team.delete_all(session)}
 
     @staticmethod
-    def get_all_teams(session):
+    def get_all(session):
 
         try:
             teams = session.query(Team).all()
@@ -173,6 +188,40 @@ class Team(Base):
             session.close()
 
     @staticmethod
+    def upsert(session, teams):
+        try:
+            for team in teams:
+                stmt = insert(Team).values(
+                    team_name=team['team_name'],
+                    team_code=team['team_code'],
+                    team_country=team['team_country'],
+                    team_founded=team['team_founded'],
+                    team_logo_url=team['team_logo_url'],
+                    current_in_serie_a=team['current_in_serie_a'],
+                    apifootball_id=team['apifootball_id']
+                ).on_conflict_do_update(
+                    index_elements=['team_name'],
+                    set_={
+                        'team_code': team['team_code'],
+                        'team_country': team['team_country'],
+                        'team_founded': team['team_founded'],
+                        'team_logo_url': team['team_logo_url'],
+                        'current_in_serie_a': team['current_in_serie_a'],
+                        'apifootball_id': team['apifootball_id']
+                    }
+                )
+                session.execute(stmt)
+            session.commit()
+            print("Teams upserted successfully: ", [team['team_name'] for team in teams]) 
+            return True
+        except Exception as e:
+            print("Error during teams upserting:", e)
+            session.rollback()
+            return False
+        finally:
+            session.close()
+
+    @staticmethod
     def get_team_by_id(session, team_id):
         try:
             team = session.query(Team).get(team_id)
@@ -219,12 +268,11 @@ class Team(Base):
             session.close()
 
     @staticmethod
-    def update_all_teams(session, update_fields):
+    def update_all(session, update_fields):
         try:
             teams = session.query(Team).all()
             for team in teams:
                 for field, value in update_fields.items():
-                    print(f"field: {field}, value: {value}")
                     if hasattr(team, field):
                         setattr(team, field, value)
                     else:
