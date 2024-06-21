@@ -1,13 +1,11 @@
 import uuid
 from sqlalchemy import Column, Integer, String, Text, ARRAY, DateTime
-from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.sql import delete
 from models.base import Base
 
 from datetime import datetime
 
-#Base = declarative_base()
 
 class Article(Base):
     __tablename__ = 'articles'
@@ -36,9 +34,7 @@ class Article(Base):
         return f"<Article(uuid={self.uuid}, title='{self.title}', subtitle='{self.subtitle}', content='{self.content}', tag='{self.tag}', category='{self.category}', author='{self.author}')>"
     
     @staticmethod
-    def handler(engine, args):
-        #Base.metadata.drop_all(engine)
-        #Base.metadata.create_all(engine)
+    def handler(session, args):
         query_type = args.get("query")
         
       
