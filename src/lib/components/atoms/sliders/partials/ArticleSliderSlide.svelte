@@ -56,26 +56,34 @@
 	}
 
 	swiper-slide .text-wrapper {
-		opacity: 0;
-		transform: translateY(45px);
+		opacity: 1;
 		position: relative;
 		text-align: left;
-		background: #fff;
+		background: rgba(var(--white), 0.85);
 		z-index: 10;
 		flex: 1;
 		padding: 1.5rem;
 		transition: all 350ms ease-out;
 	}
 
-	swiper-slide:hover .text-wrapper {
-		opacity: 1;
-		transform: translateY(0);
+	swiper-slide .text-wrapper {
+		transform: translateY(45px);
+		transition: all 350ms ease-out;
 	}
 
-	@media screen and (max-width: 700px) {
-		swiper-slide .text-wrapper {
-			opacity: 1;
-			transform: translateY(0);
-		}
+	swiper-slide .text-wrapper small {
+		opacity: 0;
+		transform: translateY(40px);
+		transition: all 350ms ease-out;
+	}
+
+	swiper-slide:hover .text-wrapper {
+		transform: translateY(0);
+		background: rgba(var(--white), 1);
+	}
+
+	swiper-slide:hover .text-wrapper small {
+		opacity: 1;
+		transform: translateY(0);
 	}
 </style>

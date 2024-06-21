@@ -1,16 +1,25 @@
 <script lang="ts">
 	import { getAiOpinionFromBackend } from '$lib/service/aiOpinion';
 	import type { PlayersStats } from '$lib/service/getStats';
-	import Loader from '../Loader.svelte';
 	import Button from '../button/button.svelte';
+	import Loader from '../Loader.svelte';
 
-	export let playerData: PlayersStats;
+	interface ICardRowProps {
+		label?: string;
+		value?: string;
+	}
+
+	export let showAiOpinion: boolean = false;
+	export let playerData: PlayersStats | undefined = undefined;
+	export let cardRow: { label?: string; value?: string; subRows?: ICardRowProps[] }[] = [];
 
 	let aiOpinion: string;
 	let aiOpinionWritingEffect: string;
 	let isLoading = false;
 
 	const getAiOpinion = async () => {
+		if (!playerData) return;
+
 		isLoading = true;
 		aiOpinion = await getAiOpinionFromBackend(playerData);
 		showMessage();
@@ -27,77 +36,61 @@
 	const sleep = async (ms: number) => {
 		return new Promise((resolve) => setTimeout(resolve, ms));
 	};
+
+	console.log('🔎 [PlayerCard][playerData] =>', playerData);
 </script>
 
 <div class="player-card flex flex-col w-[300px]">
-	<div class="card-title py-2">{playerData.name}</div>
+	<div class="card-title py-2">{playerData?.name}</div>
 
 	<div class="card-profile-img grow-1">
-		<img src="" alt={playerData.name} />
+		<img src="" alt={playerData?.name} />
 	</div>
 
 	<div class="card-stats flex flex-col">
-		<div class="flex grow">
-			<span class="flex w-[50%] px-3 py-1">Presenze</span>
+		{#each cardRow as card}
+			<div class="flex grow card-row">
+				<span class="flex w-[50%] px-3 py-1">{card?.label}</span>
 
-			<span class="flex w-[50%] px-3 py-1">{playerData.caps}</span>
-		</div>
+				{#if card?.subRows && card?.subRows?.length > 0}
+					<span class="flex w-[50%] px-3 py-1 gap-2">
+						{#each card?.subRows as subRow}
+							<div class="flex grow">{subRow?.label}</div>
 
-		<div class="flex grow">
-			<span class="flex w-[50%] px-3 py-1">Assist</span>
-
-			<span class="flex w-[50%] px-3 py-1">{playerData.assists}</span>
-		</div>
-
-		<div class="flex grow">
-			<span class="flex w-[50%] px-3 py-1">Goal</span>
-
-			<span class="flex w-[50%] px-3 py-1">{playerData.markavg}</span>
-		</div>
-
-		<div class="flex grow">
-			<span class="flex w-[50%] px-3 py-1">Media</span>
-
-			<span class="flex w-[50%] px-3 py-1">{playerData.fmarkavg}</span>
-		</div>
-
-		<div class="flex grow card-row">
-			<span class="flex w-[50%] px-3 py-1">Cartellini</span>
-
-			<span class="flex w-[50%] px-3 py-1 gap-2">
-				<div class="flex grow card card-red" />
-
-				<div class="flex grow">{playerData.rcards}</div>
-
-				<div class="flex grow card card-yellow" />
-
-				<div class="flex grow">{playerData.ycards}</div>
-			</span>
-		</div>
+							<div class="flex grow">{subRow?.value}</div>
+						{/each}
+					</span>
+				{:else}
+					<span class="flex w-[50%] px-3 py-1">{card?.value}</span>
+				{/if}
+			</div>
+		{/each}
 	</div>
 </div>
 
-<div class="flex flex-col justify-center items-center mt-5 w-[300px] gap-2">
-	<h5>Vuoi un parere?</h5>
+{#if showAiOpinion}
+	<div class="flex flex-col justify-center items-center mt-5 w-[300px] gap-2">
+		<h5>Vuoi un parere?</h5>
 
-	<p>Chiedi una AIPinion</p>
+		<p>Chiedi una AIPinion</p>
 
-	{#if !aiOpinion && !isLoading}
-		<Button label="AIpinion" onClick={getAiOpinion} />
-	{/if}
+		{#if !aiOpinion && !isLoading}
+			<Button label="AIpinion" onClick={getAiOpinion} />
+		{/if}
 
-	{#if isLoading}
-		<Loader />
-	{/if}
+		{#if isLoading}
+			<Loader />
+		{/if}
 
-	{#if aiOpinionWritingEffect && !isLoading}
-		<hr />
+		{#if aiOpinionWritingEffect && !isLoading}
+			<hr />
 
-		<div class="aipinion-text flex flex-col w-full p-[2px] mt-3 text-center gap-2">
-			{aiOpinionWritingEffect}
-		</div>
-	{/if}
-</div>
+			<div class="aipinion-text flex flex-col w-full p-[2px] mt-3 text-center gap-2">
+				{aiOpinionWritingEffect}
+			</div>
+		{/if}
+	</div>
+{/if}
 
 <style>
 	.player-card {

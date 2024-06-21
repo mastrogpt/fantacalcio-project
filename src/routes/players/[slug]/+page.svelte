@@ -4,5 +4,5 @@
 	export let data: PlayersStats;
 </script>
 
-<h1>{data.name}</h1>
-<div>{data.team}</div>
+<h1>{data?.name}</h1>
+<div>{data?.team}</div>

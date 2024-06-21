@@ -9,6 +9,8 @@
 	let playerData;
 	let opinion = '';
 
+	let cardRow: any[] = [];
+
 	const openAIpinion = async () => {
 		const message = await getAiOpinionFromBackend(playerData);
 
@@ -20,6 +22,37 @@
 		if (playerId) {
 			const data = await getStatsDataById(playerId);
 			playerData = data;
+			cardRow = [
+				{
+					label: 'Presenze',
+					value: playerData?.caps
+				},
+				{
+					label: 'Assist',
+					value: playerData?.assists
+				},
+				{
+					label: 'Goal',
+					value: playerData?.markavg
+				},
+				{
+					label: 'Media',
+					value: playerData?.fmarkavg
+				},
+				{
+					label: 'Cartellini',
+					subRows: [
+						{
+							label: '🟥',
+							value: playerData?.rcards
+						},
+						{
+							label: '🟨',
+							value: playerData?.ycards
+						}
+					]
+				}
+			];
 		}
 	});
 </script>
@@ -29,28 +62,7 @@
 		{#if !playerData}
 			<p>Caricamento...</p>
 		{:else if playerData}
-			<PlayerCard {playerData} />
-
-			<!-- <div class="header">
-				<h2>{playerData?.name}</h2>
-			</div>
-
-			<div class="details">
-				<p><strong>Caps:</strong> {playerData?.caps}</p>
-				<p><strong>Assists:</strong> {playerData?.assists}</p>
-				<p><strong>Goals:</strong> {playerData?.goals}</p>
-				<p><strong>Markavg:</strong> {playerData?.markavg}</p>
-				<p><strong>Fmarkavg:</strong> {playerData?.fmarkavg}</p>
-				<p><strong>Rcards:</strong> {playerData?.rcards}</p>
-				<p><strong>Ycards:</strong> {playerData?.ycards}</p>
-
-			</div>
-
-			<div class="actions gap-5">
-				<Button label="Compara" onClick={() => console.log('Compare clicked')} />
-
-				<Button label="Aipinion" onClick={openAIpinion} />
-			</div> -->
+			<PlayerCard {playerData} showAiOpinion {cardRow} />
 		{/if}
 
 		<p>{opinion}</p>

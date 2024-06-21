@@ -142,7 +142,9 @@
 			{#each $table.getHeaderGroups() as headerGroup}
 				<tr>
 					<!-- Empty header for checkboxes -->
-					<th class="px-4 py-2 text-left border border-gray-300"></th>
+					{#if selectableRows}
+						<th class="px-4 py-2 text-left border border-gray-300 w-2"></th>
+					{/if}
 					{#each headerGroup.headers as header}
 						<th class="px-4 py-2 text-left border border-gray-300" colSpan={header.colSpan}>
 							{#if !header.isPlaceholder}
@@ -172,15 +174,21 @@
 			{#each $table.getRowModel().rows as row}
 				<tr class="odd:bg-light even:bg-white cursor-pointer" on:click={() => handleRowClick(row)}>
 					{#if selectableRows}
-						<td class="px-4 py-2 border text-black flex items-center" on:click|stopPropagation>
-							<input
-								type="checkbox"
-								on:change={() => handleCheckboxChange(row)}
-								checked={Array.from($selectedRows).some((r) => r.id === row.original.id)}
-								disabled={Array.from($selectedRows).length >= 2 &&
-									!Array.from($selectedRows).some((r) => r.id === row.original.id)}
-								class="mr-2"
-							/>
+						<td
+							class="px-4 py-2 border text-black flex items-center"
+							on:click|stopPropagation
+							style="width:min-content"
+						>
+							<div class="h-[33px] flex items-center justify-center">
+								<input
+									type="checkbox"
+									on:change={() => handleCheckboxChange(row)}
+									checked={Array.from($selectedRows).some((r) => r.id === row.original.id)}
+									disabled={Array.from($selectedRows).length >= 2 &&
+										!Array.from($selectedRows).some((r) => r.id === row.original.id)}
+									class="mr-2"
+								/>
+							</div>
 						</td>
 					{/if}
 

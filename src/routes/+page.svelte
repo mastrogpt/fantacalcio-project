@@ -3,7 +3,9 @@
 	import ArticlesSlider from '$lib/components/atoms/sliders/ArticlesSlider.svelte';
 	import HeroSlider from '$lib/components/atoms/sliders/HeroSlider.svelte';
 	import Chatbot from '$lib/components/molecules/chatbot/Chatbot.svelte';
+
 	import TableCard from '$lib/components/organisms/tableCard/TableCard.svelte';
+	import TeamsComparator from '$lib/components/organisms/teamsComparator/TeamsComparator.svelte';
 	import anime from 'animejs';
 	import { onMount } from 'svelte';
 
@@ -77,6 +79,10 @@
 
 <section class="table-secction flex align-center justify-center text-center my-20 gap-10 py-20">
 	<TableCard />
+</section>
+
+<section class="lignup-section flex flex-col text-center gap-5">
+	<TeamsComparator />
 </section>
 
 <section

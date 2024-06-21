@@ -34,8 +34,8 @@
 	];
 
 	const unavailableCols = [
-		{ accessorKey: 'team', header: 'Squadra' },
 		{ accessorKey: 'name', header: 'Nome' },
+		{ accessorKey: 'team', header: 'Squadra' },
 		{ accessorKey: 'role', header: 'Ruolo' },
 		{ accessorKey: 'doubt', header: 'Dubbio' }
 	];
@@ -129,9 +129,20 @@
 				</ul>
 
 				<div class="flex flex-col gap-5 justify-center items-center my-2">
-					<Button label="Cancella selezione" outline noBorder onClick={clearSelection} />
+					<Button
+						label="Cancella selezione"
+						outline
+						noBorder
+						size="small"
+						onClick={clearSelection}
+					/>
 
-					<Button label="Compara" size="small" onClick={() => toggleModal('COMPARE')} />
+					<Button
+						label="Compara"
+						size="small"
+						variant="accent"
+						onClick={() => toggleModal('COMPARE')}
+					/>
 				</div>
 			{:else}
 				<ul>
