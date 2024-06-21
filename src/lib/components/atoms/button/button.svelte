@@ -3,6 +3,9 @@
 	import anime from 'animejs';
 
 	export let variant: 'primary' | 'accent' = 'primary';
+	export let outline: boolean = false;
+	export let noBorder: boolean = false;
+	export let size: 'small' | 'normal' = 'normal';
 	export let label: string;
 	export let type: 'button' | 'reset' | 'submit' | null | undefined = 'button';
 	export let onClick: () => void;
@@ -53,7 +56,7 @@
 
 <button
 	bind:this={button}
-	class={`btn ${variant}`}
+	class={`btn ${variant} ${size} ${outline ? 'outlined' : ''} ${noBorder ? 'borderless' : ''}`}
 	on:click={handleClick}
 	on:mouseenter={handleMouseEnter}
 	on:mouseleave={handleMouseLeave}
@@ -82,8 +85,16 @@
 		box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 	}
 
-	.btn:focus {
-		box-shadow: 0 0 0 4px rgba(255, 215, 0, 0.5);
+	.btn.small {
+		padding: 0.5rem 1rem;
+	}
+
+	.btn.primary:focus {
+		box-shadow: 0 0 0 4px rgba(var(--primary), 0.5);
+	}
+
+	.btn.accent:focus {
+		box-shadow: 0 0 0 4px rgba(var(--accent), 0.5);
 	}
 
 	.btn.primary {
@@ -92,9 +103,37 @@
 		color: rgb(var(--white));
 	}
 
+	.btn.primary.outlined {
+		background-color: transparent;
+		border: solid 2px;
+		border-color: rgb(var(--primary));
+		color: rgb(var(--primary));
+	}
+
+	.btn.primary.borderless {
+		background-color: transparent;
+		border: 0px;
+		box-shadow: none;
+		color: rgb(var(--dark));
+	}
+
 	.btn.accent {
 		background-color: rgb(var(--accent));
 		border-color: rgb(var(--accent));
+		color: rgb(var(--dark));
+	}
+
+	.btn.accent.outlined {
+		background-color: transparent;
+		border: solid 2px;
+		border-color: rgb(var(--accent));
+		color: rgb(var(--accent));
+	}
+
+	.btn.accent.borderless {
+		background-color: transparent;
+		border: 0px;
+		box-shadow: none;
 		color: rgb(var(--dark));
 	}
 </style>

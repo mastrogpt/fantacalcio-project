@@ -180,3 +180,17 @@ p {
 	letter-spacing: 0.04em; /* 4% */
 	font-weight: 700; /* Bold */
 }
+
+hr {
+	width: 100%;
+	height: 1px;
+	border-color: rgba(var(--accent), 0.25);
+}
+
+hr.light {
+	border-color: rgba(var(--light), 0.25);
+}
+
+hr.dark {
+	border-color: rgba(var(--dark), 0.25);
+}

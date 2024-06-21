@@ -1,4 +1,6 @@
 <script lang="ts">
+	import Button from '$lib/components/atoms/button/button.svelte';
+	import { selectedRows } from '$lib/store/store';
 	import { rankItem } from '@tanstack/match-sorter-utils';
 	import type { FilterFn, OnChangeFn, SortingState, TableOptions } from '@tanstack/svelte-table';
 	import {
@@ -10,23 +12,26 @@
 		getSortedRowModel
 	} from '@tanstack/svelte-table';
 	import { writable } from 'svelte/store';
-	import { selectedRows } from '../../../store/store';
 
+	// Props
 	export let data: any[] = [];
 	export let columns: any[] = [];
 	export let selectableRows: boolean = false;
 	export let onRowClick: (data: any) => void;
 
+	// Fuzzy filter for search
 	const fuzzyFilter: FilterFn<any> = (row, columnId, value, addMeta) => {
 		const itemRank = rankItem(row.getValue(columnId), value);
 		addMeta({ itemRank });
 		return itemRank.passed;
 	};
 
+	// Sorting state
 	let sorting: SortingState = [];
 
+	// Function to set sorting state
 	const setSorting: OnChangeFn<SortingState> = (updater) => {
-		if (updater instanceof Function) {
+		if (typeof updater === 'function') {
 			sorting = updater(sorting);
 		} else {
 			sorting = updater;
@@ -40,9 +45,10 @@
 		}));
 	};
 
-	// Make data reactive
+	// Store for the data
 	const dataStore = writable(data);
 
+	// Options for the table
 	const options = writable<TableOptions<{ [key: string]: string }>>({
 		data,
 		columns,
@@ -53,8 +59,8 @@
 			fuzzy: fuzzyFilter
 		},
 		enableMultiRowSelection: true,
-		getPaginationRowModel: getPaginationRowModel(), // Enable pagination
-		autoResetPageIndex: true, // Automatically update pagination when data or page size changes
+		getPaginationRowModel: getPaginationRowModel(),
+		autoResetPageIndex: true,
 		getCoreRowModel: getCoreRowModel(),
 		globalFilterFn: fuzzyFilter,
 		getFilteredRowModel: getFilteredRowModel(),
@@ -62,52 +68,57 @@
 		getSortedRowModel: getSortedRowModel()
 	});
 
+	// Create the table instance
 	const table = createSvelteTable(options);
 
-	let pageSize = 10; // number of rows to show
+	// Set the number of rows per page
+	let pageSize = 10;
 	$table.setPageSize(pageSize);
 
+	// Handle global filter (search)
 	const handleKeyUp = (e: any) => {
 		$table.setGlobalFilter(String(e?.target?.value));
 	};
 
-	const handleCheckboxChange = (rowId) => {
+	// Handle checkbox selection of rows
+	const handleCheckboxChange = (row) => {
 		selectedRows.update((rows) => {
 			const newRows = new Set(rows);
-			if (newRows.has(rowId)) {
-				newRows.delete(rowId);
+			const foundRow = Array.from(newRows).find((r: any) => r.id === row.original.id);
+
+			if (foundRow) {
+				newRows.delete(foundRow);
 			} else {
 				if (newRows.size < 2) {
-					newRows.add(rowId);
+					newRows.add(row.original);
 				}
 			}
+
 			return newRows;
 		});
 	};
 
+	// Handle row click
 	const handleRowClick = (row) => {
-		const rowId = row.id;
-
-		if (Boolean(onRowClick)) return onRowClick(row);
+		if (onRowClick) return onRowClick(row);
 
 		selectedRows.update((rows) => {
 			const newRows = new Set(rows);
-			if (newRows.has(rowId)) {
-				newRows.delete(rowId);
+			const foundRow = Array.from(newRows).find((r: any) => r.id === row.original.id);
+
+			if (foundRow) {
+				newRows.delete(foundRow);
 			} else {
 				if (newRows.size < 2) {
-					newRows.add(rowId);
+					newRows.add(row.original);
 				}
 			}
+
 			return newRows;
 		});
 	};
 
-	const clearSelection = () => {
-		selectedRows.set(new Set());
-	};
-
-	// Function to update data reactively
+	// Function to update the table data
 	export function updateData(newData) {
 		dataStore.set(newData);
 		options.update((opt) => ({ ...opt, data: newData }));
@@ -115,28 +126,28 @@
 </script>
 
 <div class="p-2">
-	<!-- Filtro globale -->
+	<!-- Global filter (search) -->
 	<div class="mb-4">
 		<input
 			type="text"
-			placeholder="Cerca..."
+			placeholder="Search..."
 			class="w-full px-4 py-2 border border-gray-300 rounded"
 			on:keyup={handleKeyUp}
 		/>
 	</div>
 
+	<!-- Table -->
 	<table class="w-full border-collapse table-fixed">
 		<thead>
 			{#each $table.getHeaderGroups() as headerGroup}
 				<tr>
+					<!-- Empty header for checkboxes -->
 					<th class="px-4 py-2 text-left border border-gray-300"></th>
-					<!-- Empty header for the compare icon -->
 					{#each headerGroup.headers as header}
 						<th class="px-4 py-2 text-left border border-gray-300" colSpan={header.colSpan}>
-							<!-- svelte-ignore a11y-click-events-have-key-events -->
-							<!-- svelte-ignore a11y-no-static-element-interactions -->
 							{#if !header.isPlaceholder}
 								<!-- svelte-ignore a11y-click-events-have-key-events -->
+								<!-- svelte-ignore a11y-no-static-element-interactions -->
 								<div
 									class="cursor-pointer select-none"
 									on:click={header.column.getToggleSortingHandler()}
@@ -160,15 +171,14 @@
 		<tbody>
 			{#each $table.getRowModel().rows as row}
 				<tr class="odd:bg-light even:bg-white cursor-pointer" on:click={() => handleRowClick(row)}>
-					<!-- svelte-ignore a11y-click-events-have-key-events -->
-					<!-- svelte-ignore a11y-no-static-element-interactions -->
 					{#if selectableRows}
 						<td class="px-4 py-2 border text-black flex items-center" on:click|stopPropagation>
 							<input
 								type="checkbox"
-								on:change={() => handleCheckboxChange(row.id)}
-								checked={$selectedRows.has(row.id)}
-								disabled={$selectedRows.size >= 2 && !$selectedRows.has(row.id)}
+								on:change={() => handleCheckboxChange(row)}
+								checked={Array.from($selectedRows).some((r) => r.id === row.original.id)}
+								disabled={Array.from($selectedRows).length >= 2 &&
+									!Array.from($selectedRows).some((r) => r.id === row.original.id)}
 								class="mr-2"
 							/>
 						</td>
@@ -186,9 +196,9 @@
 
 	<!-- Pagination Controls -->
 	<div class="flex justify-center mt-4">
-		<button on:click={() => $table.previousPage()} disabled={!$table.getCanPreviousPage()}>
-			Prev
-		</button>
+		<button on:click={() => $table.previousPage()} disabled={!$table.getCanPreviousPage()}
+			>Prev</button
+		>
 
 		{#if $table.getPageCount() > 5}
 			<button
@@ -234,31 +244,8 @@
 				</button>
 			{/each}
 		{/if}
-		<button on:click={() => $table.nextPage()} disabled={!$table.getCanNextPage()}> Next </button>
+		<button on:click={() => $table.nextPage()} disabled={!$table.getCanNextPage()}>Next</button>
 	</div>
-
-	<!-- Selected Rows -->
-	{#if selectableRows}
-		<div class="mt-4">
-			<h3 class="text-xl font-bold mb-2">Elementi selezionati:</h3>
-
-			{#if $selectedRows.size === 0}
-				<p>Nessun elemento selezionato.</p>
-			{:else}
-				<ul>
-					{#each Array.from($selectedRows) as rowId}
-						{#each $table.getRowModel().rows as row}
-							{#if row.id === rowId}
-								<li>{row.original.name}</li>
-							{/if}
-						{/each}
-					{/each}
-				</ul>
-
-				<button class="mt-2 px-4 py-2" on:click={clearSelection}> Pulisci selezione </button>
-			{/if}
-		</div>
-	{/if}
 </div>
 
 <style>
