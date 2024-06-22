@@ -4,10 +4,16 @@
 from dataclasses import dataclass
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from models.article import Article
-from models.team import Team
-from models.team_details import TeamDetails
 from models.utils import create_tables, drop_tables
+from models.article import Article
+from models.season import Season
+from models.league import League
+from models.team import Team
+from models.team_season import TeamSeason
+from models.player import Player
+from models.player_season import PlayerSeason
+from models.player_statistic import PlayerStatistic
+
 
 def main(args):
 
@@ -17,14 +23,24 @@ def main(args):
     db.connect_to_db(db_url)
 
     # drop_tables(db_url)
-    # create_tables(db_url)
+    create_tables(db_url)
     
     if(args.get("model") == "article"):
         return Article.handler(db.session, args)
+    elif(args.get("model") == "season"):
+        return Season.handler(db.session, args)
+    elif(args.get("model") == "league"):
+        return League.handler(db.session, args) 
     elif(args.get("model") == "team"):
         return Team.handler(db.session, args)
-    elif(args.get("model") == "team_details"):
-        return TeamDetails.handler(db.session, args)                
+    elif(args.get("model") == "team_season"):
+        return TeamSeason.handler(db.session, args)
+    elif(args.get("model") == "player"):
+        return Player.handler(db.session, args)    
+    elif(args.get("model") == "player_season"):
+        return PlayerSeason.handler(db.session, args)
+    elif(args.get("model") == "player_statistic"):
+        return PlayerStatistic.handler(db.session, args)                                                                                                    
     else: 
         return {
         "body": "model and/or query not present"
