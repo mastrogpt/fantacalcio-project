@@ -1,67 +1,117 @@
 <script lang="ts">
-	import Loader from '$lib/components/atoms/Loader.svelte';
-	import { getAiPresentationFromBackend } from '$lib/service/aiPresentation';
+	import Button from '$lib/components/atoms/button/button.svelte';
+	import ArticlesSlider from '$lib/components/atoms/sliders/ArticlesSlider.svelte';
+	import HeroSlider from '$lib/components/atoms/sliders/HeroSlider.svelte';
+	import Chatbot from '$lib/components/molecules/chatbot/Chatbot.svelte';
+
+	import TableCard from '$lib/components/organisms/tableCard/TableCard.svelte';
+	import TeamsComparator from '$lib/components/organisms/teamsComparator/TeamsComparator.svelte';
+	import anime from 'animejs';
 	import { onMount } from 'svelte';
-	import football from '$lib/assets/football.png';
-	import footballVertical from '$lib/assets/footballVertical.png';
 
-	let aiPresentation: string;
-	let aiPresentationWritingEffect: string;
-	let isLoading = false;
-
-	/**
-	 * Functions util to show text with real effect
-	 */
-	async function showMessage() {
-		for (let i = 0; i < aiPresentation.length; i++) {
-			aiPresentationWritingEffect = aiPresentation.substring(0, i + 1);
-			await sleep(25);
-		}
-	}
-	function sleep(ms: number) {
-		return new Promise((resolve) => setTimeout(resolve, ms));
-	}
-	/*
-	 */
-
-	async function getAiPresentation() {
-		isLoading = true;
-		aiPresentation = await getAiPresentationFromBackend();
-		showMessage();
-		isLoading = false;
-	}
+	let heroTitle: HTMLHeadingElement;
+	let heroSubtitle: HTMLHeadingElement;
+	let heroSlider: HTMLDivElement;
 
 	onMount(async () => {
-		await getAiPresentation();
+		anime
+			.timeline({ loop: false })
+			.add({
+				targets: heroTitle,
+				translateY: [-50, 0],
+				opacity: [0, 1],
+				duration: 800,
+				easing: 'easeOutExpo',
+				delay: (el, i) => 500 + 30 * i
+			})
+			.add({
+				targets: heroSubtitle,
+				translateY: [50, 0],
+				opacity: [0, 1],
+				duration: 800,
+				easing: 'easeOutExpo',
+				delay: (el, i) => 800 + 30 * i
+			})
+			.add({
+				targets: heroSlider,
+				opacity: [0, 1],
+				duration: 1000,
+				easing: 'easeOutExpo',
+				offset: '-=500'
+			});
 	});
+
+	function animateOnScroll(target: Element): void {
+		const observer: IntersectionObserver = new IntersectionObserver(
+			(entries) => {
+				entries.forEach((entry) => {
+					if (entry.isIntersecting) {
+						anime({
+							targets: entry.target,
+							translateY: [100, 0],
+							opacity: [0, 1],
+							duration: 1000,
+							easing: 'easeOutExpo'
+						});
+						observer.unobserve(entry.target);
+					}
+				});
+			},
+			{ threshold: 0.1 }
+		);
+		observer.observe(target);
+	}
 </script>
 
-<div>
-	<div class="w-full mt-2 bg-gray-900 h-96">
-		<div class="relative h-full sm:block">
-			<img
-				alt=""
-				src={footballVertical}
-				class="absolute inset-0 w-full h-120 object-cover block lg:hidden"
-			/>
-
-			<img
-				alt=""
-				src={football}
-				class="absolute inset-0 w-full h-120 object-cover hidden lg:block"
-			/>
-
-			<div
-				class="m-4 p-2 absolute flex items-center justify-center lg:w-2/5 sm:w-3/5 bg-opacity-85 bg-gray-900 rounded-lg"
-			>
-				{#if aiPresentation}
-					<p class="mt-2 text-l text-white font-extrabold lg:text-base sm:text-sm">
-						{aiPresentationWritingEffect}
-					</p>
-				{:else}
-					<Loader />
-				{/if}
-			</div>
-		</div>
+<section class="hero flex flex-col items-center justify-center text-center gap-10">
+	<div bind:this={heroSlider} class="hero-slider">
+		<HeroSlider />
 	</div>
-</div>
+</section>
+
+<section
+	class="articles-section flex flex-col items-center justify-center text-center my-20 gap-10 bg-accent py-20"
+>
+	<h2 class="text-4xl font-semibold" use:animateOnScroll>Articoli più discussi</h2>
+
+	<ArticlesSlider />
+</section>
+
+<section class="table-secction flex align-center justify-center text-center my-20 gap-10 py-20">
+	<TableCard />
+</section>
+
+<section class="lignup-section flex flex-col text-center gap-5">
+	<TeamsComparator />
+</section>
+
+<section
+	class="flex flex-col align-center justify-center items-center text-center my-20 gap-10 py-20"
+>
+	<div
+		class="flex flex-col align-center justify-center items-center text-center my-20 gap-10 py-20 container"
+	>
+		<h2 class="text-4xl font-semibold" use:animateOnScroll>Collabora</h2>
+
+		<p>
+			Lorem ipsum, dolor sit amet consectetur adipisicing elit. Molestiae, debitis sint. Incidunt
+			cumque cum necessitatibus, optio tempore eos reprehenderit similique placeat hic porro amet
+			atque sint voluptas molestias quasi vitae.
+		</p>
+
+		<Button label="Clicca qui" onClick={console.log} />
+	</div>
+</section>
+
+<Chatbot />
+
+<style>
+	.hero {
+		height: calc(100vh - 100px);
+	}
+
+	.hero-slider {
+		width: 100%;
+		max-width: 1200px;
+	}
+</style>
