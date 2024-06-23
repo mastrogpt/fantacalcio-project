@@ -1,7 +1,8 @@
 from sqlalchemy import Column, Integer, String, Boolean, delete, create_engine
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm.exc import NoResultFound
+from sqlalchemy.orm import relationship, sessionmaker
+from sqlalchemy.dialects.postgresql import insert
 from models.base import Base
-from sqlalchemy.orm import sessionmaker
 import uuid
 
 class Team(Base):
@@ -9,19 +10,18 @@ class Team(Base):
     
     id = Column(Integer, primary_key=True, autoincrement=True)
     uuid = Column(String(36), unique=True, nullable=False, default=lambda: str(uuid.uuid4()))
-    team_name = Column(String(50))
+    team_name = Column(String(50), unique=True, nullable=False)
     team_code = Column(String(10))
     team_country = Column(String(50))
     team_founded = Column(Integer)
     team_logo_url = Column(String(255))
     current_in_serie_a = Column(Boolean)
-    footballapi_id = Column(Integer, unique=True)
+    apifootball_id = Column(Integer, unique=True)
 
+    details = relationship("TeamDetails", back_populates="team", cascade="all, delete-orphan")
     # players = relationship("Player", back_populates="team")
-    # details = relationship("TeamDetails", back_populates="team")
-    # team_name_mappings = relationship("TeamNameMapping", back_populates="team")
 
-    def __init__(self, team_name, team_code, team_country, team_founded, team_logo_url, current_in_serie_a, footballapi_id):
+    def __init__(self, team_name, team_code, team_country, team_founded, team_logo_url, current_in_serie_a, apifootball_id):
         #self.uuid = uuid
         self.team_name = team_name
         self.team_code = team_code
@@ -29,46 +29,97 @@ class Team(Base):
         self.team_founded = team_founded
         self.team_logo_url = team_logo_url
         self.current_in_serie_a = current_in_serie_a
-        self.footballapi_id = footballapi_id
+        self.apifootball_id = apifootball_id
         
     def __repr__(self):
-        return f"<Team(id={self.id}, team_name='{self.team_name}', team_code='{self.team_code}', team_country='{self.team_country}', team_founded={self.team_founded}, team_logo_url='{self.team_logo_url}', current_in_serie_a={self.current_in_serie_a}, footballapi_id={self.footballapi_id})>"
+        return f"<Team(id={self.id}, team_name='{self.team_name}', team_code='{self.team_code}', team_country='{self.team_country}', team_founded={self.team_founded}, team_logo_url='{self.team_logo_url}', current_in_serie_a={self.current_in_serie_a}, apifootball_id={self.apifootball_id})>"
 
     @staticmethod
-    def handler(engine, args):
-        #Base.metadata.create_all(engine)
+    def handler(session, args):
+
         query_type = args.get("query")
       
         if query_type == "delete":
-            return Team.delete_handler(engine, args)
-        elif query_type == "new":
-            if 'teams' in args:
-                success = Team.save_teams(engine, args['teams'])
-                return {"body": "Teams saved successfully" if success else "Failed to save teams"}
-            else:
-                return {"body": "No teams provided in the payload"}
+            return Team.delete_handler(session, args)
+        elif query_type == "insert":
+            return Team.insert_handler(session, args)
+        elif query_type == "upsert":
+            return Team.upsert_handler(session, args)            
+        elif query_type == "update":
+            return Team.update_handler(session, args)
         else:
-            return Team.get_handler(engine, args)
+            return Team.get_handler(session, args)
 
     @staticmethod
-    def get_handler(engine, args):
+    def insert_handler(session, args):
+        try:
+            if 'teams' in args:
+                ret = Team.insert_if_not_exists(session, args['teams'])
+                if ret:
+                    return {"statusCode": 200, "body": "Teams saved successfully"}
+                else:
+                    return {"statusCode": 500, "body": "Failed to save teams"}
+            else:
+                return {"statusCode": 400, "body": "No teams provided in the payload"}
+        except Exception as e:
+            return {"statusCode": 500, "body": f"Error during update operation: {e}"}            
+
+    @staticmethod
+    def upsert_handler(session, args):
+        try:
+            if 'teams' in args:
+                ret = Team.upsert(session, args['teams'])
+                if ret:
+                    return {"statusCode": 200, "body": "Teams saved successfully"}
+                else:
+                    return {"statusCode": 500, "body": "Failed to save teams"}
+            else:
+                return {"statusCode": 400, "body": "No teams provided in the payload"}
+        except Exception as e:
+            return {"statusCode": 500, "body": f"Error during update operation: {e}"}                     
+
+    @staticmethod
+    def update_handler(session, args):
+        try:
+            update_fields = args.get("update_fields", {})
+
+            if 'id' in args:
+                team_id = args['id']
+                ret = Team.update_team_by_id(session, team_id, update_fields)
+                if ret:
+                    return {"statusCode": 200, "body": f"Updated fields successfully for team with ID: {team_id}"}
+                else:
+                    return {"statusCode": 500, "body": f"Failed to update fields for team with ID: {team_id}"}
+            else:
+                ret = Team.update_all(session, update_fields)
+                if ret:
+                    return {"statusCode": 200, "body": f"Updated fields successfully for all teams"}
+                else:
+                    return {"statusCode": 500, "body": f"Failed to update fields for all teams"}
+        except Exception as e:
+            return {"statusCode": 500, "body": f"Error during update operation: {e}"}
+
+    @staticmethod
+    def get_handler(session, args):
         if 'id' in args:
-            team = Team.get_team_by_id(engine, args['id'])
+            team = Team.get_team_by_id(session, args['id'])
+            return {"body": team if team else "Team not found"}
+        elif 'apifootball_id' in args:
+            team = Team.get_team_by_apifootball_id(session, args['apifootball_id'])
             return {"body": team if team else "Team not found"}
         else:
-            return {"body": Team.get_all_teams(engine)}
+            return {"body": Team.get_all(session)}
 
     @staticmethod
-    def delete_handler(engine, args):
+    def delete_handler(session, args):
         if 'id' in args:
-            return {"body": Team.delete_by_id(engine, args['id'])}
+            return {"body": Team.delete_by_id(session, args['id'])}
         else:
-            return {"body": Team.delete_all(engine)}
+            return {"body": Team.delete_all(session)}
 
     @staticmethod
-    def get_all_teams(engine):
-        Session = sessionmaker(bind=engine)
-        session = Session()
+    def get_all(session):
+
         try:
             teams = session.query(Team).all()
             return [team._to_dict() for team in teams]
@@ -79,9 +130,8 @@ class Team(Base):
             session.close()
 
     @staticmethod
-    def delete_all(engine):
-        Session = sessionmaker(bind=engine)
-        session = Session()
+    def delete_all(session):
+
         try:
             session.execute(delete(Team))
             session.commit()
@@ -94,9 +144,8 @@ class Team(Base):
             session.close()
 
     @staticmethod
-    def delete_by_id(engine, team_id):
-        Session = sessionmaker(bind=engine)
-        session = Session()
+    def delete_by_id(session, team_id):
+
         try:
             team = session.query(Team).get(team_id)
             if team:
@@ -113,36 +162,67 @@ class Team(Base):
             session.close()
 
     @staticmethod
-    def save_teams(engine, teams):
-        Session = sessionmaker(bind=engine)
-        session = Session()
+    def insert_if_not_exists(session, teams):  
         try:
             for team in teams:
-                new_team = Team(
-                    #uuid=str(uuid.uuid4()),
+                stmt = insert(Team).values(
                     team_name=team['team_name'],
                     team_code=team['team_code'],
                     team_country=team['team_country'],
                     team_founded=team['team_founded'],
                     team_logo_url=team['team_logo_url'],
                     current_in_serie_a=team['current_in_serie_a'],
-                    footballapi_id=team['footballapi_id']
+                    apifootball_id=team['apifootball_id']
+                ).on_conflict_do_nothing(
+                    index_elements=['team_name']
                 )
-                session.add(new_team)
-            print("Teams saved successfully: ", [team['team_name'] for team in teams]) 
+                session.execute(stmt)
             session.commit()
+            print("Teams saved successfully: ", [team['team_name'] for team in teams]) 
             return True
         except Exception as e:
             print("Error during teams saving:", e)
             session.rollback()
             return False
         finally:
-            session.close() 
+            session.close()
 
     @staticmethod
-    def get_team_by_id(engine, team_id):
-        Session = sessionmaker(bind=engine)
-        session = Session()
+    def upsert(session, teams):
+        try:
+            for team in teams:
+                stmt = insert(Team).values(
+                    team_name=team['team_name'],
+                    team_code=team['team_code'],
+                    team_country=team['team_country'],
+                    team_founded=team['team_founded'],
+                    team_logo_url=team['team_logo_url'],
+                    current_in_serie_a=team['current_in_serie_a'],
+                    apifootball_id=team['apifootball_id']
+                ).on_conflict_do_update(
+                    index_elements=['team_name'],
+                    set_={
+                        'team_code': team['team_code'],
+                        'team_country': team['team_country'],
+                        'team_founded': team['team_founded'],
+                        'team_logo_url': team['team_logo_url'],
+                        'current_in_serie_a': team['current_in_serie_a'],
+                        'apifootball_id': team['apifootball_id']
+                    }
+                )
+                session.execute(stmt)
+            session.commit()
+            print("Teams upserted successfully: ", [team['team_name'] for team in teams]) 
+            return True
+        except Exception as e:
+            print("Error during teams upserting:", e)
+            session.rollback()
+            return False
+        finally:
+            session.close()
+
+    @staticmethod
+    def get_team_by_id(session, team_id):
         try:
             team = session.query(Team).get(team_id)
             return team._to_dict() if team else None
@@ -150,7 +230,65 @@ class Team(Base):
             print("Error during team loading:", e)
             return None
         finally:
-            session.close()    
+            session.close()
+
+    @staticmethod
+    def get_team_by_apifootball_id(session, apifootball_id):
+        try:
+            team = session.query(Team).filter_by(apifootball_id=apifootball_id).one()
+            return team._to_dict() if team else None
+        except Exception as e:
+            print("Error during team loading:", e)
+            return None
+        finally:
+            session.close()
+
+    @staticmethod
+    def update_team_by_id(session, team_id, update_fields):
+        try:
+            team = session.query(Team).filter_by(id=team_id).one()
+            for field, value in update_fields.items():
+                if hasattr(team, field):
+                    setattr(team, field, value)
+                else:
+                    raise AttributeError(f"Field '{field}' does not exist in Team model")
+            session.commit()
+            return True
+        except NoResultFound:
+            return False
+        except AttributeError as ae:
+            print(f"AttributeError during update for team with ID {team_id}: {ae}")
+            session.rollback()
+            return False
+        except Exception as e:
+            print(f"Error during update for team with ID {team_id}: {e}")
+            session.rollback()
+            return False
+        finally:
+            session.close()
+
+    @staticmethod
+    def update_all(session, update_fields):
+        try:
+            teams = session.query(Team).all()
+            for team in teams:
+                for field, value in update_fields.items():
+                    if hasattr(team, field):
+                        setattr(team, field, value)
+                    else:
+                        raise AttributeError(f"Field '{field}' is not a valid attribute for Team model")
+            session.commit()
+            return True
+        except AttributeError as ae:
+            print(f"AttributeError during update for all teams: {ae}")
+            session.rollback()
+            return False
+        except Exception as e:
+            print(f"Error during update for all teams: {e}")
+            session.rollback()
+            return False
+        finally:
+            session.close()
 
     def _to_dict(self):
         return {
@@ -162,6 +300,6 @@ class Team(Base):
             'team_founded': self.team_founded,
             'team_logo_url': self.team_logo_url,
             'current_in_serie_a': self.current_in_serie_a,
-            'footballapi_id': self.footballapi_id
+            'apifootball_id': self.apifootball_id
         }    
     
