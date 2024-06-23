@@ -27,7 +27,6 @@
 
 	const playersCols = [
 		{ accessorKey: 'name', header: 'Nome' },
-		{ accessorKey: 'playmaker', header: 'Playmaker' },
 		{ accessorKey: 'role', header: 'Ruolo' },
 		{ accessorKey: 'team', header: 'Squadra' },
 		{ accessorKey: 'value', header: 'Valore' }
