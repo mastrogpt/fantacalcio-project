@@ -10,33 +10,43 @@ class Team(Base):
     
     id = Column(Integer, primary_key=True, autoincrement=True)
     uuid = Column(String(36), unique=True, nullable=False, default=lambda: str(uuid.uuid4()))
-    team_name = Column(String(50), unique=True, nullable=False)
-    team_code = Column(String(10))
-    team_country = Column(String(50))
-    team_founded = Column(Integer)
-    team_logo_url = Column(String(255))
-    current_in_serie_a = Column(Boolean)
+    name = Column(String(100), unique=True, nullable=False)
+    code = Column(String(10))
+    country = Column(String(100))
+    founded = Column(Integer)
+    national = Column(Boolean)
+    logo = Column(String(255))
+    venue_name = Column(String(100))
+    venue_address = Column(String(255))
+    venue_city = Column(String(100))
+    venue_capacity = Column(Integer)
+    venue_surface = Column(String(50))
+    venue_image = Column(String(255))
     apifootball_id = Column(Integer, unique=True)
 
-    details = relationship("TeamDetails", back_populates="team", cascade="all, delete-orphan")
-    # players = relationship("Player", back_populates="team")
+    team_seasons = relationship('TeamSeason', back_populates='team', cascade="all, delete-orphan")
+    player_statistics = relationship('PlayerStatistic', back_populates='team', cascade="all, delete-orphan")
 
-    def __init__(self, team_name, team_code, team_country, team_founded, team_logo_url, current_in_serie_a, apifootball_id):
-        #self.uuid = uuid
-        self.team_name = team_name
-        self.team_code = team_code
-        self.team_country = team_country
-        self.team_founded = team_founded
-        self.team_logo_url = team_logo_url
-        self.current_in_serie_a = current_in_serie_a
+    def __init__(self, name, code, country, founded, national, logo, venue_name, venue_address, venue_city, venue_capacity, venue_surface, venue_image, apifootball_id):
+        self.name = name
+        self.code = code
+        self.country = country
+        self.founded = founded
+        self.national = national
+        self.logo = logo
+        self.venue_name = venue_name
+        self.venue_address = venue_address
+        self.venue_city = venue_city
+        self.venue_capacity = venue_capacity
+        self.venue_surface = venue_surface
+        self.venue_image = venue_image
         self.apifootball_id = apifootball_id
         
     def __repr__(self):
-        return f"<Team(id={self.id}, team_name='{self.team_name}', team_code='{self.team_code}', team_country='{self.team_country}', team_founded={self.team_founded}, team_logo_url='{self.team_logo_url}', current_in_serie_a={self.current_in_serie_a}, apifootball_id={self.apifootball_id})>"
+        return f"<Team(id={self.id}, name='{self.name}', code='{self.code}', country='{self.country}', founded={self.founded}, national={self.national}, logo='{self.logo}', venue_name='{self.venue_name}', venue_address='{self.venue_address}', venue_city='{self.venue_city}', venue_capacity={self.venue_capacity}, venue_surface='{self.venue_surface}', venue_image='{self.venue_image}', apifootball_id={self.apifootball_id})>"
 
     @staticmethod
     def handler(session, args):
-
         query_type = args.get("query")
       
         if query_type == "delete":
@@ -56,13 +66,13 @@ class Team(Base):
             if 'teams' in args:
                 ret = Team.insert_if_not_exists(session, args['teams'])
                 if ret:
-                    return {"statusCode": 200, "body": "Teams saved successfully"}
+                    return {"statusCode": 200, "body": ret}
                 else:
                     return {"statusCode": 500, "body": "Failed to save teams"}
             else:
                 return {"statusCode": 400, "body": "No teams provided in the payload"}
         except Exception as e:
-            return {"statusCode": 500, "body": f"Error during update operation: {e}"}            
+            return {"statusCode": 500, "body": f"Error during insert operation: {e}"}                 
 
     @staticmethod
     def upsert_handler(session, args):
@@ -70,13 +80,13 @@ class Team(Base):
             if 'teams' in args:
                 ret = Team.upsert(session, args['teams'])
                 if ret:
-                    return {"statusCode": 200, "body": "Teams saved successfully"}
+                    return {"statusCode": 200, "body": ret}
                 else:
-                    return {"statusCode": 500, "body": "Failed to save teams"}
+                    return {"statusCode": 500, "body": "Failed to upsert teams"}
             else:
                 return {"statusCode": 400, "body": "No teams provided in the payload"}
         except Exception as e:
-            return {"statusCode": 500, "body": f"Error during update operation: {e}"}                     
+            return {"statusCode": 500, "body": f"Error during upsert operation: {e}"}                   
 
     @staticmethod
     def update_handler(session, args):
@@ -93,9 +103,9 @@ class Team(Base):
             else:
                 ret = Team.update_all(session, update_fields)
                 if ret:
-                    return {"statusCode": 200, "body": f"Updated fields successfully for all teams"}
+                    return {"statusCode": 200, "body": "Updated fields successfully for all teams"}
                 else:
-                    return {"statusCode": 500, "body": f"Failed to update fields for all teams"}
+                    return {"statusCode": 500, "body": "Failed to update fields for all teams"}
         except Exception as e:
             return {"statusCode": 500, "body": f"Error during update operation: {e}"}
 
@@ -107,6 +117,10 @@ class Team(Base):
         elif 'apifootball_id' in args:
             team = Team.get_team_by_apifootball_id(session, args['apifootball_id'])
             return {"body": team if team else "Team not found"}
+        elif 'apifootball_ids' in args:
+            apifootball_ids = [int(id) for id in args['apifootball_ids'].split(',')]
+            teams = Team.get_teams_by_apifootball_ids(session, apifootball_ids)
+            return {"body": teams}
         else:
             return {"body": Team.get_all(session)}
 
@@ -119,7 +133,6 @@ class Team(Base):
 
     @staticmethod
     def get_all(session):
-
         try:
             teams = session.query(Team).all()
             return [team._to_dict() for team in teams]
@@ -131,7 +144,6 @@ class Team(Base):
 
     @staticmethod
     def delete_all(session):
-
         try:
             session.execute(delete(Team))
             session.commit()
@@ -145,7 +157,6 @@ class Team(Base):
 
     @staticmethod
     def delete_by_id(session, team_id):
-
         try:
             team = session.query(Team).get(team_id)
             if team:
@@ -162,24 +173,33 @@ class Team(Base):
             session.close()
 
     @staticmethod
-    def insert_if_not_exists(session, teams):  
+    def insert_if_not_exists(session, teams):
         try:
+            inserted_teams = []
             for team in teams:
                 stmt = insert(Team).values(
-                    team_name=team['team_name'],
-                    team_code=team['team_code'],
-                    team_country=team['team_country'],
-                    team_founded=team['team_founded'],
-                    team_logo_url=team['team_logo_url'],
-                    current_in_serie_a=team['current_in_serie_a'],
+                    name=team['name'],
+                    code=team['code'],
+                    country=team['country'],
+                    founded=team['founded'],
+                    national=team['national'],
+                    logo=team['logo'],
+                    venue_name=team['venue_name'],
+                    venue_address=team['venue_address'],
+                    venue_city=team['venue_city'],
+                    venue_capacity=team['venue_capacity'],
+                    venue_surface=team['venue_surface'],
+                    venue_image=team['venue_image'],
                     apifootball_id=team['apifootball_id']
                 ).on_conflict_do_nothing(
-                    index_elements=['team_name']
+                    index_elements=['name']
                 )
-                session.execute(stmt)
+                result = session.execute(stmt)
+                if result.rowcount > 0:  # If a row was actually inserted
+                    inserted_team = session.query(Team).filter_by(name=team['name']).one()
+                    inserted_teams.append(inserted_team._to_dict())
             session.commit()
-            print("Teams saved successfully: ", [team['team_name'] for team in teams]) 
-            return True
+            return inserted_teams
         except Exception as e:
             print("Error during teams saving:", e)
             session.rollback()
@@ -190,30 +210,44 @@ class Team(Base):
     @staticmethod
     def upsert(session, teams):
         try:
+            upserted_teams = []
             for team in teams:
                 stmt = insert(Team).values(
-                    team_name=team['team_name'],
-                    team_code=team['team_code'],
-                    team_country=team['team_country'],
-                    team_founded=team['team_founded'],
-                    team_logo_url=team['team_logo_url'],
-                    current_in_serie_a=team['current_in_serie_a'],
+                    name=team['name'],
+                    code=team['code'],
+                    country=team['country'],
+                    founded=team['founded'],
+                    national=team['national'],
+                    logo=team['logo'],
+                    venue_name=team['venue_name'],
+                    venue_address=team['venue_address'],
+                    venue_city=team['venue_city'],
+                    venue_capacity=team['venue_capacity'],
+                    venue_surface=team['venue_surface'],
+                    venue_image=team['venue_image'],
                     apifootball_id=team['apifootball_id']
                 ).on_conflict_do_update(
-                    index_elements=['team_name'],
+                    index_elements=['name'],
                     set_={
-                        'team_code': team['team_code'],
-                        'team_country': team['team_country'],
-                        'team_founded': team['team_founded'],
-                        'team_logo_url': team['team_logo_url'],
-                        'current_in_serie_a': team['current_in_serie_a'],
+                        'code': team['code'],
+                        'country': team['country'],
+                        'founded': team['founded'],
+                        'national': team['national'],
+                        'logo': team['logo'],
+                        'venue_name': team['venue_name'],
+                        'venue_address': team['venue_address'],
+                        'venue_city': team['venue_city'],
+                        'venue_capacity': team['venue_capacity'],
+                        'venue_surface': team['venue_surface'],
+                        'venue_image': team['venue_image'],
                         'apifootball_id': team['apifootball_id']
                     }
                 )
                 session.execute(stmt)
+                upserted_team = session.query(Team).filter_by(name=team['name']).one()
+                upserted_teams.append(upserted_team._to_dict())
             session.commit()
-            print("Teams upserted successfully: ", [team['team_name'] for team in teams]) 
-            return True
+            return upserted_teams
         except Exception as e:
             print("Error during teams upserting:", e)
             session.rollback()
@@ -227,7 +261,7 @@ class Team(Base):
             team = session.query(Team).get(team_id)
             return team._to_dict() if team else None
         except Exception as e:
-            print("Error during team loading:", e)
+            print(f"Error during fetching team with ID {team_id}: {e}")
             return None
         finally:
             session.close()
@@ -238,10 +272,21 @@ class Team(Base):
             team = session.query(Team).filter_by(apifootball_id=apifootball_id).one()
             return team._to_dict() if team else None
         except Exception as e:
-            print("Error during team loading:", e)
+            print(f"Error during fetching team with API football ID {apifootball_id}: {e}")
             return None
         finally:
             session.close()
+
+    @staticmethod
+    def get_teams_by_apifootball_ids(session, apifootball_ids):
+        try:
+            teams = session.query(Team).filter(Team.apifootball_id.in_(apifootball_ids)).all()
+            return [team._to_dict() for team in teams]
+        except Exception as e:
+            print(f"Error while fetching teams by apifootball_ids: {e}")
+            return []
+        finally:
+            session.close()            
 
     @staticmethod
     def update_team_by_id(session, team_id, update_fields):
@@ -255,6 +300,7 @@ class Team(Base):
             session.commit()
             return True
         except NoResultFound:
+            print(f"Team with ID {team_id} not found.")
             return False
         except AttributeError as ae:
             print(f"AttributeError during update for team with ID {team_id}: {ae}")
@@ -294,12 +340,18 @@ class Team(Base):
         return {
             'id': self.id,
             'uuid': self.uuid,
-            'team_name': self.team_name,
-            'team_code': self.team_code,
-            'team_country': self.team_country,
-            'team_founded': self.team_founded,
-            'team_logo_url': self.team_logo_url,
-            'current_in_serie_a': self.current_in_serie_a,
+            'name': self.name,
+            'code': self.code,
+            'country': self.country,
+            'founded': self.founded,
+            'national': self.national,
+            'logo': self.logo,
+            'venue_name': self.venue_name,
+            'venue_address': self.venue_address,
+            'venue_city': self.venue_city,
+            'venue_capacity': self.venue_capacity,
+            'venue_surface': self.venue_surface,
+            'venue_image': self.venue_image,
             'apifootball_id': self.apifootball_id
-        }    
-    
+        }
+
