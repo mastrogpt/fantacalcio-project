@@ -55,7 +55,6 @@
 
 	const handleTabChange = (val: string) => {
 		activeTab = val;
-		console.log('Tab attivo:', activeTab);
 	};
 
 	// Function to clear selection

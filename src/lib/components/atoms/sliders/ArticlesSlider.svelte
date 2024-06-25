@@ -11,7 +11,7 @@
 	const sliderContainerCommonProps = {
 		'space-between': 50,
 		pagination: false,
-		'slides-per-view': 4,
+		'slides-per-view': 'auto',
 		loop: true,
 		autoplay: {
 			delay: 3000,
@@ -25,39 +25,63 @@
 	<Loader />
 {:then articles}
 	<div class="flex flex-col gap-[50px]">
-		<!-- svelte-ignore a11y-no-static-element-interactions -->
-		<swiper-container class="articles-slider-up" {...sliderContainerCommonProps} transition:fade>
-			{#each articles as { title, subtitle, id }, idx}
-				<ArticleSliderSlide
-					onClick={() => goto(`/articles/${id}`)}
-					sliderData={{
-						title,
-						subtitle,
-						imageUrl: `https://picsum.photos/id/${234 + idx}/400/500`
-					}}
-				/>
-			{/each}
-		</swiper-container>
+		{#if articles.length > 10}
+			<!-- Primo slider con la prima metà degli articoli -->
+			<swiper-container class="articles-slider-up" {...sliderContainerCommonProps} transition:fade>
+				{#each articles.slice(0, articles.length / 2) as { title, subtitle, id }, idx}
+					<ArticleSliderSlide
+						onClick={() => goto(`/articles/${id}`)}
+						sliderData={{
+							title,
+							subtitle,
+							imageUrl: `https://picsum.photos/id/${234 + idx}/400/500`
+						}}
+					/>
+				{/each}
+			</swiper-container>
 
-		<!-- <swiper-container
-			class="articles-slider-bottom"
-			{...sliderContainerCommonProps}
-			autoplay={{
-				...sliderContainerCommonProps.autoplay,
-				reverseDirection: true
-			}}
-			transition:fade
-		>
-			{#each slider2Slides as sliderData}
-				<ArticleSliderSlide {sliderData} />
-			{/each}
-		</swiper-container> -->
+			<!-- Secondo slider con la seconda metà degli articoli -->
+			<swiper-container
+				class="articles-slider-bottom"
+				{...sliderContainerCommonProps}
+				autoplay={{
+					...sliderContainerCommonProps.autoplay,
+					reverseDirection: true
+				}}
+				transition:fade
+			>
+				{#each articles.slice(articles.length / 2) as { title, subtitle, id }, idx}
+					<ArticleSliderSlide
+						onClick={() => goto(`/articles/${id}`)}
+						sliderData={{
+							title,
+							subtitle,
+							imageUrl: `https://picsum.photos/id/${234 + idx + articles.length / 2}/400/500`
+						}}
+					/>
+				{/each}
+			</swiper-container>
+		{:else}
+			<!-- Slider singolo se gli articoli sono meno di 10 -->
+			<swiper-container class="articles-slider-up" {...sliderContainerCommonProps} transition:fade>
+				{#each articles as { title, subtitle, id }, idx}
+					<ArticleSliderSlide
+						onClick={() => goto(`/articles/${id}`)}
+						sliderData={{
+							title,
+							subtitle,
+							imageUrl: `https://picsum.photos/id/${234 + idx}/400/500`
+						}}
+					/>
+				{/each}
+			</swiper-container>
+		{/if}
 	</div>
 {/await}
 
 <style>
 	swiper-container {
-		width: 100vw;
+		width: 90vw;
 		height: 100%;
 	}
 

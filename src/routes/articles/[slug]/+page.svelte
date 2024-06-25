@@ -3,8 +3,6 @@
 	import type { IArticlesProps } from '$lib/service/getArticles.js';
 
 	export let data: IArticlesProps;
-
-	console.log('🔎 [+page][data] =>', data);
 </script>
 
 <article class="flex flex-col justify-center items-center">

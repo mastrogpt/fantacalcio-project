@@ -17,8 +17,6 @@
 			playersToCompare.push(row);
 		});
 
-		console.log('🔎 [ComparePlayers][playersToCompare] =>', playersToCompare);
-
 		aiComparsion = await getAiComparison(playersToCompare);
 
 		loading = false;

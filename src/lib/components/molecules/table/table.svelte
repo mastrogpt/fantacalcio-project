@@ -1,17 +1,18 @@
 <script lang="ts">
-	import Button from '$lib/components/atoms/button/button.svelte';
-	import { selectedRows } from '$lib/store/store';
-	import { rankItem } from '@tanstack/match-sorter-utils';
-	import type { FilterFn, OnChangeFn, SortingState, TableOptions } from '@tanstack/svelte-table';
+	import { writable } from 'svelte/store';
 	import {
 		createSvelteTable,
 		flexRender,
 		getCoreRowModel,
 		getFilteredRowModel,
 		getPaginationRowModel,
-		getSortedRowModel
+		getSortedRowModel,
+		type TableOptions
 	} from '@tanstack/svelte-table';
-	import { writable } from 'svelte/store';
+	import { rankItem } from '@tanstack/match-sorter-utils';
+	import type { FilterFn, OnChangeFn, SortingState } from '@tanstack/svelte-table';
+	import { selectedRows } from '$lib/store/store';
+	import Button from '$lib/components/atoms/button/button.svelte';
 
 	// Props
 	export let data: any[] = [];
@@ -125,31 +126,38 @@
 	}
 </script>
 
-<div class="p-2">
+<div class="table-container p-2">
 	<!-- Global filter (search) -->
 	<div class="mb-4">
+		<label for="table-global-filter" class="block text-left text-sm font-medium text-gray-700"
+			>Cerca nella tabella</label
+		>
+
 		<input
+			id="table-global-filter"
 			type="text"
-			placeholder="Search..."
-			class="w-full px-4 py-2 border border-gray-300 rounded"
+			placeholder="Cerca..."
+			class="block appearance-none w-full bg-transparent border border-2 border-primary text-gray-700 py-2 px-4 pr-8 rounded leading-tight focus:outline-none focus:border-gray-500 focus:border-3 w-full px-4 py-2 border border-gray-300 rounded"
 			on:keyup={handleKeyUp}
 		/>
 	</div>
 
 	<!-- Table -->
-	<table class="w-full border-collapse table-fixed">
+	<table>
 		<thead>
 			{#each $table.getHeaderGroups() as headerGroup}
 				<tr>
 					<!-- Empty header for checkboxes -->
 					{#if selectableRows}
-						<th class="px-4 py-2 text-left border border-gray-300 w-2"></th>
+						<th class="w-2"></th>
 					{/if}
+
 					{#each headerGroup.headers as header}
-						<th class="px-4 py-2 text-left border border-gray-300" colSpan={header.colSpan}>
+						<th colSpan={header.colSpan}>
+							<!-- svelte-ignore a11y-click-events-have-key-events -->
+							<!-- svelte-ignore a11y-no-static-element-interactions -->
 							{#if !header.isPlaceholder}
 								<!-- svelte-ignore a11y-click-events-have-key-events -->
-								<!-- svelte-ignore a11y-no-static-element-interactions -->
 								<div
 									class="cursor-pointer select-none"
 									on:click={header.column.getToggleSortingHandler()}
@@ -172,28 +180,21 @@
 
 		<tbody>
 			{#each $table.getRowModel().rows as row}
-				<tr class="odd:bg-light even:bg-white cursor-pointer" on:click={() => handleRowClick(row)}>
+				<tr on:click={() => handleRowClick(row)}>
 					{#if selectableRows}
-						<td
-							class="px-4 py-2 border text-black flex items-center"
-							on:click|stopPropagation
-							style="width:min-content"
-						>
-							<div class="h-[33px] flex items-center justify-center">
-								<input
-									type="checkbox"
-									on:change={() => handleCheckboxChange(row)}
-									checked={Array.from($selectedRows).some((r) => r.id === row.original.id)}
-									disabled={Array.from($selectedRows).length >= 2 &&
-										!Array.from($selectedRows).some((r) => r.id === row.original.id)}
-									class="mr-2"
-								/>
-							</div>
+						<td on:click|stopPropagation>
+							<input
+								type="checkbox"
+								on:change={() => handleCheckboxChange(row)}
+								checked={Array.from($selectedRows).some((r) => r.id === row.original.id)}
+								disabled={Array.from($selectedRows).length >= 2 &&
+									!Array.from($selectedRows).some((r) => r.id === row.original.id)}
+							/>
 						</td>
 					{/if}
 
 					{#each row.getVisibleCells() as cell}
-						<td class="px-4 py-2 border text-black">
+						<td>
 							<svelte:component this={flexRender(cell.column.columnDef.cell, cell.getContext())} />
 						</td>
 					{/each}
@@ -215,6 +216,7 @@
 			>
 				1
 			</button>
+
 			{#if $table.getState().pagination.pageIndex > 2}
 				<span>...</span>
 			{/if}
@@ -230,7 +232,6 @@
 					{pageIndex + 1}
 				</button>
 			{/each}
-
 			{#if $table.getState().pagination.pageIndex < $table.getPageCount() - 3}
 				<span>...</span>
 			{/if}
@@ -257,33 +258,36 @@
 </div>
 
 <style>
-	table,
-	thead tr,
-	tbody tr,
-	thead tr th {
-		background-color: transparent;
-		border: 0;
+	.table-container {
+		overflow-x: auto;
+	}
+
+	table {
+		width: 100%;
+		border-collapse: collapse;
+	}
+
+	th,
+	td {
+		padding: 0.5rem;
+		text-align: left;
 	}
 
 	thead tr {
-		margin-bottom: 20px;
-	}
-
-	thead tr th {
-		font-size: 1rem;
-	}
-
-	tbody {
-		border-bottom: 1px solid lightgray;
+		border-bottom: rgba(var(--primary), 0.25) solid 1px;
 	}
 
 	tbody tr {
-		height: 50px;
-		border-bottom: solid 1px;
+		cursor: pointer;
+		transition: all 250ms 50ms ease-out;
 	}
 
-	tbody tr td {
-		border: 0;
+	tbody tr:nth-child(even) {
+		background-color: rgba(var(--primary), 0.15);
+	}
+
+	tbody tr:hover {
+		background-color: rgba(var(--primary), 0.55);
 	}
 
 	button {
