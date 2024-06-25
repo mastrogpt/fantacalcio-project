@@ -13,6 +13,7 @@ from models.team_season import TeamSeason
 from models.player import Player
 from models.player_season import PlayerSeason
 from models.player_statistic import PlayerStatistic
+from models.current_player_team import CurrentPlayerTeam
 
 
 def main(args):
@@ -40,7 +41,9 @@ def main(args):
     elif(args.get("model") == "player_season"):
         return PlayerSeason.handler(db.session, args)
     elif(args.get("model") == "player_statistic"):
-        return PlayerStatistic.handler(db.session, args)                                                                                                    
+        return PlayerStatistic.handler(db.session, args)                
+    elif(args.get("model") == "current_player_team"):
+        return CurrentPlayerTeam.handler(db.session, args)                                                                                               
     else: 
         return {
         "body": "model and/or query not present"
