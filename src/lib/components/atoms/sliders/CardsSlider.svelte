@@ -11,8 +11,6 @@
 	export let sliderData: {
 		title?: string;
 	}[];
-
-	console.log('🔎 [CardsSlider][sliderData] =>', sliderData);
 </script>
 
 <swiper-container class="cards-slider" effect="cards" transition:fade>

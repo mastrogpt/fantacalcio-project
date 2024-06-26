@@ -36,8 +36,6 @@
 	const sleep = async (ms: number) => {
 		return new Promise((resolve) => setTimeout(resolve, ms));
 	};
-
-	console.log('🔎 [PlayerCard][playerData] =>', playerData);
 </script>
 
 <div class="player-card flex flex-col w-[300px]">

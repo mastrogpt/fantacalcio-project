@@ -14,7 +14,6 @@
 	const openAIpinion = async () => {
 		const message = await getAiOpinionFromBackend(playerData);
 
-		console.log('🔎 [PlayerDetails][message] =>', message);
 		openChatWithMessage(message);
 	};
 

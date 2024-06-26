@@ -4,8 +4,6 @@
 	import consoleMessage from '$lib/utils/consoleMessage';
 
 	import '../app.css';
-
-	console.log(consoleMessage);
 </script>
 
 <Header />

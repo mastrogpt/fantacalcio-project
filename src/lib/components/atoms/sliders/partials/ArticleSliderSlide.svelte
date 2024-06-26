@@ -55,6 +55,11 @@
 		object-fit: cover;
 	}
 
+	swiper-slide h4 {
+		font-size: 1.25rem;
+		line-height: 1.75rem;
+	}
+
 	swiper-slide .text-wrapper {
 		opacity: 1;
 		position: relative;
@@ -62,12 +67,12 @@
 		background: rgba(var(--white), 0.85);
 		z-index: 10;
 		flex: 1;
-		padding: 1.5rem;
+		padding: 1rem;
 		transition: all 350ms ease-out;
 	}
 
 	swiper-slide .text-wrapper {
-		transform: translateY(45px);
+		transform: translateY(50px);
 		transition: all 350ms ease-out;
 	}
 
