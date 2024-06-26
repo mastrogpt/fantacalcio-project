@@ -3,6 +3,9 @@ from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.orm import relationship, sessionmaker
 from sqlalchemy.dialects.postgresql import insert
 from models.base import Base
+from models.season import Season
+from models.league import League
+from models.team_season import TeamSeason
 import uuid
 
 class Team(Base):
@@ -26,6 +29,7 @@ class Team(Base):
 
     team_seasons = relationship('TeamSeason', back_populates='team', cascade="all, delete-orphan")
     player_statistics = relationship('PlayerStatistic', back_populates='team', cascade="all, delete-orphan")
+    current_players_teams = relationship('CurrentPlayerTeam', back_populates='team', cascade="all, delete-orphan")
 
     def __init__(self, name, code, country, founded, national, logo, venue_name, venue_address, venue_city, venue_capacity, venue_surface, venue_image, apifootball_id):
         self.name = name
@@ -121,6 +125,11 @@ class Team(Base):
             apifootball_ids = [int(id) for id in args['apifootball_ids'].split(',')]
             teams = Team.get_teams_by_apifootball_ids(session, apifootball_ids)
             return {"body": teams}
+        elif "current_serie_a_teams" in args:
+            current_serie_a_teams = args.get("current_serie_a_teams")
+            if current_serie_a_teams.lower() == "true":
+                return {"body": Team.get_current_serie_a_teams(session)}
+            return {"statusCode": 500, "body": f"Value '{current_serie_a_teams}' of current_serie_a_teams param is not valid"} 
         else:
             return {"body": Team.get_all(session)}
 
@@ -286,7 +295,22 @@ class Team(Base):
             print(f"Error while fetching teams by apifootball_ids: {e}")
             return []
         finally:
-            session.close()            
+            session.close() 
+
+    @staticmethod
+    def get_current_serie_a_teams(session):
+        try:
+            teams = session.query(Team).join(TeamSeason).join(Season).join(League).filter(
+                League.name == "Serie A",
+                League.country_name == "Italy",
+                Season.current == True
+            ).all()
+            return [team._to_dict() for team in teams]
+        except Exception as e:
+            print(f"Error during fetching Serie A teams for current season: {e}")
+            return {"statusCode": 500, "body": f"Error during fetching Serie A teams for current season: {e}"}
+        finally:
+            session.close()                       
 
     @staticmethod
     def update_team_by_id(session, team_id, update_fields):

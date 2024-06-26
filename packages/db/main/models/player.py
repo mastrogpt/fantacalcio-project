@@ -2,8 +2,11 @@ from sqlalchemy import Column, Integer, String, Boolean, Date, insert, UniqueCon
 from sqlalchemy.orm import sessionmaker, relationship
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.dialects.postgresql import insert as pg_insert
-import uuid
+from models.season import Season
+from models.league import League
+from models.player_season import PlayerSeason
 from models.base import Base
+import uuid
 
 class Player(Base):
     __tablename__ = 'players'
@@ -29,6 +32,7 @@ class Player(Base):
 
     player_seasons = relationship('PlayerSeason', back_populates='player', cascade="all, delete-orphan")
     player_statistics = relationship('PlayerStatistic', back_populates='player', cascade="all, delete-orphan")
+    current_players_teams = relationship('CurrentPlayerTeam', back_populates='player', cascade="all, delete-orphan")
 
     def __init__(self, name, firstname, lastname, birth_date, birth_place, birth_country, nationality, height, weight, injured, photo, apifootball_id):
         self.name = name
@@ -123,6 +127,11 @@ class Player(Base):
             apifootball_ids = list(map(int, args['apifootball_ids'].split(',')))
             players = Player.get_players_by_apifootball_ids(session, apifootball_ids)
             return {"body": players if players else "Players not found"}
+        elif "current_serie_a_players" in args:
+            current_serie_a_players = args.get("current_serie_a_players")
+            if current_serie_a_players.lower() =="true":
+                return {"body": Player.get_current_serie_a_players(session)}
+            return {"statusCode": 500, "body": f"Value '{current_serie_a_players}' of current_serie_a_players param is not valid"}            
         else:
             return {"body": Player.get_all(session)}
 
@@ -291,7 +300,22 @@ class Player(Base):
             print("Error while fetching players by apifootball_ids:", e)
             return []
         finally:
-            session.close()            
+            session.close()  
+
+    @staticmethod
+    def get_current_serie_a_players(session):
+        try:
+            players = session.query(Player).join(PlayerSeason).join(Season).join(League).filter(
+                League.name == "Serie A",
+                League.country_name == "Italy",
+                Season.current == True
+            ).all()
+            return [player._to_dict() for player in players]
+        except Exception as e:
+            print(f"Error during fetching Serie A players for current season: {e}")
+            return {"statusCode": 500, "body": f"Error during fetching Serie A players for current season: {e}"}
+        finally:
+            session.close()                        
 
     @staticmethod
     def update_player_by_id(session, player_id, update_fields):
