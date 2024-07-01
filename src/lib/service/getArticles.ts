@@ -9,7 +9,7 @@ export interface IArticlesProps {
 	title: string;
 	category: string[];
 	tag: string[];
-	creationDate: string;
+	creation_date: string;
 }
 
 export async function getArticlesList(): Promise<IArticlesProps[]> {

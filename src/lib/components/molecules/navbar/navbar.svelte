@@ -1,16 +1,41 @@
 <script>
 	import { fly } from 'svelte/transition';
+	import { onMount } from 'svelte';
+	import { goto } from '$app/navigation';
+	import { page } from '$app/stores';
+	import { get } from 'svelte/store';
 
 	let isOpen = false;
 	const navItems = [
 		{ label: 'Home', link: '/' },
 		{ label: 'Chi siamo', link: '/about' },
-		{ label: 'Giocatori', link: '/players' },
-		{ label: 'Rose', link: '/composition' }
+		{ label: 'Giocatori', link: '#players' },
+		{ label: 'Formazioni', link: '#composition' }
 	];
+
+	let activePath = '';
+
+	onMount(() => {
+		const currentPage = get(page);
+		activePath = currentPage.url.pathname;
+	});
 
 	function toggleMenu() {
 		isOpen = !isOpen;
+	}
+
+	function scrollToSection(link) {
+		isOpen = false;
+		if (link.startsWith('/#')) {
+			const id = link.split('#')[1];
+			const element = document.getElementById(id);
+			if (element) {
+				element.scrollIntoView({ behavior: 'smooth' });
+				activePath = `/${id}`;
+			}
+		} else {
+			goto(link);
+		}
 	}
 </script>
 
@@ -32,7 +57,14 @@
 		<ul class="flex items-center space-x-8">
 			{#each navItems.slice(0, Math.ceil(navItems.length / 2)) as navItem}
 				<li class="menu-item">
-					<a href={navItem.link} class="text-white relative hover:text-gray-300">{navItem.label}</a>
+					<a
+						href={navItem.link}
+						class="text-white relative hover:text-gray-300"
+						on:click|preventDefault={() => scrollToSection(navItem.link)}
+						class:active={activePath === navItem.link}
+					>
+						{navItem.label}
+					</a>
 				</li>
 			{/each}
 
@@ -44,7 +76,14 @@
 
 			{#each navItems.slice(Math.ceil(navItems.length / 2)) as navItem}
 				<li class="menu-item">
-					<a href={navItem.link} class="text-white relative hover:text-gray-300">{navItem.label}</a>
+					<a
+						href={navItem.link}
+						class="text-white relative hover:text-gray-300"
+						on:click|preventDefault={() => scrollToSection(navItem.link)}
+						class:active={activePath === navItem.link}
+					>
+						{navItem.label}
+					</a>
 				</li>
 			{/each}
 		</ul>
@@ -57,7 +96,14 @@
 		>
 			{#each navItems as navItem}
 				<li class="menu-item">
-					<a href={navItem.link} class="text-white">{navItem.label}</a>
+					<a
+						href={navItem.link}
+						class="text-white"
+						on:click|preventDefault={() => scrollToSection(navItem.link)}
+						class:active={activePath === navItem.link}
+					>
+						{navItem.label}
+					</a>
 				</li>
 			{/each}
 		</ul>
@@ -81,7 +127,8 @@
 	}
 
 	nav a:hover::before,
-	nav a:focus::before {
+	nav a:focus::before,
+	nav a.active::before {
 		width: 100%;
 	}
 

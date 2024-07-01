@@ -65,7 +65,7 @@
 
 <div class="table-card container flex flex-col align-center justify-center">
 	<div class="flex justify-between items-center gap-5 mb-5">
-		<h2 class="text-2xl font-bold mb-4 text-black">Dettagli giocatore</h2>
+		<h2 class="text-2xl font-bold mb-4 text-white">Lista giocatori</h2>
 
 		<Tab {tabs} {activeTab} onTabClick={handleTabChange} />
 	</div>

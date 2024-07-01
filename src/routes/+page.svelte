@@ -7,6 +7,8 @@
 	import Chatbot from '$lib/components/molecules/chatbot/Chatbot.svelte';
 	import TableCard from '$lib/components/organisms/tableCard/TableCard.svelte';
 	import TeamsComparator from '$lib/components/organisms/teamsComparator/TeamsComparator.svelte';
+	import Loader from '$lib/components/atoms/Loader.svelte';
+	import { getArticlesList } from '$lib/service/getArticles';
 
 	let heroTitle: HTMLHeadingElement;
 	let heroSubtitle: HTMLHeadingElement;
@@ -69,24 +71,30 @@
 </section>
 
 <section
-	class="articles-section flex flex-col items-center justify-center text-center my-10 gap-4 bg-accent py-10 section-padding"
+	class="articles-section flex flex-col items-center justify-center text-center my-10 py-20 gap-4 bg-accent"
 >
-	<h2 class="text-2xl md:text-4xl font-semibold" use:animateOnScroll>Articoli più discussi</h2>
-	<ArticlesSlider />
+	<h2 class="text-2xl md:text-4xl font-semibold" use:animateOnScroll>AIrticoli più discu</h2>
+
+	{#await getArticlesList()}
+		<Loader />
+	{:then data}
+		<ArticlesSlider {data} />
+	{/await}
 </section>
 
 <section
-	class="table-section flex align-center justify-center text-center my-10 gap-4 py-10 section-padding"
+	class="table-section flex align-center justify-center text-center my-10 py-20 gap-4"
+	id="players"
 >
 	<TableCard />
 </section>
 
-<section class="lineup-section flex flex-col text-center gap-5 section-padding">
+<section class="lineup-section flex flex-col text-center gap-5" id="composition">
 	<TeamsComparator />
 </section>
 
 <section
-	class="flex flex-col align-center justify-center items-center text-center my-10 gap-4 py-10 section-padding"
+	class="flex flex-col align-center justify-center items-center text-center my-10 gap-4 py-10"
 >
 	<div class="flex flex-col align-center justify-center items-center text-center gap-4">
 		<h2 class="text-2xl md:text-4xl font-semibold" use:animateOnScroll>Collabora</h2>
@@ -110,10 +118,6 @@
 	.hero-slider {
 		width: 100%;
 		max-width: 1200px;
-	}
-
-	.section-padding {
-		padding: 1rem;
 	}
 
 	.decorative-ball {
