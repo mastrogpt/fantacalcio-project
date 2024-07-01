@@ -1,94 +1,79 @@
 <script lang="ts">
 	export let sliderData: {
-		imageUrl?: string;
-		imageAlt?: string;
 		title?: string;
 		subtitle?: string;
+		author?: string;
+		creationDate?: string;
 	} = {};
+
 	export let onClick: () => void;
 </script>
 
 <!-- svelte-ignore a11y-no-static-element-interactions -->
 <!-- svelte-ignore a11y-click-events-have-key-events -->
-<!-- svelte-ignore a11y-click-events-have-key-events -->
 <swiper-slide on:click={onClick}>
-	<img src={sliderData?.imageUrl} alt={sliderData?.imageAlt} />
-
-	<div class="text-wrapper flex flex-col gap-2">
-		<h4 class="font-bold">{sliderData.title}</h4>
-
-		<small>{sliderData.subtitle}</small>
+	<div class="article-card">
+		<div class="text-wrapper">
+			<h4 class="article-title font-bold">{sliderData?.title}</h4>
+			<p class="article-subtitle">{sliderData?.subtitle}</p>
+			<small class="article-meta">
+				Di {sliderData?.author} il {new Date(sliderData?.creationDate || '').toLocaleDateString()}
+			</small>
+		</div>
 	</div>
 </swiper-slide>
 
 <style>
 	swiper-slide {
 		position: relative;
-		text-align: center;
-		font-size: 18px;
-		background: #fff;
 		display: flex;
-		justify-content: stretch;
-		align-items: flex-end;
+		justify-content: center;
+		align-items: center;
 		width: 350px;
 		height: 300px;
-		border: solid 1px;
 		border-radius: 20px;
 		overflow: hidden;
 		transition: all 250ms ease-out;
 		cursor: pointer;
+		background: var(--card-bg-gradient);
+		box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 	}
 
 	swiper-slide:hover {
 		transform: scale(0.95);
+		background: var(--card-hover-gradient);
 	}
 
-	swiper-slide img {
-		position: absolute;
-		top: 0;
-		bottom: 0;
-		left: 0;
-		right: 0;
+	.article-card {
 		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		align-items: center;
 		width: 100%;
 		height: 100%;
-		object-fit: cover;
+		padding: 20px;
+		background: rgba(255, 255, 255, 0.9);
+		border-radius: 20px;
+		transition:
+			background 0.3s,
+			transform 0.3s;
 	}
 
-	swiper-slide h4 {
-		font-size: 1.25rem;
-		line-height: 1.75rem;
+	.text-wrapper {
+		text-align: center;
 	}
 
-	swiper-slide .text-wrapper {
-		opacity: 1;
-		position: relative;
-		text-align: left;
-		background: rgba(var(--white), 0.85);
-		z-index: 10;
-		flex: 1;
-		padding: 1rem;
-		transition: all 350ms ease-out;
+	.article-title {
+		color: var(--main-text-color);
+		margin-bottom: 10px;
 	}
 
-	swiper-slide .text-wrapper {
-		transform: translateY(50px);
-		transition: all 350ms ease-out;
+	.article-subtitle {
+		color: var(--main-text-color);
+		margin-bottom: 15px;
 	}
 
-	swiper-slide .text-wrapper small {
-		opacity: 0;
-		transform: translateY(40px);
-		transition: all 350ms ease-out;
-	}
-
-	swiper-slide:hover .text-wrapper {
-		transform: translateY(0);
-		background: rgba(var(--white), 1);
-	}
-
-	swiper-slide:hover .text-wrapper small {
-		opacity: 1;
-		transform: translateY(0);
+	.article-meta {
+		color: var(--main-text-color);
 	}
 </style>
