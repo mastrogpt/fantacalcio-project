@@ -8,7 +8,6 @@
 
 	export function handleClick() {
 		if (clickAction) {
-			console.log('clicked');
 			clickAction();
 		}
 	}

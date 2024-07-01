@@ -34,7 +34,7 @@
 
 		const sort = (a: Element, b: Element) => {
 			const aValue = a[column];
-			console.log(column);
+
 			const bValue = b[column];
 
 			if (aValue < bValue) {
