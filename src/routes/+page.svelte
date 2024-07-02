@@ -70,7 +70,7 @@
 </section>
 
 <section
-	class="articles-section flex flex-col items-center justify-center text-center my-10 py-20 gap-4 bg-accent"
+	id="articles" class="articles-section flex flex-col items-center justify-center text-center my-10 py-20 gap-4 bg-accent"
 >
 	<h2 class="text-2xl md:text-4xl font-semibold" use:animateOnScroll>AIrticoli più discussi</h2>
 
@@ -88,7 +88,7 @@
 	<TableCard />
 </section>
 
-<section class="lineup-section flex flex-col text-center gap-5" id="composition">
+<section  class="lineup-section flex flex-col text-center gap-5" id="composition">
 	<TeamsComparator />
 </section>
 
