@@ -12,7 +12,7 @@
 	const sliderContainerCommonProps = {
 		'space-between': 50,
 		pagination: false,
-		'slides-per-view': 'auto',
+		'slides-per-view': 3,
 		loop: true,
 		autoplay: {
 			delay: 3000,

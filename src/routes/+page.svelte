@@ -73,7 +73,7 @@
 <section
 	class="articles-section flex flex-col items-center justify-center text-center my-10 py-20 gap-4 bg-accent"
 >
-	<h2 class="text-2xl md:text-4xl font-semibold" use:animateOnScroll>AIrticoli più discu</h2>
+	<h2 class="text-2xl md:text-4xl font-semibold" use:animateOnScroll>AIrticoli più discussi</h2>
 
 	{#await getArticlesList()}
 		<Loader />
@@ -99,9 +99,8 @@
 	<div class="flex flex-col align-center justify-center items-center text-center gap-4">
 		<h2 class="text-2xl md:text-4xl font-semibold" use:animateOnScroll>Collabora</h2>
 		<p class="text-base md:text-lg">
-			Lorem ipsum dolor sit amet, consectetur adipisicing elit. Molestiae, debitis sint. Incidunt
-			cumque cum necessitatibus, optio tempore eos reprehenderit similique placeat hic porro amet
-			atque sint voluptas molestias quasi vitae.
+			Fare il fantallenatore è stressante, fare il developer ancora di più, farle entrambe è da matti.  <br/>
+			Se sei almeno una di queste due cose, non esitare a contattarci!
 		</p>
 		<Button label="Clicca qui" onClick={() => console.log('Button clicked')} />
 	</div>

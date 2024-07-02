@@ -1,3 +1,7 @@
+<script>
+	import { goto } from "$app/navigation";
+
+</script>
 <div class="footer">
 	<div class="footer-content">
 		<div class="footer-section">
@@ -8,10 +12,11 @@
 		<div class="footer-section">
 			<h2 class="footer-title">Quick Links</h2>
 			<ul class="footer-links">
-				<li><a href="#">Home</a></li>
-				<li><a href="#">Chi siamo</a></li>
-				<li><a href="#">Giocatori</a></li>
-				<li><a href="#">Rose</a></li>
+				<li><a href="/"> Home</a></li>
+				<li>  <a href="/about"> Chi siamo </a>
+				</li>
+				<li><a href="/#players">Giocatori</a></li>
+				<li><a href="/#composition">Probabili formazioni</a></li>
 			</ul>
 		</div>
 		<div class="footer-section">
@@ -29,7 +34,7 @@
 		</div>
 
 		<div class="text-center">
-			<p>A product of <br /> <span class="footer-brand">FantaAICalcio</span></p>
+			<p>A product of <br /> <span class="footer-brand">Mastrogpt</span></p>
 		</div>
 
 		<div>

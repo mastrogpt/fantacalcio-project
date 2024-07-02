@@ -9,8 +9,8 @@
 	const navItems = [
 		{ label: 'Home', link: '/' },
 		{ label: 'Chi siamo', link: '/about' },
-		{ label: 'Giocatori', link: '#players' },
-		{ label: 'Formazioni', link: '#composition' }
+		{ label: 'Giocatori', link: '/#players' },
+		{ label: 'Formazioni', link: '/#composition' }
 	];
 
 	let activePath = '';
