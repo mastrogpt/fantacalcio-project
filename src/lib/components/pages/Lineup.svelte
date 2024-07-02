@@ -5,6 +5,7 @@
 	import { onMount } from 'svelte';
 	import { getAiLineupOpinion } from '$lib/service/aiLineup';
 	import GreenButton from '../atoms/buttons/GreenButton.svelte';
+	import Button from '../atoms/button/button.svelte';
 
 	let fMatch: FootballMatch;
 	let lineUps: string[] = [];
@@ -104,9 +105,10 @@
 					</div>
 				</div>
 			</div>
+
 			<div class="h-70 rounded-lg">
 				<h2 class="text-dark">
-					Formazione ospite: {fMatch.lineups[selectedLineUp].away}
+					Formazione ospasdite: {fMatch.lineups[selectedLineUp].away}
 				</h2>
 				<div class="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-8">
 					<div class="h-70 rounded-lg">
@@ -123,6 +125,8 @@
 					</div>
 				</div>
 			</div>
+
+			<Button label="I consligli dell'AI" onClick={handleAiOpinion} />
 		</div>
 	</div>
 {/if}
