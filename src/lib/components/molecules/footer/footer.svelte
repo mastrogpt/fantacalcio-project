@@ -2,7 +2,8 @@
 	<div class="footer-content">
 		<div class="footer-section">
 			<h2 class="footer-title text-primary">FantaAICalcio</h2>
-			<a href="mailto:email@gmail.com" class="footer-email">email@gmail.com</a>
+			<a href="mailto:info@nuvolaris.io" class="footer-email">info@nuvolaris.io
+			</a>
 		</div>
 		<div class="footer-section">
 			<h2 class="footer-title">Quick Links</h2>
@@ -23,9 +24,8 @@
 	</div>
 	<div class="footer-bottom flex space-x-0">
 		<div class="footer-social">
-			<a href="#" class="social-icon">in</a>
-			<a href="#" class="social-icon">f</a>
-			<a href="#" class="social-icon">t</a>
+			<a href="https://www.linkedin.com/company/nuvolaris-io/" class="social-icon">in</a>
+			<a href="https://x.com/NuvolarisIO" class="social-icon">t</a>
 		</div>
 
 		<div class="text-center">
@@ -33,7 +33,7 @@
 		</div>
 
 		<div>
-			<p>© 2020 Lift Media. All rights reserved</p>
+			<p>© 2024. All rights reserved</p>
 		</div>
 	</div>
 </div>
