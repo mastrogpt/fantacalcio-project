@@ -1,12 +1,13 @@
 <script lang="ts">
-	import { register } from 'swiper/element/bundle';
-	import { fade } from 'svelte/transition';
-	import ArticleSliderSlide from './partials/ArticleSliderSlide.svelte';
-	import { getArticlesList } from '$lib/service/getArticles';
-	import Loader from '../Loader.svelte';
 	import { goto } from '$app/navigation';
+	import { type IArticlesProps } from '$lib/service/getArticles';
+	import { fade } from 'svelte/transition';
+	import { register } from 'swiper/element/bundle';
+	import ArticleSliderSlide from './partials/ArticleSliderSlide.svelte';
 
 	register();
+
+	export let data: IArticlesProps[] = [];
 
 	const sliderContainerCommonProps = {
 		'space-between': 50,
@@ -21,63 +22,62 @@
 	};
 </script>
 
-{#await getArticlesList()}
-	<Loader />
-{:then articles}
-	<div class="flex flex-col gap-[50px]">
-		{#if articles.length > 10}
-			<!-- Primo slider con la prima metà degli articoli -->
-			<swiper-container class="articles-slider-up" {...sliderContainerCommonProps} transition:fade>
-				{#each articles.slice(0, articles.length / 2) as { title, subtitle, id }, idx}
-					<ArticleSliderSlide
-						onClick={() => goto(`/articles/${id}`)}
-						sliderData={{
-							title,
-							subtitle,
-							imageUrl: `https://picsum.photos/id/${234 + idx}/400/500`
-						}}
-					/>
-				{/each}
-			</swiper-container>
+<div class="flex flex-col gap-[50px]">
+	{#if data?.length > 10}
+		<!-- Primo slider con la prima metà degli articoli -->
+		<swiper-container class="articles-slider-up" {...sliderContainerCommonProps} transition:fade>
+			{#each data?.slice(0, data?.length / 2) as { title, subtitle, id, author, creation_date }, idx}
+				<ArticleSliderSlide
+					onClick={() => goto(`/articles/${id}`)}
+					sliderData={{
+						title,
+						subtitle,
+						author,
+						creationDate: creation_date
+					}}
+				/>
+			{/each}
+		</swiper-container>
 
-			<!-- Secondo slider con la seconda metà degli articoli -->
-			<swiper-container
-				class="articles-slider-bottom"
-				{...sliderContainerCommonProps}
-				autoplay={{
-					...sliderContainerCommonProps.autoplay,
-					reverseDirection: true
-				}}
-				transition:fade
-			>
-				{#each articles.slice(articles.length / 2) as { title, subtitle, id }, idx}
-					<ArticleSliderSlide
-						onClick={() => goto(`/articles/${id}`)}
-						sliderData={{
-							title,
-							subtitle,
-							imageUrl: `https://picsum.photos/id/${234 + idx + articles.length / 2}/400/500`
-						}}
-					/>
-				{/each}
-			</swiper-container>
-		{:else}
-			<!-- Slider singolo se gli articoli sono meno di 10 -->
-			<swiper-container class="articles-slider-up" {...sliderContainerCommonProps} transition:fade>
-				{#each articles as { title, subtitle, id }, idx}
-					<ArticleSliderSlide
-						onClick={() => goto(`/articles/${id}`)}
-						sliderData={{
-							title,
-							subtitle,
-							imageUrl: `https://picsum.photos/id/${234 + idx}/400/500`
-						}}
-					/>
-				{/each}
-			</swiper-container>
-		{/if}
-	</div>
-{/await}
+		<!-- Secondo slider con la seconda metà degli articoli -->
+		<swiper-container
+			class="articles-slider-bottom"
+			{...sliderContainerCommonProps}
+			autoplay={{
+				...sliderContainerCommonProps.autoplay,
+				reverseDirection: true
+			}}
+			transition:fade
+		>
+			{#each data?.slice(data?.length / 2) as { title, subtitle, id, author, creation_date }, idx}
+				<ArticleSliderSlide
+					onClick={() => goto(`/articles/${id}`)}
+					sliderData={{
+						title,
+						subtitle,
+						author,
+						creationDate: creation_date
+					}}
+				/>
+			{/each}
+		</swiper-container>
+	{:else}
+		<!-- Slider singolo se gli articoli sono meno di 10 -->
+		<swiper-container class="articles-slider-up" {...sliderContainerCommonProps} transition:fade>
+			{#each data as { title, subtitle, id, author, creation_date }, idx}
+				<ArticleSliderSlide
+					onClick={() => goto(`/articles/${id}`)}
+					sliderData={{
+						title,
+						subtitle,
+						author,
+						creationDate: creation_date
+					}}
+				/>
+			{/each}
+		</swiper-container>
+	{/if}
+</div>
 
 <style>
 	swiper-container {
