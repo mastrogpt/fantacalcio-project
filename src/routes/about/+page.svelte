@@ -2,6 +2,7 @@
 	import Loader from '$lib/components/atoms/Loader.svelte';
 	import { getAiPresentationFromBackend } from '$lib/service/aiPresentation';
 	import { onMount } from 'svelte';
+	import JoinButton from '$lib/components/molecules/JoinButton.svelte';
 
 	let aiPresentation: string;
 	let aiPresentationWritingEffect: string = '';
@@ -70,13 +71,17 @@
 
 <div class="hero w-full flex flex-col items-center">
 	<div class="content">
-		<h1 class="title">About Us</h1>
-		<h2 class="subtitle">Our Journey and Vision</h2>
+		<h1 class="title">Chi siamo</h1>
 		<p class="description">
-			We are passionate about football and dedicated to providing the best content, insights, and
-			experiences for our community. Our team works tirelessly to bring you the latest news,
-			in-depth analyses, and engaging stories from the world of football.
+			Siamo sviluppatori di software, amanti del calcio, delle statistiche e delle innovazioni.
+			<br/> Attraverso questo progetto, vogliamo offrire ai Fantallenatori di tutta Italia un consigliere fidato, un AI che somigli all'amico a cui chiedere consiglio il giovedì sera davanti ad una birra su che calciatore schierare o su chi comprare all'asta. 
+			L'amico che ne sa, ma che non pretende di aver sempre ragione, perché il fantacalcio è arte e improvvisazione, oltre che strategia. E noi, oltre i buoni consigli, vogliamo portare fortuna!
+			
+			
+			<br/> <i> Usiamo Nuvolaris come piattaforma, il serverless come filosofia. Se vuoi unirti a noi, clicca qui </i>
+			<p class="text-2xl">👇🏻
 		</p>
+		<JoinButton/>
 		<div class="ai-text">
 			{#if aiPresentation}
 				<p>{aiPresentationWritingEffect}</p>

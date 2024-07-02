@@ -1,10 +1,8 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import anime from 'animejs';
-	import Button from '$lib/components/atoms/button/button.svelte';
 	import ArticlesSlider from '$lib/components/atoms/sliders/ArticlesSlider.svelte';
 	import HeroSlider from '$lib/components/atoms/sliders/HeroSlider.svelte';
-	import Chatbot from '$lib/components/molecules/chatbot/Chatbot.svelte';
 	import TableCard from '$lib/components/organisms/tableCard/TableCard.svelte';
 	import TeamsComparator from '$lib/components/organisms/teamsComparator/TeamsComparator.svelte';
 	import Loader from '$lib/components/atoms/Loader.svelte';
