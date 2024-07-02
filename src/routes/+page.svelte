@@ -9,6 +9,7 @@
 	import TeamsComparator from '$lib/components/organisms/teamsComparator/TeamsComparator.svelte';
 	import Loader from '$lib/components/atoms/Loader.svelte';
 	import { getArticlesList } from '$lib/service/getArticles';
+	import JoinButton from '$lib/components/molecules/JoinButton.svelte';
 
 	let heroTitle: HTMLHeadingElement;
 	let heroSubtitle: HTMLHeadingElement;
@@ -102,7 +103,7 @@
 			Fare il fantallenatore è stressante, fare il developer ancora di più, farle entrambe è da matti.  <br/>
 			Se sei almeno una di queste due cose, non esitare a contattarci!
 		</p>
-		<Button label="Clicca qui" onClick={() => console.log('Button clicked')} />
+		<JoinButton />
 	</div>
 </section>
 
