@@ -2,40 +2,46 @@
 	import { fade } from 'svelte/transition';
 	import { register } from 'swiper/element/bundle';
 	import HeroSliderSlide from './partials/HeroSliderSlide.svelte';
+	import { goto } from '$app/navigation';
+	import calcio3d from '$lib/assets/calcio3d.png'
+	import confrontoGiocatori from '$lib/assets/confrontoGiocatori.png'
+	import articlesImg from '$lib/assets/articlesImg.jpg'
+	import lineups from '$lib/assets/lineups.jpg'
+
 
 	register();
 
 	const data = [
 		{
-			title: 'Titolo 1',
-			description: 'Descrzione 1',
-			buttonLabel: 'Bottone 1',
-			buttonOnClick: () => console.log,
-			imageUrl: 'asd',
+			title: 'Benvenuto su FantAIcalcio!',
+			description: 'La piattaforma che ti aiuta a vincere divertendoti',
+			buttonLabel: 'Chi siamo',
+			buttonOnClick: () => goto("/about"),
+			imageUrl: calcio3d,
 			imageAlt: 'img 1'
 		},
 		{
-			title: 'Titolo 2',
-			description: 'Descrzione 2',
-			buttonLabel: 'Bottone 2',
-			buttonOnClick: () => console.log,
-			imageUrl: 'asd',
+			title: 'Confronta i giocatori',
+			description: 'Usa i nostri dati e la nostra AI',
+			buttonLabel: 'Vai ai giocatori',
+			buttonOnClick: () => goto("#players"),
+			imageUrl: confrontoGiocatori,
 			imageAlt: 'img 2'
 		},
 		{
-			title: 'Titolo 3',
-			description: 'Descrzione 3',
-			buttonLabel: 'Bottone 3',
-			buttonOnClick: () => console.log,
-			imageUrl: 'asd',
+			title: 'Informati con gli AIrticoli',
+			description: 'Articoli della nostra redaizione fatti apposta per te',
+			buttonLabel: 'Leggi gli airticoli',
+			buttonOnClick: () => goto("#articles"),
+			imageUrl: articlesImg,
 			imageAlt: 'img 3'
 		},
 		{
-			title: 'Titolo 4',
-			description: 'Descrzione 4',
-			buttonLabel: 'Bottone 4',
-			buttonOnClick: () => console.log,
-			imageUrl: 'asd',
+			title: 'Scopri le formazioni',
+			description: 'I pronostici e le ultime',
+			buttonLabel: 'Probabili formazioni',
+			buttonOnClick: () => goto("#composition"),
+			imageUrl: lineups,
 			imageAlt: 'img 4'
 		}
 	];
