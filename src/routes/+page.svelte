@@ -106,7 +106,11 @@
 	</div>
 </section>
 
-<Chatbot />
+
+
+<!-- ><Chatbot /> -->
+
+
 
 <style>
 	.hero {

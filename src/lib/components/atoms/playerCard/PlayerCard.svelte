@@ -70,7 +70,7 @@
 	<div class="flex flex-col justify-center items-center mt-5 w-[300px] gap-2">
 		<h5>Vuoi un parere?</h5>
 
-		<p>Chiedi una AIPinion</p>
+		<p class="text-2xl">👇🏻</p>
 
 		{#if !aiOpinion && !isLoading}
 			<Button label="AIpinion" onClick={getAiOpinion} />

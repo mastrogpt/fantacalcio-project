@@ -73,9 +73,7 @@
 	<hr />
 
 	<p class="my-5 px-10">
-		Lorem, ipsum dolor sit amet consectetur adipisicing elit. Animi maiores esse maxime corrupti
-		assumenda nam natus sunt fugiat dolores? Veritatis assumenda cum asperiores ipsa esse excepturi
-		aperiam, illum dolorem fugiat!
+		Noi ti forniamo la lista dei giocatori, i dati e le statistiche più interessanti. Tu decidi chi mandare in campo. Se hai dei dubbi, seleziona due calciatori e comparali. <br/> Magari ti confonderemo idee, o magari ti aiuteremo a vincere!
 	</p>
 
 	<div class="table-card-content">

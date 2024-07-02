@@ -1,15 +1,12 @@
-<script>
-	import { goto } from "$app/navigation";
 
-</script>
 <div class="footer">
-	<div class="footer-content">
+	<div class="footer-content flex justify-between">
 		<div class="footer-section">
 			<h2 class="footer-title text-primary">FantaAICalcio</h2>
 			<a href="mailto:info@nuvolaris.io" class="footer-email">info@nuvolaris.io
 			</a>
 		</div>
-		<div class="footer-section">
+		<div class="footer-section align-end justify-end text-right">
 			<h2 class="footer-title">Quick Links</h2>
 			<ul class="footer-links">
 				<li><a href="/"> Home</a></li>
@@ -19,13 +16,7 @@
 				<li><a href="/#composition">Probabili formazioni</a></li>
 			</ul>
 		</div>
-		<div class="footer-section">
-			<h2 class="footer-title">Subscribe</h2>
-			<div class="footer-subscribe">
-				<input type="email" placeholder="Get product updates" class="footer-input" />
-				<button class="footer-button">➔</button>
-			</div>
-		</div>
+		
 	</div>
 	<div class="footer-bottom flex space-x-0">
 		<div class="footer-social">
@@ -34,7 +25,9 @@
 		</div>
 
 		<div class="text-center">
-			<p>A product of <br /> <span class="footer-brand">Mastrogpt</span></p>
+			<p>A product of <br /> <span class="footer-brand">
+				
+				<a href="https://mastrogpt.nuvolaris.dev/"> Mastrogpt </a></span></p>
 		</div>
 
 		<div>
