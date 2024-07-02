@@ -3,6 +3,7 @@
 	import type { PlayersStats } from '$lib/service/getStats';
 	import Button from '../button/button.svelte';
 	import Loader from '../Loader.svelte';
+	import imgFallback from '$lib/assets/player-img-fallback.jpeg';
 
 	interface ICardRowProps {
 		label?: string;
@@ -42,7 +43,7 @@
 	<div class="card-title py-2">{playerData?.name}</div>
 
 	<div class="card-profile-img grow-1">
-		<img src="" alt={playerData?.name} />
+		<img src={imgFallback} alt={playerData?.name} />
 	</div>
 
 	<div class="card-stats flex flex-col">

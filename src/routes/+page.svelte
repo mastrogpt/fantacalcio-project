@@ -98,19 +98,18 @@
 >
 	<div class="flex flex-col align-center justify-center items-center text-center gap-4">
 		<h2 class="text-2xl md:text-4xl font-semibold" use:animateOnScroll>Collabora</h2>
+
 		<p class="text-base md:text-lg">
-			Fare il fantallenatore è stressante, fare il developer ancora di più, farle entrambe è da matti.  <br/>
+			Fare il fantallenatore è stressante, fare il developer ancora di più, farle entrambe è da
+			matti. <br />
 			Se sei almeno una di queste due cose, non esitare a contattarci!
 		</p>
+
 		<Button label="Clicca qui" onClick={() => console.log('Button clicked')} />
 	</div>
 </section>
 
-
-
 <!-- ><Chatbot /> -->
-
-
 
 <style>
 	.hero {
@@ -121,15 +120,5 @@
 	.hero-slider {
 		width: 100%;
 		max-width: 1200px;
-	}
-
-	.decorative-ball {
-		display: none;
-	}
-
-	@media (min-width: 768px) {
-		.decorative-ball {
-			display: block;
-		}
 	}
 </style>
