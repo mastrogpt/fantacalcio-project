@@ -103,6 +103,7 @@
 			matti. <br />
 			Se sei almeno una di queste due cose, non esitare a contattarci!
 		</p>
+
 		<JoinButton />
 	</div>
 </section>

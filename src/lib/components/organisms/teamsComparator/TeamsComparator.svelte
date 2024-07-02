@@ -1,13 +1,20 @@
 <script lang="ts">
+	import Button from '$lib/components/atoms/button/button.svelte';
+	import Loader from '$lib/components/atoms/Loader.svelte';
 	import Select from '$lib/components/atoms/select/Select.svelte';
 	import CardsSlider from '$lib/components/atoms/sliders/CardsSlider.svelte';
+	import { getAiLineupOpinion } from '$lib/service/aiLineup';
 	import { getLineUp, type FootballMatch } from '$lib/service/lineUp';
 	import { onMount } from 'svelte';
 
 	let lineUp: FootballMatch | undefined = undefined;
 	let selectOptions: { value: string; label: string }[] = [];
 	let selectedOption: string = '';
-	let data: any[] = [];
+	let homeLineup: { title: string }[] = [];
+	let awayLineup: { title: string }[] = [];
+	let aiOpinionLoading = false;
+	let aiOpinionDesc: string = '';
+	let aiPresentationWritingEffect: string = '';
 
 	onMount(async () => {
 		lineUp = await getLineUp();
@@ -20,18 +27,41 @@
 
 			if (selectOptions.length > 0) {
 				selectedOption = selectOptions[0].value;
-				updateData(Number(selectedOption));
+				updateLineups(Number(selectedOption));
 			}
 		}
 	});
 
-	function handleSelectChange(event: CustomEvent) {
-		selectedOption = event.detail.value;
-		updateData(Number(selectedOption));
+	async function updateLineups(optionIndex: number) {
+		homeLineup =
+			lineUp?.lineups[optionIndex].fm.home_lineup.map((e) => ({ title: e.player })) || [];
+		awayLineup =
+			lineUp?.lineups[optionIndex].fm.away_lineup.map((e) => ({ title: e.player })) || [];
+		aiPresentationWritingEffect = ''; // Reset AI presentation text
 	}
 
-	function updateData(optionIndex: number) {
-		data = lineUp?.lineups[optionIndex].fm.away_lineup.map((e) => ({ title: e.player })) || [];
+	async function handleAiOpinion() {
+		aiOpinionLoading = true;
+		aiOpinionDesc = await getAiLineupOpinion((lineUp?.lineups || [])[Number(selectedOption)]);
+		await showMessage(aiOpinionDesc);
+		aiOpinionLoading = false;
+	}
+
+	async function showMessage(description: string) {
+		for (let i = 0; i < description.length; i++) {
+			aiPresentationWritingEffect = description.substring(0, i + 1);
+			await sleep(25);
+		}
+	}
+
+	function sleep(ms: number) {
+		return new Promise((resolve) => setTimeout(resolve, ms));
+	}
+
+	function handleSelectChange(event: CustomEvent) {
+		selectedOption = event.detail.value;
+		aiPresentationWritingEffect = ''; // Reset AI presentation text
+		updateLineups(Number(selectedOption));
 	}
 </script>
 
@@ -54,22 +84,32 @@
 			<div class="flex flex-col grow items-center w-2/5 gap-6 min-w-[550px]">
 				<h4>Formazione di casa: <b>{lineUp?.lineups[Number(selectedOption)].home}</b></h4>
 
-				<CardsSlider
-					sliderData={lineUp?.lineups[Number(selectedOption)].fm.home_lineup.map((e) => {
-						return { title: e.player };
-					})}
-				/>
+				<CardsSlider sliderData={homeLineup} />
 			</div>
 
 			<div class="flex flex-col grow items-center w-2/5 gap-6">
 				<h4>Formazione ospite: <b>{lineUp?.lineups[Number(selectedOption)].away}</b></h4>
 
-				<CardsSlider
-					sliderData={lineUp?.lineups[Number(selectedOption)].fm.away_lineup.map((e) => {
-						return { title: e.player };
-					})}
-				/>
+				<CardsSlider sliderData={awayLineup} />
 			</div>
 		</div>
 	{/if}
+
+	<div class="flex flex-col items-center justify-center gap-10 max-w-screen-lg">
+		<p>
+			Lorem ipsum dolor sit, amet consectetur adipisicing elit. Quo quas tempore alias temporibus!
+			Dignissimos facilis illum dolores quis, aliquam reiciendis pariatur exercitationem odit minus
+			sed saepe, voluptatem, id similique mollitia.
+		</p>
+
+		{#if aiOpinionLoading && !aiPresentationWritingEffect}
+			<Loader />
+		{:else}
+			<Button label="I consigli dell'AI" onClick={handleAiOpinion} />
+		{/if}
+
+		{#if aiPresentationWritingEffect}
+			<p>{aiPresentationWritingEffect}</p>
+		{/if}
+	</div>
 </div>
