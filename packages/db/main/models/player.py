@@ -308,11 +308,11 @@ class Player(Base):
     @staticmethod
     def get_current_serie_a_players(session):
         ''' 
-        This query returns all serie a current players and respective team for each player
+        This query returns all serie a current players and respective season and team for each player
         '''
         try:
 
-            players_teams = (session.query(Player, Team)
+            players_teams = (session.query(Player, Team, Season)
                  .join(PlayerSeason, Player.id == PlayerSeason.player_id)
                  .join(Season, PlayerSeason.season_id == Season.id)
                  .join(League, Season.league_id == League.id)
@@ -326,11 +326,14 @@ class Player(Base):
                  .all())
 
             result = []
+            print("PLAYERS ARE", players_teams)
 
             for player in players_teams:
                 player_dict = player.Player._to_dict()
                 player_dict['team'] = player.Team.name
-                player_dict['teamLogo'] = player.Team.logo
+                player_dict['team_logo'] = player.Team.logo
+                player_dict['team_id'] = player.Team.id
+                player_dict['season_id'] = player.Season.id
                 
                 result.append(player_dict)
             return result
