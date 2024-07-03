@@ -104,16 +104,9 @@
 							{#each paginatedPlayers as player}
 								<tr class="border-b">
 									<td class="whitespace-nowrap p-2 font-medium text-gray-900">{player.name}</td>
-									<td class="whitespace-nowrap p-2 font-medium text-gray-900 hidden sm:table-cell"
-										>{player.playmaker ? 'Yes' : 'No'}</td
-									>
-									<td class="whitespace-nowrap p-2 font-medium text-gray-900 hidden sm:table-cell"
-										>{player.role}</td
-									>
+
 									<td class="whitespace-nowrap p-2 font-medium text-gray-900">{player.team}</td>
-									<td class="whitespace-nowrap p-2 font-medium text-gray-900 hidden sm:table-cell"
-										>{player.value}</td
-									>
+
 									<td class="whitespace-nowrap p-2 font-medium text-gray-900">
 										<GreenButton href="/stats/{player.id}" text="Dati" />
 									</td>
