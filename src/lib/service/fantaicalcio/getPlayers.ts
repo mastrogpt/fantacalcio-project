@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { PUBLIC_URL_API_BASEURL } from '$env/static/public';
+import {PUBLIC_URL_API_BASEURL, PUBLIC_FANTAICALCIO_BASE_URL, PUBLIC_FANTAICALCIO_FANTA_PLAYERS_ALL_SERIE_A } from '$env/static/public';
 
 /*
 ALL PLAYERS
@@ -8,25 +8,36 @@ interface Player {
     id: number;
     name: string;
     playmaker: boolean;
-    role: string;
+    position: string;
     team: string;
-    value: number;
+    photo: string;
+    cards_red: string;
+    cards_yellow: string;
+    available: string;
+    //value: number;
 }
 
 export interface PlayersList extends Array<Player> {}
 
 export async function getPlayersList(): Promise<PlayersList> {
+    
+    var finalUrl = PUBLIC_FANTAICALCIO_BASE_URL + PUBLIC_FANTAICALCIO_FANTA_PLAYERS_ALL_SERIE_A
+    
     try {
-        const response = await axios.get(PUBLIC_URL_API_BASEURL, {
-            params: { module: 'fantamaster', action: 'playerslist' }
+        const response = await axios.get(finalUrl, {
+            params: { current_serie_a_players: 'true' }
         });
-        return response.data.data.players.map((player: any) => ({
+        console.log("players are", response.data)
+        return response.data.map((player: any) => ({
             id: player.id,
             name: player.name,
-            playmaker: player.playmaker,
-            role: player.role,
             team: player.team,
-            value: player.value
+            photo: player.photo,
+            cards_red: player.cards_red,
+            cards_yellow: player.cards_yellow,
+            position: player?.position,
+            available: player?.injured ? 'F' : 'Y'
+            //value: player.value
         }));
     } catch (error) {
         console.error(error);

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { getPlayersList } from '$lib/service/getPlayers';
-	import type { PlayersList } from '$lib/service/getPlayers';
+	import { getPlayersList } from '$lib/service/fantaicalcio/getPlayers';
+	import type { PlayersList } from '$lib/service/fantaicalcio/getPlayers';
 	import Loader from '$lib/components/atoms/Loader.svelte';
 
 	import ArrowDown from '$lib/components/atoms/icons/ArrowDown.svelte';
@@ -81,10 +81,6 @@
 								</th>
 
 								<th
-									class="whitespace-nowrap p-2 font-medium text-primary text-xl font-bold text-left hidden sm:table-cell"
-									>Playmaker</th
-								>
-								<th
 									class="whitespace-nowrap p-2 font-medium text-primary font-bold text-xl text-left hidden sm:table-cell"
 									>Ruolo</th
 								>
@@ -96,16 +92,21 @@
 								<th
 									on:click={() => sortAll('value')}
 									class="whitespace-nowrap p-2 font-medium text-primary font-bold text-xl text-left hidden sm:table-cell"
-									>Valore</th
+									>Disponibile</th
 								>
 							</tr>
 						</thead>
 						<tbody class="divide-y divide-gray-200">
 							{#each paginatedPlayers as player}
 								<tr class="border-b">
-									<td class="whitespace-nowrap p-2 font-medium text-gray-900">{player.name}</td>
+									<td class="whitespace-nowrap p-2 font-medium text-gray-900">{player?.name}</td>
 
-									<td class="whitespace-nowrap p-2 font-medium text-gray-900">{player.team}</td>
+									<td class="whitespace-nowrap p-2 font-medium text-gray-900">{player?.position}</td
+									>
+									<td class="whitespace-nowrap p-2 font-medium text-gray-900">{player?.team}</td>
+									<td class="whitespace-nowrap p-2 font-medium text-gray-900"
+										>{player?.available}</td
+									>
 
 									<td class="whitespace-nowrap p-2 font-medium text-gray-900">
 										<GreenButton href="/stats/{player.id}" text="Dati" />
