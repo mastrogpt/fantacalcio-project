@@ -7,6 +7,7 @@ from models.team import Team
 from models.current_player_team import CurrentPlayerTeam
 from models.league import League
 from models.player_season import PlayerSeason
+from models.player_statistic import PlayerStatistic
 from models.base import Base
 import uuid
 
@@ -312,7 +313,8 @@ class Player(Base):
         '''
         try:
 
-            players_teams = (session.query(Player, Team, Season)
+            players_teams = (session.query(Player, Team, Season, PlayerStatistic)
+                 .join(PlayerStatistic, Player.id == PlayerStatistic.player_id)
                  .join(PlayerSeason, Player.id == PlayerSeason.player_id)
                  .join(Season, PlayerSeason.season_id == Season.id)
                  .join(League, Season.league_id == League.id)
@@ -334,6 +336,8 @@ class Player(Base):
                 player_dict['team_logo'] = player.Team.logo
                 player_dict['team_id'] = player.Team.id
                 player_dict['season_id'] = player.Season.id
+                #player_dict['value'] = player.PlayerStatistic
+                player_dict['statistics'] = player.PlayerStatistic._to_dict()
                 
                 result.append(player_dict)
             return result
