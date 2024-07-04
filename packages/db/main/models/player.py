@@ -137,7 +137,12 @@ class Player(Base):
             current_serie_a_players = args.get("current_serie_a_players")
             if current_serie_a_players.lower() =="true":
                 return {"body": Player.get_current_serie_a_players(session)}
-            return {"statusCode": 500, "body": f"Value '{current_serie_a_players}' of current_serie_a_players param is not valid"}            
+            return {"statusCode": 500, "body": f"Value '{current_serie_a_players}' of current_serie_a_players param is not valid"} 
+        elif "all_current_serie_a_players" in args:
+            all_current_serie_a_players = args.get("all_current_serie_a_players")
+            if all_current_serie_a_players.lower() =="true":
+                return {"body": Player.get_all_current_serie_a_players(session)}
+            return {"statusCode": 500, "body": f"Value '{all_current_serie_a_players}' of all_current_serie_a_players param is not valid"}                           
         else:
             return {"body": Player.get_all(session)}
 
@@ -363,12 +368,25 @@ class Player(Base):
             return []
         finally:
             session.close()  
-
    
     @staticmethod
     def get_current_serie_a_players(session):
         ''' 
-        This query returns all serie a current players and respective season and team for each player
+        This query returns all Serie A current players with their respective season and team details.
+
+        This method retrieves players who are currently active in Serie A teams, including their team
+        information and statistics for the current season.
+
+        Returns:
+            A list of dictionaries, each containing player details along with team and season information.
+
+        Raises:
+            Exception: If there's an error during the data retrieval process.
+
+        Notes:
+            - The query ensures players are currently associated with Serie A teams.
+            - It includes team name, logo, ID, season ID, and player statistics such as position.
+            - Suitable for scenarios where you need up-to-date information on Serie A players in current teams.
         '''
         try:
 
@@ -405,7 +423,41 @@ class Player(Base):
             print(f"Error during fetching Serie A players for current season: {e}")
             return {"statusCode": 500, "body": f"Error during fetching Serie A players for current season: {e}"}
         finally:
-            session.close()                        
+            session.close()    
+
+    @staticmethod
+    def get_all_current_serie_a_players(session):
+        ''' 
+        This query returns all Serie A current players for the current season.
+    
+        Retrieves all players who are registered for the current Serie A season, regardless of their
+        current team status (whether they are transferred, released, etc.).
+    
+        Returns:
+            A list of dictionaries, each containing player details.
+    
+        Raises:
+            Exception: If there's an error during the data retrieval process.
+    
+        Notes:
+            - The query fetches players associated with the Serie A league in the current season.
+            - It does not guarantee that players are currently active in Serie A teams.
+            - **Crucial for ETL process**: This method should not be modified as it populates the `player_statistics` table.
+            - Suitable when you need a comprehensive list of players registered for the current Serie A season,
+              irrespective of their current team affiliation.
+        '''
+        try:
+            players = session.query(Player).join(PlayerSeason).join(Season).join(League).filter(
+                League.name == "Serie A",
+                League.country_name == "Italy",
+                Season.current == True
+            ).all()
+            return [player._to_dict() for player in players]
+        except Exception as e:
+            print(f"Error during fetching Serie A players for current season: {e}")
+            return {"statusCode": 500, "body": f"Error during fetching Serie A players for current season: {e}"}
+        finally:
+            session.close()                                  
 
     @staticmethod
     def update_player_by_id(session, player_id, update_fields):
