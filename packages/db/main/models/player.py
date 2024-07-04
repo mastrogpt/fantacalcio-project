@@ -336,7 +336,6 @@ class Player(Base):
                 player_dict['team_logo'] = player.Team.logo
                 player_dict['team_id'] = player.Team.id
                 player_dict['season_id'] = player.Season.id
-                #player_dict['value'] = player.PlayerStatistic
                 player_dict['statistics'] = player.PlayerStatistic._to_dict()
                 
                 result.append(player_dict)
