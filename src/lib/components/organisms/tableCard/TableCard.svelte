@@ -4,12 +4,15 @@
 	import Modal from '$lib/components/atoms/modal/Modal.svelte';
 	import Tab from '$lib/components/atoms/tab/Tab.svelte';
 	import Table from '$lib/components/molecules/table/table.svelte';
-	import { getPlayersList, getUnavailablePlayers } from '$lib/service/getPlayers';
+	import { getPlayersList, getUnavailablePlayers } from '$lib/service/fantaicalcio/getPlayers';
 	import { selectedRows } from '$lib/store/store';
 	import ComparePlayers from '../comparePlayers/ComparePlayers.svelte';
 	import PlayerDetails from '../playerDetails/PlayerDetails.svelte';
 
-	let playerId: number | undefined = undefined;
+	let player_id: number;
+	let season_id: number;
+	let team_id: number;
+
 	let showModal = false;
 	let activeTab = 'all';
 	let modalContent;
@@ -27,9 +30,11 @@
 
 	const playersCols = [
 		{ accessorKey: 'name', header: 'Nome' },
-		{ accessorKey: 'role', header: 'Ruolo' },
+		{ accessorKey: 'position', header: 'Ruolo' },
 		{ accessorKey: 'team', header: 'Squadra' },
-		{ accessorKey: 'value', header: 'Valore' }
+		{ accessorKey: 'available', header: 'Disponibile' }
+
+		//, { accessorKey: 'value', header: 'Valore' }
 	];
 
 	const unavailableCols = [
@@ -73,7 +78,9 @@
 	<hr />
 
 	<p class="my-5 px-10">
-		Noi ti forniamo la lista dei giocatori, i dati e le statistiche più interessanti. Tu decidi chi mandare in campo. Se hai dei dubbi, seleziona due calciatori e comparali. <br/> Magari ti confonderemo idee, o magari ti aiuteremo a vincere!
+		Noi ti forniamo la lista dei giocatori, i dati e le statistiche più interessanti. Tu decidi chi
+		mandare in campo. Se hai dei dubbi, seleziona due calciatori e comparali. <br /> Magari ti confonderemo
+		idee, o magari ti aiuteremo a vincere!
 	</p>
 
 	<div class="table-card-content">
@@ -86,7 +93,10 @@
 					columns={playersCols}
 					selectableRows
 					onRowClick={(row) => {
-						playerId = row.original.id;
+						player_id = row.original.id;
+						season_id = row.original.season_id;
+						team_id = row.original.team_id;
+
 						toggleModal('DETAILS');
 					}}
 				/>
@@ -101,7 +111,7 @@
 					{data}
 					columns={unavailableCols}
 					onRowClick={(row) => {
-						playerId = row.original.id;
+						player_id = row.original.id;
 						toggleModal('DETAILS');
 					}}
 				/>
@@ -158,7 +168,9 @@
 		{toggleModal}
 		{modalContent}
 		modalProps={{
-			playerId
+			player_id,
+			season_id,
+			team_id
 		}}
 	/>
 {/if}

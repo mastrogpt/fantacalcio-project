@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { getAiOpinionFromBackend } from '$lib/service/aiOpinion';
-	import type { PlayersStats } from '$lib/service/getStats';
+	import type { PlayerCompleteStats } from '$lib/service/fantaicalcio/getStats';
 	import Button from '../button/button.svelte';
 	import Loader from '../Loader.svelte';
 	import imgFallback from '$lib/assets/player-img-fallback.jpeg';
@@ -11,7 +11,7 @@
 	}
 
 	export let showAiOpinion: boolean = false;
-	export let playerData: PlayersStats | undefined = undefined;
+	export let playerData: PlayerCompleteStats | undefined = undefined;
 	export let cardRow: { label?: string; value?: string; subRows?: ICardRowProps[] }[] = [];
 
 	let aiOpinion: string;
@@ -19,6 +19,7 @@
 	let isLoading = false;
 
 	const getAiOpinion = async () => {
+		console.log('PLAYER COMPLETE DATA', playerData);
 		if (!playerData) return;
 
 		isLoading = true;
@@ -40,10 +41,10 @@
 </script>
 
 <div class="player-card flex flex-col w-[300px]">
-	<div class="card-title py-2">{playerData?.name}</div>
+	<div class="card-title py-2">{playerData?.player?.name}</div>
 
 	<div class="card-profile-img grow-1">
-		<img src={imgFallback} alt={playerData?.name} />
+		<img src={playerData?.player.photo} alt={playerData?.name} />
 	</div>
 
 	<div class="card-stats flex flex-col">

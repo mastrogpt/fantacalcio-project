@@ -1,11 +1,14 @@
 <script lang="ts">
 	import PlayerCard from '$lib/components/atoms/playerCard/PlayerCard.svelte';
 	import { getAiOpinionFromBackend } from '$lib/service/aiOpinion';
-	import { getStatsDataById } from '$lib/service/getStats';
+	import { getStatsDataById } from '$lib/service/fantaicalcio/getStats';
 	import { openChatWithMessage } from '$lib/store/store';
 	import { onMount } from 'svelte';
 
-	export let playerId: number | undefined;
+	export let player_id: number;
+	export let season_id: number;
+	export let team_id: number;
+
 	let playerData;
 	let opinion = '';
 
@@ -18,36 +21,37 @@
 	};
 
 	onMount(async () => {
-		if (playerId) {
-			const data = await getStatsDataById(playerId);
+		if (player_id) {
+			const data = await getStatsDataById(player_id, season_id, team_id);
 			playerData = data;
+			let playerStats = data?.player_statistic;
 			cardRow = [
 				{
 					label: 'Presenze',
-					value: playerData?.caps
+					value: playerStats?.games_appearences
 				},
 				{
 					label: 'Assist',
-					value: playerData?.assists
+					value: playerStats?.goals_assists ? playerData?.goals_assists : '0'
 				},
 				{
 					label: 'Goal',
-					value: playerData?.markavg
+					value: playerStats?.goals_total
 				},
 				{
 					label: 'Media',
-					value: playerData?.fmarkavg
+					value: playerStats?.rating ? playerData?.rating?.toFixed(2) : '0'
 				},
 				{
 					label: 'Cartellini',
 					subRows: [
 						{
 							label: '🟥',
-							value: playerData?.rcards
+							value: playerStats?.cards_red
 						},
 						{
 							label: '🟨',
-							value: playerData?.ycards
+							value: playerStats?.cards_yellow
 						}
 					]
 				}
@@ -56,7 +60,7 @@
 	});
 </script>
 
-{#if playerId}
+{#if player_id}
 	<div class="player-details">
 		{#if !playerData}
 			<p>Caricamento...</p>
