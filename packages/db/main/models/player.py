@@ -7,6 +7,7 @@ from models.league import League
 from models.player_season import PlayerSeason
 from models.base import Base
 import uuid
+from datetime import datetime
 
 class Player(Base):
     __tablename__ = 'players'
@@ -31,7 +32,7 @@ class Player(Base):
     )
 
     player_seasons = relationship('PlayerSeason', back_populates='player', cascade="all, delete-orphan")
-    player_statistics = relationship('PlayerStatistic', back_populates='player', cascade="all, delete-orphan")
+    player_statistics = relationship('PlayerStatistics', back_populates='player', cascade="all, delete-orphan")
     current_players_teams = relationship('CurrentPlayerTeam', back_populates='player', cascade="all, delete-orphan")
 
     def __init__(self, name, firstname, lastname, birth_date, birth_place, birth_country, nationality, height, weight, injured, photo, apifootball_id):
@@ -70,15 +71,17 @@ class Player(Base):
     def insert_handler(session, args):
         try:
             if 'players' in args:
-                ret = Player.insert_if_not_exists(session, args['players'])
-                if ret:
-                    return {"statusCode": 200, "body": ret}
+                inserted_players = Player.insert_if_not_exists(session, args['players'])
+                if inserted_players is not False:
+                    return {"statusCode": 200, "body": inserted_players}
                 else:
                     return {"statusCode": 500, "body": "Failed to save players"}
             else:
                 return {"statusCode": 400, "body": "No players provided in the payload"}
         except Exception as e:
-            return {"statusCode": 500, "body": f"Error during insert operation: {e}"}            
+            return {"statusCode": 500, "body": f"Error during insert operation: {e}"}
+        finally:
+            session.close()      
 
     @staticmethod
     def upsert_handler(session, args):
@@ -184,17 +187,34 @@ class Player(Base):
             session.close()
 
     @staticmethod
+    def _parse_date(date_str):
+        if isinstance(date_str, str):
+            try:
+                return datetime.strptime(date_str, '%Y-%m-%d').date()
+            except ValueError:
+                return None
+        return date_str
+
+    @staticmethod
     def insert_if_not_exists(session, players):
         try:
             inserted_players = []
             for player in players:
+                # Convertiamo le date nel formato corretto
+                player['birth_date'] = Player._parse_date(player.get('birth_date'))
+
+                # Check if the player with the same apifootball_id already exists
+                existing_player = session.query(Player).filter_by(apifootball_id=player['apifootball_id']).first()
+                if existing_player:
+                    continue  # Skip the insert if a player with the same apifootball_id already exists
+
                 stmt = pg_insert(Player).values(
                     name=player['name'],
                     firstname=player['firstname'],
                     lastname=player['lastname'],
                     birth_date=player['birth_date'],
                     birth_place=player['birth_place'],
-                    birth_country=player['birth_country'],                    
+                    birth_country=player['birth_country'],
                     nationality=player['nationality'],
                     height=player['height'],
                     weight=player['weight'],
@@ -205,9 +225,14 @@ class Player(Base):
                     index_elements=['name', 'firstname', 'lastname']
                 )
                 result = session.execute(stmt)
-                if result.rowcount > 0:  # If a row was actually inserted
-                    inserted_player = session.query(Player).filter_by(name=player['name'], firstname=player['firstname'], lastname=player['lastname']).one()
+                if result.rowcount > 0:  # Se una riga è stata effettivamente inserita
+                    inserted_player = session.query(Player).filter_by(
+                        name=player['name'],
+                        firstname=player['firstname'],
+                        lastname=player['lastname']
+                    ).one()
                     inserted_players.append(inserted_player._to_dict())
+
             session.commit()
             return inserted_players
         except Exception as e:
@@ -222,36 +247,70 @@ class Player(Base):
         try:
             upserted_players = []
             for player in players:
-                stmt = pg_insert(Player).values(
+                # Convertiamo le date nel formato corretto
+                player['birth_date'] = Player._parse_date(player.get('birth_date'))
+
+                # Primo controllo sulla tripla (name, firstname, lastname)
+                existing_player = session.query(Player).filter_by(
                     name=player['name'],
                     firstname=player['firstname'],
-                    lastname=player['lastname'],
-                    birth_date=player['birth_date'],
-                    birth_place=player['birth_place'],
-                    birth_country=player['birth_country'],
-                    nationality=player['nationality'],
-                    height=player['height'],
-                    weight=player['weight'],
-                    injured=player['injured'],
-                    photo=player['photo'],
-                    apifootball_id=player['apifootball_id']
-                ).on_conflict_do_update(
-                    index_elements=['name', 'firstname', 'lastname'],
-                    set_={
-                        'birth_date': player['birth_date'],
-                        'birth_place': player['birth_place'],
-                        'birth_country': player['birth_country'],
-                        'nationality': player['nationality'],
-                        'height': player['height'],
-                        'weight': player['weight'],
-                        'injured': player['injured'],
-                        'photo': player['photo'],
-                        'apifootball_id': player['apifootball_id']
-                    }
-                )
-                session.execute(stmt)
-                upserted_player = session.query(Player).filter_by(name=player['name'], firstname=player['firstname'], lastname=player['lastname']).one()
+                    lastname=player['lastname']
+                ).one_or_none()
+
+                if existing_player:
+                    # Aggiorna le informazioni del giocatore esistente
+                    existing_player.birth_date = player['birth_date']
+                    existing_player.birth_place = player['birth_place']
+                    existing_player.birth_country = player['birth_country']
+                    existing_player.nationality = player['nationality']
+                    existing_player.height = player['height']
+                    existing_player.weight = player['weight']
+                    existing_player.injured = player['injured']
+                    existing_player.photo = player['photo']
+                    existing_player.apifootball_id = player['apifootball_id']
+                    upserted_player = existing_player
+                else:
+                    # Secondo controllo sull'apifootball_id
+                    existing_player = session.query(Player).filter_by(
+                        apifootball_id=player['apifootball_id']
+                    ).one_or_none()
+
+                    if existing_player:
+                        # Aggiorna le informazioni del giocatore esistente ma cambiando nome, cognome o secondo nome
+                        existing_player.name = player['name']
+                        existing_player.firstname = player['firstname']
+                        existing_player.lastname = player['lastname']
+                        existing_player.birth_date = player['birth_date']
+                        existing_player.birth_place = player['birth_place']
+                        existing_player.birth_country = player['birth_country']
+                        existing_player.nationality = player['nationality']
+                        existing_player.height = player['height']
+                        existing_player.weight = player['weight']
+                        existing_player.injured = player['injured']
+                        existing_player.photo = player['photo']
+                        upserted_player = existing_player
+                    else:
+                        # Inserisci un nuovo giocatore
+                        new_player = Player(
+                            name=player['name'],
+                            firstname=player['firstname'],
+                            lastname=player['lastname'],
+                            birth_date=player['birth_date'],
+                            birth_place=player['birth_place'],
+                            birth_country=player['birth_country'],
+                            nationality=player['nationality'],
+                            height=player['height'],
+                            weight=player['weight'],
+                            injured=player['injured'],
+                            photo=player['photo'],
+                            apifootball_id=player['apifootball_id']
+                        )
+                        session.add(new_player)
+                        upserted_player = new_player
+
+                session.flush()  # Sincronizza i cambiamenti con il database
                 upserted_players.append(upserted_player._to_dict())
+
             session.commit()
             return upserted_players
         except Exception as e:

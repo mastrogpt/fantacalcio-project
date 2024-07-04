@@ -4,7 +4,7 @@ from sqlalchemy.dialects.postgresql import insert
 from models.base import Base
 import uuid
 
-class PlayerStatistic(Base):
+class PlayerStatistics(Base):
     __tablename__ = 'players_statistics'
     
     uuid = Column(String(36), unique=True, nullable=False, default=lambda: str(uuid.uuid4()))
@@ -61,28 +61,28 @@ class PlayerStatistic(Base):
             setattr(self, key, value)
         
     def __repr__(self):
-        return f"<PlayerStatistic(player_id={self.player_id}, team_id={self.team_id}, season_id={self.season_id}, uuid='{self.uuid}')>"
+        return f"<PlayerStatistics(player_id={self.player_id}, team_id={self.team_id}, season_id={self.season_id}, uuid='{self.uuid}')>"
 
     @staticmethod
     def handler(session, args):
         query_type = args.get("query")
       
         if query_type == "delete":
-            return PlayerStatistic.delete_handler(session, args)
+            return PlayerStatistics.delete_handler(session, args)
         elif query_type == "insert":
-            return PlayerStatistic.insert_handler(session, args)         
+            return PlayerStatistics.insert_handler(session, args)         
         elif query_type == "update":
-            return PlayerStatistic.update_handler(session, args)
+            return PlayerStatistics.update_handler(session, args)
         elif query_type == "upsert":
-            return PlayerStatistic.upsert_handler(session, args)
+            return PlayerStatistics.upsert_handler(session, args)
         else:
-            return PlayerStatistic.get_handler(session, args)
+            return PlayerStatistics.get_handler(session, args)
 
     @staticmethod
     def insert_handler(session, args):
         try:
             if 'player_statistics' in args:
-                ret = PlayerStatistic.insert_if_not_exists(session, args['player_statistics'])
+                ret = PlayerStatistics.insert_if_not_exists(session, args['player_statistics'])
                 if ret:
                     return {"statusCode": 200, "body": ret}
                 else:
@@ -96,7 +96,7 @@ class PlayerStatistic(Base):
     def upsert_handler(session, args):
         try:
             if 'player_statistics' in args:
-                ret = PlayerStatistic.upsert(session, args['player_statistics'])
+                ret = PlayerStatistics.upsert(session, args['player_statistics'])
                 if ret:
                     return {"statusCode": 200, "body": ret}
                 else:
@@ -116,7 +116,7 @@ class PlayerStatistic(Base):
                 player_id = args['player_id']
                 team_id = args['team_id']
                 season_id = args['season_id']
-                ret = PlayerStatistic.update_by_ids(session, player_id, team_id, season_id, update_fields)
+                ret = PlayerStatistics.update_by_ids(session, player_id, team_id, season_id, update_fields)
                 if ret:
                     return {"statusCode": 200, "body": f"Updated fields successfully for player_id: {player_id}, team_id: {team_id}, season_id: {season_id}"}
                 else:
@@ -129,22 +129,22 @@ class PlayerStatistic(Base):
     @staticmethod
     def get_handler(session, args):
         if 'player_id' in args and 'team_id' in args and 'season_id' in args:
-            player_statistic = PlayerStatistic.get_by_ids(session, args['player_id'], args['team_id'], args['season_id'])
-            return {"body": player_statistic if player_statistic else "PlayerStatistic not found"}
+            player_statistic = PlayerStatistics.get_by_ids(session, args['player_id'], args['team_id'], args['season_id'])
+            return {"body": player_statistic if player_statistic else "PlayerStatistics not found"}
         else:
-            return {"body": PlayerStatistic.get_all(session)}
+            return {"body": PlayerStatistics.get_all(session)}
 
     @staticmethod
     def delete_handler(session, args):
         if 'player_id' in args and 'team_id' in args and 'season_id' in args:
-            return {"body": PlayerStatistic.delete_by_ids(session, args['player_id'], args['team_id'], args['season_id'])}
+            return {"body": PlayerStatistics.delete_by_ids(session, args['player_id'], args['team_id'], args['season_id'])}
         else:
-            return {"body": PlayerStatistic.delete_all(session)}
+            return {"body": PlayerStatistics.delete_all(session)}
 
     @staticmethod
     def get_all(session):
         try:
-            player_statistics = session.query(PlayerStatistic).all()
+            player_statistics = session.query(PlayerStatistics).all()
             return [ps._to_dict() for ps in player_statistics]
         except Exception as e:
             print("Error during player statistics loading:", e)
@@ -155,7 +155,7 @@ class PlayerStatistic(Base):
     @staticmethod
     def delete_all(session):
         try:
-            session.execute(delete(PlayerStatistic))
+            session.execute(delete(PlayerStatistics))
             session.commit()
             return "All player statistics deleted"
         except Exception as e:
@@ -168,17 +168,17 @@ class PlayerStatistic(Base):
     @staticmethod
     def delete_by_ids(session, player_id, team_id, season_id):
         try:
-            player_statistic = session.query(PlayerStatistic).filter_by(player_id=player_id, team_id=team_id, season_id=season_id).one_or_none()
+            player_statistic = session.query(PlayerStatistics).filter_by(player_id=player_id, team_id=team_id, season_id=season_id).one_or_none()
             if player_statistic:
                 session.delete(player_statistic)
                 session.commit()
-                return f"PlayerStatistic with player_id={player_id}, team_id={team_id}, season_id={season_id} deleted"
+                return f"PlayerStatistics with player_id={player_id}, team_id={team_id}, season_id={season_id} deleted"
             else:
-                return "PlayerStatistic not found"
+                return "PlayerStatistics not found"
         except Exception as e:
-            print(f"Error while deleting PlayerStatistic: {e}")
+            print(f"Error while deleting PlayerStatistics: {e}")
             session.rollback()
-            return "Error while deleting PlayerStatistic"
+            return "Error while deleting PlayerStatistics"
         finally:
             session.close()
 
@@ -187,7 +187,7 @@ class PlayerStatistic(Base):
         try:
             inserted_records = []
             for ps in player_statistics:
-                stmt = insert(PlayerStatistic).values(
+                stmt = insert(PlayerStatistics).values(
                     player_id=ps['player_id'],
                     team_id=ps['team_id'],
                     season_id=ps['season_id'],
@@ -249,7 +249,7 @@ class PlayerStatistic(Base):
             upserted_player_statistics = []
             for ps in player_statistics:
                 # Try to insert the record
-                stmt = insert(PlayerStatistic).values(
+                stmt = insert(PlayerStatistics).values(
                     player_id=ps['player_id'],
                     team_id=ps['team_id'],
                     season_id=ps['season_id'],
@@ -296,7 +296,7 @@ class PlayerStatistic(Base):
                 session.execute(stmt)
     
                 # Fetch the inserted or existing record
-                upserted_player_statistic = session.query(PlayerStatistic).filter_by(
+                upserted_player_statistic = session.query(PlayerStatistics).filter_by(
                     player_id=ps['player_id'],
                     team_id=ps['team_id'],
                     season_id=ps['season_id']
@@ -366,10 +366,10 @@ class PlayerStatistic(Base):
     @staticmethod
     def get_by_ids(session, player_id, team_id, season_id):
         try:
-            player_statistic = session.query(PlayerStatistic).filter_by(player_id=player_id, team_id=team_id, season_id=season_id).one_or_none()
+            player_statistic = session.query(PlayerStatistics).filter_by(player_id=player_id, team_id=team_id, season_id=season_id).one_or_none()
             return player_statistic._to_dict() if player_statistic else None
         except Exception as e:
-            print(f"Error during fetching PlayerStatistic with player_id={player_id}, team_id={team_id}, season_id={season_id}: {e}")
+            print(f"Error during fetching PlayerStatistics with player_id={player_id}, team_id={team_id}, season_id={season_id}: {e}")
             return None
         finally:
             session.close()
@@ -377,26 +377,26 @@ class PlayerStatistic(Base):
     @staticmethod
     def update_by_ids(session, player_id, team_id, season_id, update_fields):
         try:
-            player_statistic = session.query(PlayerStatistic).filter_by(player_id=player_id, team_id=team_id, season_id=season_id).one_or_none()
+            player_statistic = session.query(PlayerStatistics).filter_by(player_id=player_id, team_id=team_id, season_id=season_id).one_or_none()
             if player_statistic:
                 for field, value in update_fields.items():
                     if hasattr(player_statistic, field):
                         setattr(player_statistic, field, value)
                     else:
-                        raise AttributeError(f"Field '{field}' does not exist in PlayerStatistic model")
+                        raise AttributeError(f"Field '{field}' does not exist in PlayerStatistics model")
                 session.commit()
                 return True
             else:
                 return False
         except NoResultFound:
-            print(f"PlayerStatistic with player_id={player_id}, team_id={team_id}, season_id={season_id} not found.")
+            print(f"PlayerStatistics with player_id={player_id}, team_id={team_id}, season_id={season_id} not found.")
             return False
         except AttributeError as ae:
-            print(f"AttributeError during update for PlayerStatistic with player_id={player_id}, team_id={team_id}, season_id={season_id}: {ae}")
+            print(f"AttributeError during update for PlayerStatistics with player_id={player_id}, team_id={team_id}, season_id={season_id}: {ae}")
             session.rollback()
             return False
         except Exception as e:
-            print(f"Error during update for PlayerStatistic with player_id={player_id}, team_id={team_id}, season_id={season_id}: {e}")
+            print(f"Error during update for PlayerStatistics with player_id={player_id}, team_id={team_id}, season_id={season_id}: {e}")
             session.rollback()
             return False
         finally:
