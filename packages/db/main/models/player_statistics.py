@@ -364,10 +364,27 @@ class PlayerStatistics(Base):
             session.close()
 
     @staticmethod
-    def get_by_ids(session, player_id, team_id, season_id):
+    def get_by_ids(session, player_id: int, team_id: int, season_id: int):
         try:
-            player_statistic = session.query(PlayerStatistics).filter_by(player_id=player_id, team_id=team_id, season_id=season_id).one_or_none()
-            return player_statistic._to_dict() if player_statistic else None
+            from models.player import Player
+
+            result = (session.query(PlayerStatistics, Player)
+                .join(Player, PlayerStatistics.player_id == Player.id)
+                .filter(
+                    PlayerStatistics.player_id == player_id,
+                    PlayerStatistics.team_id == team_id,
+                    PlayerStatistics.season_id == season_id
+                ).one_or_none())
+
+            if result:
+                player_statistics, player = result
+                return {
+                    'player_statistics': player_statistics._to_dict(),
+                    'player': player._to_dict()
+                }
+            else:
+                return None
+            return player_statistics.PlayerStatistics._to_dict() if player_statistics else None
         except Exception as e:
             print(f"Error during fetching PlayerStatistics with player_id={player_id}, team_id={team_id}, season_id={season_id}: {e}")
             return None

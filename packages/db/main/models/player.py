@@ -3,8 +3,11 @@ from sqlalchemy.orm import sessionmaker, relationship
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from models.season import Season
+from models.team import Team
+from models.current_player_team import CurrentPlayerTeam
 from models.league import League
 from models.player_season import PlayerSeason
+from models.player_statistic import PlayerStatistic
 from models.base import Base
 import uuid
 from datetime import datetime
@@ -361,15 +364,43 @@ class Player(Base):
         finally:
             session.close()  
 
+   
     @staticmethod
     def get_current_serie_a_players(session):
+        ''' 
+        This query returns all serie a current players and respective season and team for each player
+        '''
         try:
-            players = session.query(Player).join(PlayerSeason).join(Season).join(League).filter(
-                League.name == "Serie A",
-                League.country_name == "Italy",
-                Season.current == True
-            ).all()
-            return [player._to_dict() for player in players]
+
+            players_teams = (session.query(Player, Team, Season, PlayerStatistic)
+                 .join(PlayerStatistic, Player.id == PlayerStatistic.player_id)
+                 .join(PlayerSeason, Player.id == PlayerSeason.player_id)
+                 .join(Season, PlayerSeason.season_id == Season.id)
+                 .join(League, Season.league_id == League.id)
+                 .join(CurrentPlayerTeam, Player.id == CurrentPlayerTeam.player_id)
+                 .join(Team, CurrentPlayerTeam.team_id == Team.id)
+                 .filter(
+                     League.name == "Serie A",
+                     League.country_name == "Italy",
+                     Season.current == True
+                 )
+                 .all())
+
+            result = []
+            print("PLAYERS ARE", players_teams)
+
+            for player in players_teams:
+                player_dict = player.Player._to_dict()
+                player_dict['team'] = player.Team.name
+                player_dict['team_logo'] = player.Team.logo
+                player_dict['team_id'] = player.Team.id
+                player_dict['season_id'] = player.Season.id
+                player_dict['position'] = player.PlayerStatistic.position
+    
+                #player_dict['statistics'] = player.PlayerStatistic._to_dict()
+                
+                result.append(player_dict)
+            return result
         except Exception as e:
             print(f"Error during fetching Serie A players for current season: {e}")
             return {"statusCode": 500, "body": f"Error during fetching Serie A players for current season: {e}"}

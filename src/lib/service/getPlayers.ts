@@ -1,7 +1,6 @@
 import axios from 'axios';
 import { PUBLIC_URL_API_BASEURL } from '$env/static/public';
 
-
 /*
 ALL PLAYERS
 */
@@ -16,23 +15,23 @@ interface Player {
 
 export interface PlayersList extends Array<Player> {}
 
-export function getPlayersList(): Promise<PlayersList> {
-    return axios
-        .get(PUBLIC_URL_API_BASEURL,{params: {"module": "fantamaster", "action": "playerslist"}})
-        .then((response) => {
-            return response.data.data.players.map((player: any) => ({
-                id: player.id,
-                name: player.name,
-                playmaker: player.playmaker,
-                role: player.role,
-                team: player.team,
-                value: player.value
-            }));
-        })
-        .catch((error) => {
-            console.error(error);
-            throw error;
+export async function getPlayersList(): Promise<PlayersList> {
+    try {
+        const response = await axios.get(PUBLIC_URL_API_BASEURL, {
+            params: { module: 'fantamaster', action: 'playerslist' }
         });
+        return response.data.data.players.map((player: any) => ({
+            id: player.id,
+            name: player.name,
+            playmaker: player.playmaker,
+            role: player.role,
+            team: player.team,
+            value: player.value
+        }));
+    } catch (error) {
+        console.error(error);
+        throw error;
+    }
 }
 
 /*
@@ -56,7 +55,7 @@ export interface UnavailabilityInfo {
 
 export function getUnavailablePlayers(): Promise<UnavailablePlayers[]> {
     return axios
-        .get(PUBLIC_URL_API_BASEURL,{params: {"module": "fantamaster", "action": "unavailable"}})
+        .get(PUBLIC_URL_API_BASEURL, { params: { module: 'fantamaster', action: 'unavailable' } })
         .then((response) => {
             return response.data.data.unavailable.map((player: any) => ({
                 team: player.team,
@@ -66,7 +65,7 @@ export function getUnavailablePlayers(): Promise<UnavailablePlayers[]> {
                 type: player.type,
                 source_desc: player.source_desc,
                 next_day: player.next_day,
-                doubt: player.doubt,
+                doubt: player.doubt
             }));
         })
         .catch((error) => {
@@ -74,3 +73,4 @@ export function getUnavailablePlayers(): Promise<UnavailablePlayers[]> {
             throw error;
         });
 }
+
