@@ -3,20 +3,19 @@
 	import { fade } from 'svelte/transition';
 	import { register } from 'swiper/element/bundle';
 	import PlayerCard from '../playerCard/PlayerCard.svelte';
+	import type { PlayerCompleteStats } from '$lib/service/fantaicalcio/getStats';
 
 	onMount(() => {
 		register();
 	});
 
-	export let sliderData: {
-		title?: string;
-	}[];
+	export let sliderData: PlayerCompleteStats[];
 </script>
 
 <swiper-container class="cards-slider" effect="cards" transition:fade>
 	{#each sliderData as data}
 		<swiper-slide>
-			<PlayerCard playerData={{ name: data.title }} />
+			<PlayerCard playerData={{ player: data.player, player_statistic: data.player_statistic }} />
 		</swiper-slide>
 	{/each}
 </swiper-container>

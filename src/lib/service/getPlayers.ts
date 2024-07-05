@@ -13,6 +13,7 @@ export interface Player {
     value: number;
     season_id: number;
     team_id: number;
+    photo: string;
 }
 
 export interface PlayersList extends Array<Player> {}
@@ -30,7 +31,8 @@ export async function getPlayersList(): Promise<PlayersList> {
             team: player.team,
             value: player.value,
             season_id: player.season_id,
-            team_id: player.team_id
+            team_id: player.team_id,
+            photo: player.photo
         }));
     } catch (error) {
         console.error(error);

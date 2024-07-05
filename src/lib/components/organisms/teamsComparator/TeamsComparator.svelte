@@ -84,13 +84,13 @@
 			<div class="flex flex-col grow items-center w-2/5 gap-6 min-w-[550px]">
 				<h4>Formazione di casa: <b>{lineUp?.lineups[Number(selectedOption)].home}</b></h4>
 
-				<CardsSlider sliderData={homeLineup} />
+				<CardsSlider simpleData={homeLineup} />
 			</div>
 
 			<div class="flex flex-col grow items-center w-2/5 gap-6">
 				<h4>Formazione ospite: <b>{lineUp?.lineups[Number(selectedOption)].away}</b></h4>
 
-				<CardsSlider sliderData={awayLineup} />
+				<CardsSlider simpleData={awayLineup} />
 			</div>
 		</div>
 	{/if}

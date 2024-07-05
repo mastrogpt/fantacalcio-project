@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { PUBLIC_FANTAICALCIO_BASE_URL, PUBLIC_FANTAICALCIO_FANTA_PLAYERS_STATS } from '$env/static/public';
-import type { Player, PlayersList } from '../getPlayers';
+import type { Player } from '../getPlayers';
 
 export interface PlayerStats {
     captain: boolean;
