@@ -18,7 +18,7 @@ class Season(Base):
     league = relationship('League', back_populates='seasons')
     team_seasons = relationship('TeamSeason', back_populates='season', cascade="all, delete-orphan")
     season_players = relationship('PlayerSeason', back_populates='season', cascade="all, delete-orphan")
-    player_statistics = relationship('PlayerStatistic', back_populates='season', cascade="all, delete-orphan")
+    player_statistics = relationship('PlayerStatistics', back_populates='season', cascade="all, delete-orphan")
 
     __table_args__ = (Index('ix_league_year', 'league_id', 'year', unique=True),)
 
