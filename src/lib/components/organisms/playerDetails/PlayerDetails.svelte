@@ -22,7 +22,7 @@
 			cardRow = [
 				{
 					label: 'Presenze',
-					value: playerStats?.games_appearences
+					value: playerStats?.games_appearences ? playerStats?.games_appearences : '0'
 				},
 				{
 					label: 'Assist',
@@ -30,7 +30,7 @@
 				},
 				{
 					label: 'Goal',
-					value: playerStats?.goals_total
+					value: playerStats?.goals_total ? playerStats?.goals_total : '0'
 				},
 				{
 					label: 'Media',
@@ -41,11 +41,11 @@
 					subRows: [
 						{
 							label: '🟥',
-							value: playerStats?.cards_red
+							value: playerStats?.cards_red ? playerStats?.cards_red : '0'
 						},
 						{
 							label: '🟨',
-							value: playerStats?.cards_yellow
+							value: playerStats?.cards_yellow ? playerStats?.cards_yellow : '0'
 						}
 					]
 				}
