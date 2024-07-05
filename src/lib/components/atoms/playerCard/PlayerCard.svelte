@@ -19,7 +19,7 @@
 	let isLoading = false;
 
 	const getAiOpinion = async () => {
-		console.log('PLAYER COMPLETE DATA', playerData);
+		//console.log('PLAYER COMPLETE DATA', playerData);
 		if (!playerData) return;
 
 		isLoading = true;
@@ -43,8 +43,8 @@
 <div class="player-card flex flex-col w-[300px]">
 	<div class="card-title py-2">{playerData?.player?.name}</div>
 
-	<div class="card-profile-img grow-1">
-		<img src={playerData?.player.photo} alt={playerData?.name} />
+	<div class="card-profile-img">
+		<img src={playerData?.player?.photo} alt={imgFallback} />
 	</div>
 
 	<div class="card-stats flex flex-col">
@@ -112,12 +112,13 @@
 		display: flex;
 		width: 100%;
 		min-height: 150px;
+		justify-content: center;
+		align-items: center;
 	}
 
 	.card-profile-img img {
-		display: flex;
-		width: 100%;
-		height: 100%;
+		width: 50%;
+		height: 50%;
 		object-fit: cover;
 	}
 

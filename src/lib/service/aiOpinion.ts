@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { PUBLIC_URL_AI_SINGLE_PLAYER  } from '$env/static/public';
-import type { PlayersStats } from './getStats';
+import type { PlayerCompleteStats } from './fantaicalcio/getStats';
 
 
 /*
@@ -10,7 +10,9 @@ export interface AiOutput {
     output: string;
 }
 
-export function getAiOpinionFromBackend(input: PlayersStats): Promise<string> {
+export function getAiOpinionFromBackend(input: PlayerCompleteStats): Promise<string> {
+
+
     return axios
         .post<AiOutput>(PUBLIC_URL_AI_SINGLE_PLAYER, {
             'input': input

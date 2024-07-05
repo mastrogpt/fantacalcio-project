@@ -1,8 +1,7 @@
 <script lang="ts">
+	import Loader from '$lib/components/atoms/Loader.svelte';
 	import PlayerCard from '$lib/components/atoms/playerCard/PlayerCard.svelte';
-	import { getAiOpinionFromBackend } from '$lib/service/aiOpinion';
 	import { getStatsDataById } from '$lib/service/fantaicalcio/getStats';
-	import { openChatWithMessage } from '$lib/store/store';
 	import { onMount } from 'svelte';
 
 	export let player_id: number;
@@ -14,17 +13,12 @@
 
 	let cardRow: any[] = [];
 
-	const openAIpinion = async () => {
-		const message = await getAiOpinionFromBackend(playerData);
-
-		openChatWithMessage(message);
-	};
-
 	onMount(async () => {
 		if (player_id) {
 			const data = await getStatsDataById(player_id, season_id, team_id);
 			playerData = data;
 			let playerStats = data?.player_statistic;
+
 			cardRow = [
 				{
 					label: 'Presenze',
@@ -40,7 +34,7 @@
 				},
 				{
 					label: 'Media',
-					value: playerStats?.rating ? playerData?.rating?.toFixed(2) : '0'
+					value: playerStats?.rating ? playerStats?.rating.toFixed(2) : '0'
 				},
 				{
 					label: 'Cartellini',
@@ -63,7 +57,7 @@
 {#if player_id}
 	<div class="player-details">
 		{#if !playerData}
-			<p>Caricamento...</p>
+			<p><Loader /></p>
 		{:else if playerData}
 			<PlayerCard {playerData} showAiOpinion {cardRow} />
 		{/if}
