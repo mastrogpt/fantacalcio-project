@@ -4,13 +4,15 @@ import { PUBLIC_URL_API_BASEURL } from '$env/static/public';
 /*
 ALL PLAYERS
 */
-interface Player {
+export interface Player {
     id: number;
     name: string;
     playmaker: boolean;
     role: string;
     team: string;
     value: number;
+    season_id: number;
+    team_id: number;
 }
 
 export interface PlayersList extends Array<Player> {}
@@ -26,7 +28,9 @@ export async function getPlayersList(): Promise<PlayersList> {
             playmaker: player.playmaker,
             role: player.role,
             team: player.team,
-            value: player.value
+            value: player.value,
+            season_id: player.season_id,
+            team_id: player.team_id
         }));
     } catch (error) {
         console.error(error);

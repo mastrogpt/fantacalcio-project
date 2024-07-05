@@ -1,5 +1,4 @@
 <script lang="ts">
-	import type { PlayersStats } from '$lib/service/getStats';
 	import { getAiOpinionFromBackend } from '$lib/service/aiOpinion';
 	import Loader from '$lib/components/atoms/Loader.svelte';
 	import BackButton from '$lib/components/atoms/buttons/BackButton.svelte';
@@ -9,9 +8,10 @@
 	import Foot from '$lib/components/atoms/icons/Foot.svelte';
 	import Ball from '$lib/components/atoms/icons/Ball.svelte';
 	import Card from '$lib/components/atoms/icons/Card.svelte';
+	import type { PlayerCompleteStats } from '$lib/service/fantaicalcio/getStats';
 
 	export let data: {
-		playerData: PlayersStats;
+		playerData: PlayerCompleteStats;
 		playerName: string;
 	};
 

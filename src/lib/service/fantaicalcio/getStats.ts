@@ -1,6 +1,6 @@
 import axios from 'axios';
-import {PUBLIC_URL_API_BASEURL, PUBLIC_FANTAICALCIO_BASE_URL, PUBLIC_FANTAICALCIO_FANTA_PLAYERS_STATS } from '$env/static/public';
-import type { Player } from '../lineUp';
+import { PUBLIC_FANTAICALCIO_BASE_URL, PUBLIC_FANTAICALCIO_FANTA_PLAYERS_STATS } from '$env/static/public';
+import type { Player, PlayersList } from '../getPlayers';
 
 export interface PlayerStats {
     captain: boolean;
@@ -42,14 +42,14 @@ export interface PlayerStats {
     tackles_blocks: number;
     tackles_interceptions: number;
     tackles_total: number;
-    team_id: number;
+    s: number;
     uuid: string;
 }
 /*
 ALL PLAYERS STATS
 */
 export interface PlayerCompleteStats {
-    player: any;
+    player: Player;
     player_statistic: PlayerStats;
     
 }
@@ -87,4 +87,3 @@ export async function getStatsDataById(player_id: number, season_id: number, tea
 	}
 }
 
-//TODO LAST 5
