@@ -17,7 +17,7 @@ Prompt can give you stats of a two players that play in the same role. In that c
 
 class Chatbot:
 
-    MODEL = "gpt-35-turbo"
+    MODEL = "gpt-4"
     
 
     def __init__(self, args):
@@ -43,7 +43,7 @@ def main(args):
     
     chat = Chatbot(args)
     # read input
-    inp = "My input is a json that describe 2 player stats. Please prepare for me a commment of these players. Important: remember that if a player has no games in last 5, he should not be considered. Use italian language, please. " + str(args.get("input"))
+    inp = "My input is a json that describe 2 player stats. Please prepare for me a commment of these players. Use italian language, please. " + str(args.get("input"))
     # produce output
     out = chat.ask(inp)
     # prepare res

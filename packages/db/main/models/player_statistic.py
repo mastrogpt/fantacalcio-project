@@ -367,24 +367,26 @@ class PlayerStatistic(Base):
     def get_by_ids(session, player_id: int, team_id: int, season_id: int):
         try:
             from models.player import Player
+            from models.team import Team
 
-            result = (session.query(PlayerStatistic, Player)
+            result = (session.query(PlayerStatistic, Player, Team)
                 .join(Player, PlayerStatistic.player_id == Player.id)
                 .filter(
                     PlayerStatistic.player_id == player_id,
                     PlayerStatistic.team_id == team_id,
-                    PlayerStatistic.season_id == season_id
+                    PlayerStatistic.season_id == season_id,
+                    Team.id == PlayerStatistic.team_id
                 ).one_or_none())
 
             if result:
-                player_statistic, player = result
+                player_statistic, player, team = result
                 return {
                     'player_statistic': player_statistic._to_dict(),
-                    'player': player._to_dict()
+                    'player': player._to_dict(),
+                    'team': team._to_dict()
                 }
             else:
                 return None
-            return player_statistic.PlayerStatistic._to_dict() if player_statistic else None
         except Exception as e:
             print(f"Error during fetching PlayerStatistic with player_id={player_id}, team_id={team_id}, season_id={season_id}: {e}")
             return None
