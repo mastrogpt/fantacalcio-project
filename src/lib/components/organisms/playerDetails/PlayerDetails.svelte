@@ -1,53 +1,51 @@
 <script lang="ts">
+	import Loader from '$lib/components/atoms/Loader.svelte';
 	import PlayerCard from '$lib/components/atoms/playerCard/PlayerCard.svelte';
-	import { getAiOpinionFromBackend } from '$lib/service/aiOpinion';
-	import { getStatsDataById } from '$lib/service/getStats';
-	import { openChatWithMessage } from '$lib/store/store';
+	import { getStatsDataById, type PlayerCompleteStats } from '$lib/service/fantaicalcio/getStats';
 	import { onMount } from 'svelte';
 
-	export let playerId: number | undefined;
-	let playerData;
+	export let player_id: number;
+	export let season_id: number;
+	export let team_id: number;
+
+	let playerData: PlayerCompleteStats | undefined;
 	let opinion = '';
 
 	let cardRow: any[] = [];
 
-	const openAIpinion = async () => {
-		const message = await getAiOpinionFromBackend(playerData);
-
-		openChatWithMessage(message);
-	};
-
 	onMount(async () => {
-		if (playerId) {
-			const data = await getStatsDataById(playerId);
+		if (player_id) {
+			const data = await getStatsDataById(player_id, season_id, team_id);
 			playerData = data;
+			let playerStats = data?.player_statistic;
+
 			cardRow = [
 				{
 					label: 'Presenze',
-					value: playerData?.caps
+					value: playerStats?.games_appearences ? playerStats?.games_appearences : '0'
 				},
 				{
 					label: 'Assist',
-					value: playerData?.assists
+					value: playerStats?.goals_assists ? playerData?.player_statistic?.goals_assists : '0'
 				},
 				{
 					label: 'Goal',
-					value: playerData?.markavg
+					value: playerStats?.goals_total ? playerStats?.goals_total : '0'
 				},
 				{
 					label: 'Media',
-					value: playerData?.fmarkavg
+					value: playerStats?.rating ? playerStats?.rating.toFixed(2) : '0'
 				},
 				{
 					label: 'Cartellini',
 					subRows: [
 						{
 							label: '🟥',
-							value: playerData?.rcards
+							value: playerStats?.cards_red ? playerStats?.cards_red : '0'
 						},
 						{
 							label: '🟨',
-							value: playerData?.ycards
+							value: playerStats?.cards_yellow ? playerStats?.cards_yellow : '0'
 						}
 					]
 				}
@@ -56,12 +54,18 @@
 	});
 </script>
 
-{#if playerId}
+{#if player_id}
 	<div class="player-details">
 		{#if !playerData}
-			<p>Caricamento...</p>
+			<p><Loader /></p>
 		{:else if playerData}
-			<PlayerCard {playerData} showAiOpinion {cardRow} />
+			<PlayerCard
+				imageUrl={playerData.player?.photo}
+				name={playerData.player?.name}
+				{playerData}
+				showAiOpinion
+				{cardRow}
+			/>
 		{/if}
 
 		<p>{opinion}</p>

@@ -1,4 +1,4 @@
-import { getStatsDataById } from '$lib/service/getStats';
+import { getStatsDataById } from '$lib/service/fantamaster/getStats';
 
 export function load({ params }: { params: { playerId: number } }) {
     

@@ -14,6 +14,8 @@ interface Player {
     cards_red: string;
     cards_yellow: string;
     available: string;
+    season_id: number;
+    team_id: number;
     //value: number;
 }
 
@@ -27,7 +29,7 @@ export async function getPlayersList(): Promise<PlayersList> {
         const response = await axios.get(finalUrl, {
             params: { current_serie_a_players: 'true' }
         });
-        console.log("players are", response.data)
+        
         return response.data.map((player: any) => ({
             id: player.id,
             name: player.name,
@@ -36,7 +38,9 @@ export async function getPlayersList(): Promise<PlayersList> {
             cards_red: player.cards_red,
             cards_yellow: player.cards_yellow,
             position: player?.position,
-            available: player?.injured ? 'F' : 'Y'
+            available: player?.injured ? 'F' : 'Y',
+            team_id: player?.team_id,
+            season_id: player?.season_id
             //value: player.value
         }));
     } catch (error) {

@@ -19,7 +19,7 @@ Prompt can give you stats of a single player. In that case, you should describe 
 
 class Chatbot:
 
-    MODEL = "gpt-35-turbo"
+    MODEL = "gpt-4"
     
 
     def __init__(self, args):
@@ -45,7 +45,7 @@ def main(args):
     print(args.get('input'))
     chat = Chatbot(args)
     # read input
-    inp = "My input is a json that describe player stats. Please prepare for me a commment of this player, explaining what he do in the last 5 games. Important: remember that if player has no games in last 5, he should not be considered. Use italian language, please. " + str(args.get("input"))
+    inp = "My input is a json that describe player stats. Please prepare for me a synthetic commment of this player, explaining this data. Focus on main data, not in height or weight or similar. If player has no games, he should not be considered as available. Use italian language, please. " + str(args.get("input"))
     # produce output
     out = chat.ask(inp)
     # prepare res

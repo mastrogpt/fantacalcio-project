@@ -1,4 +1,4 @@
-import { getArticlesList, type IArticlesProps } from '$lib/service/getArticles';
+import { getArticlesList, type IArticlesProps } from '$lib/service/fantaicalcio/getArticles';
 
 export async function load({ params }: { params: { name: string } }) {
 	const articles: IArticlesProps[] = await getArticlesList();

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { type IArticlesProps } from '$lib/service/getArticles';
+	import { type IArticlesProps } from '$lib/service/fantaicalcio/getArticles';
 	import { fade } from 'svelte/transition';
 	import { register } from 'swiper/element/bundle';
 	import ArticleSliderSlide from './partials/ArticleSliderSlide.svelte';

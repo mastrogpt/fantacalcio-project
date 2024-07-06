@@ -5,7 +5,7 @@
 @tailwind components;
 @tailwind utilities;
 
-:root { 
+:root {
 	--black: 0, 0, 0;
 	--white: 255, 255, 255;
 	--dark: 26, 38, 58;
@@ -14,6 +14,10 @@
 	--accent: 255, 215, 0;
 	--swiper-pagination-color: rgb(var(--accent));
 	--swiper-pagination-bullet-inactive-color: rgb(var(--accent));
+}
+
+html {
+	scroll-behavior: smooth;
 }
 
 body {
