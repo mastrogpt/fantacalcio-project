@@ -2,7 +2,7 @@
 	import { goto } from '$app/navigation';
 	import Loader from '$lib/components/atoms/Loader.svelte';
 	import ArticlesSlider from '$lib/components/atoms/sliders/ArticlesSlider.svelte';
-	import { getArticlesList, type IArticlesProps } from '$lib/service/getArticles.js';
+	import { getArticlesList, type IArticlesProps } from '$lib/service/fantaicalcio/getArticles';
 
 	export let data: IArticlesProps;
 </script>
