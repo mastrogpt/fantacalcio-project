@@ -3,7 +3,7 @@
 	import Loader from '$lib/components/atoms/Loader.svelte';
 	import Select from '$lib/components/atoms/select/Select.svelte';
 	import CardsSlider from '$lib/components/atoms/sliders/CardsSlider.svelte';
-	import { getAiLineupOpinion } from '$lib/service/aiLineup';
+	import { getAiLineupOpinion } from '$lib/service/ai/aiLineup';
 	import type { ISliderDataProps } from '$lib/service/fantaicalcio/getStats';
 	import { getLineUp, type FootballMatch } from '$lib/service/fantamaster/lineUp';
 	import { onMount } from 'svelte';

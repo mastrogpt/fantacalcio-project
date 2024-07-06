@@ -2,7 +2,7 @@
 	import aboutImage from '$lib/assets/about.png';
 	import Loader from '$lib/components/atoms/Loader.svelte';
 	import JoinCta from '$lib/components/molecules/JoinCta.svelte';
-	import { getAiPresentationFromBackend } from '$lib/service/aiPresentation';
+	import { getAiPresentationFromBackend } from '$lib/service/ai/aiPresentation';
 	import { onMount } from 'svelte';
 
 	let aiPresentation: string;

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { getAiOpinionFromBackend } from '$lib/service/aiOpinion';
+	import { getAiOpinionFromBackend } from '$lib/service/ai/aiOpinion';
 	import type { PlayerCompleteStats } from '$lib/service/fantaicalcio/getStats';
 	import Button from '../button/button.svelte';
 	import Loader from '../Loader.svelte';
