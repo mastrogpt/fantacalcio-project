@@ -378,9 +378,6 @@ class PlayerStatistics(Base):
                     Team.id == PlayerStatistic.team_id
                 ).one_or_none())
             from models.player import Player 
-            print("player_id", player_id)
-            print("team_id", team_id)
-            print("season_id", season_id)
 
             # Esegui la query per recuperare PlayerStatistics con join su Player
             result = session.query(PlayerStatistics, Player). \
@@ -403,7 +400,6 @@ class PlayerStatistics(Base):
                 }
             else:
                 return None
-            return player_statistic.PlayerStatistic._to_dict() if player_statistic else None
         except Exception as e:
             print(f"Error during fetching PlayerStatistics with player_id={player_id}, team_id={team_id}, season_id={season_id}: {e}")
             return None
