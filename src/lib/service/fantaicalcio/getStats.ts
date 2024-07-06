@@ -3,7 +3,7 @@ import {
 	PUBLIC_FANTAICALCIO_BASE_URL,
 	PUBLIC_FANTAICALCIO_FANTA_PLAYERS_STATS
 } from '$env/static/public';
-import type { Player } from '../getPlayers';
+import type { Player } from '../fantamaster/getPlayers';
 
 export interface PlayerStats {
 	captain: boolean;
@@ -86,7 +86,7 @@ export async function getStatsDataById(
 ): Promise<PlayerCompleteStats | undefined> {
 	try {
 		const playerStats = await getStatsData(player_id, season_id, team_id);
-		console.log('Player stats are', playerStats);
+		
 		if (playerStats) {
 			return playerStats;
 		} else {

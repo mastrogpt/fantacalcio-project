@@ -5,7 +5,7 @@
 	import CardsSlider from '$lib/components/atoms/sliders/CardsSlider.svelte';
 	import { getAiLineupOpinion } from '$lib/service/aiLineup';
 	import type { ISliderDataProps } from '$lib/service/fantaicalcio/getStats';
-	import { getLineUp, type FootballMatch } from '$lib/service/lineUp';
+	import { getLineUp, type FootballMatch } from '$lib/service/fantamaster/lineUp';
 	import { onMount } from 'svelte';
 
 	let lineUp: FootballMatch | undefined = undefined;
@@ -103,9 +103,8 @@
 
 		<div class="flex flex-col items-center justify-center gap-10 max-w-screen-lg">
 			<p>
-				Lorem ipsum dolor sit, amet consectetur adipisicing elit. Quo quas tempore alias temporibus!
-				Dignissimos facilis illum dolores quis, aliquam reiciendis pariatur exercitationem odit
-				minus sed saepe, voluptatem, id similique mollitia.
+				Non che ci azzecchi spesso, ma puoi chiedere una piccola previsione della partita al nostro
+				ainalist...
 			</p>
 
 			{#if aiOpinionLoading && !aiPresentationWritingEffect}

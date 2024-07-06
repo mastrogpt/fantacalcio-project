@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Loader from '$lib/components/atoms/Loader.svelte';
 	import { getAiComparison } from '$lib/service/aiComparator';
-	import { getStatsData, getStatsDataById } from '$lib/service/getStats';
+	import { getStatsData, getStatsDataById } from '$lib/service/fantamaster/getStats';
 	import { selectedRows } from '$lib/store/store';
 	import { onMount } from 'svelte';
 

@@ -29,7 +29,7 @@ export async function getPlayersList(): Promise<PlayersList> {
         const response = await axios.get(finalUrl, {
             params: { current_serie_a_players: 'true' }
         });
-        console.log("players are", response.data)
+        
         return response.data.map((player: any) => ({
             id: player.id,
             name: player.name,

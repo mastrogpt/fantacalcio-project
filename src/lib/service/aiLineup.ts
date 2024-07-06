@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { PUBLIC_URL_AI_LINEUP_OPINION  } from '$env/static/public';
-import type { LineUp } from './lineUp';
+import type { LineUp } from './fantamaster/lineUp';
 
 
 /*

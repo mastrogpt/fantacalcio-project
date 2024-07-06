@@ -6,7 +6,7 @@
 	import TableCard from '$lib/components/organisms/tableCard/TableCard.svelte';
 	import TeamsComparator from '$lib/components/organisms/teamsComparator/TeamsComparator.svelte';
 	import Loader from '$lib/components/atoms/Loader.svelte';
-	import { getArticlesList } from '$lib/service/getArticles';
+	import { getArticlesList } from '$lib/service/fantaicalcio/getArticles';
 	import JoinCta from '$lib/components/molecules/JoinCta.svelte';
 
 	let heroTitle: HTMLHeadingElement;

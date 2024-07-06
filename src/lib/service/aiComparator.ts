@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { PUBLIC_URL_AI_COMPARATOR  } from '$env/static/public';
-import type { PlayersList } from './getPlayers';
+import type { PlayersList } from './fantamaster/getPlayers';
 import {getStatsDataById}  from '$lib/service/fantaicalcio/getStats'
 
 /*
