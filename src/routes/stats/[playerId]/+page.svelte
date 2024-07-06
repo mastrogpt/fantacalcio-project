@@ -1,9 +1,6 @@
 <script lang="ts">
-	import { getAiOpinionFromBackend } from '$lib/service/aiOpinion';
+	import { getAiOpinionFromBackend } from '$lib/service/ai/aiOpinion';
 	import Loader from '$lib/components/atoms/Loader.svelte';
-	import BackButton from '$lib/components/atoms/buttons/BackButton.svelte';
-	import GreenButton from '$lib/components/atoms/buttons/GreenButton.svelte';
-	import DisabledButton from '$lib/components/atoms/buttons/DisabledButton.svelte';
 	import Person from '$lib/components/atoms/icons/Person.svelte';
 	import Foot from '$lib/components/atoms/icons/Foot.svelte';
 	import Ball from '$lib/components/atoms/icons/Ball.svelte';

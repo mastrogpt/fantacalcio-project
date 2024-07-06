@@ -3,6 +3,7 @@
 	import Loader from '$lib/components/atoms/Loader.svelte';
 	import JoinCta from '$lib/components/molecules/JoinCta.svelte';
 	import { getAiPresentationFromBackend } from '$lib/service/ai/aiPresentation';
+	import { marked } from 'marked';
 	import { onMount } from 'svelte';
 
 	let aiPresentation: string;
@@ -11,7 +12,7 @@
 
 	async function showMessage() {
 		for (let i = 0; i < aiPresentation.length; i++) {
-			aiPresentationWritingEffect = aiPresentation.substring(0, i + 1);
+			aiPresentationWritingEffect = marked.parse(aiPresentation.substring(0, i + 1));
 			await sleep(25);
 		}
 	}
@@ -84,7 +85,7 @@
 
 		<div class="mt-4">
 			{#if aiPresentation}
-				<p>{aiPresentationWritingEffect}</p>
+				<p>{@html aiPresentationWritingEffect}</p>
 			{:else}
 				<Loader />
 			{/if}

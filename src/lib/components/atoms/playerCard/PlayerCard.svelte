@@ -4,6 +4,7 @@
 	import Button from '../button/button.svelte';
 	import Loader from '../Loader.svelte';
 	import imgFallback from '$lib/assets/player-img-fallback.jpeg';
+	import { marked } from 'marked';
 
 	interface ICardRowProps {
 		label?: string;
@@ -31,7 +32,7 @@
 
 	const showMessage = async () => {
 		for (let i = 0; i < aiOpinion.length; i++) {
-			aiOpinionWritingEffect = aiOpinion.substring(0, i + 1);
+			aiOpinionWritingEffect = marked.parse(aiOpinion.substring(0, i + 1));
 			await sleep(30);
 		}
 	};
@@ -87,7 +88,7 @@
 			<hr />
 
 			<div class="aipinion-text flex flex-col w-full p-[2px] mt-3 text-center gap-2">
-				{aiOpinionWritingEffect}
+				{@html aiOpinionWritingEffect}
 			</div>
 		{/if}
 	</div>

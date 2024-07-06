@@ -3,6 +3,7 @@
 	import { getAiComparison } from '$lib/service/ai/aiComparator';
 	import { getStatsData, getStatsDataById } from '$lib/service/fantamaster/getStats';
 	import { selectedRows } from '$lib/store/store';
+	import { marked } from 'marked';
 	import { onMount } from 'svelte';
 
 	const playersToCompare = [];
@@ -18,7 +19,7 @@
 		});
 
 		aiComparsion = await getAiComparison(playersToCompare);
-
+		aiComparsion = marked.parse(aiComparsion);
 		loading = false;
 	});
 </script>
@@ -30,7 +31,7 @@
 		<h3>Il verdetto dell'AI</h3>
 
 		<p>
-			{aiComparsion}
+			{@html aiComparsion}
 		</p>
 	</div>
 {/if}

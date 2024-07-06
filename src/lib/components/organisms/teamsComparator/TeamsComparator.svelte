@@ -6,6 +6,7 @@
 	import { getAiLineupOpinion } from '$lib/service/ai/aiLineup';
 	import type { ISliderDataProps } from '$lib/service/fantaicalcio/getStats';
 	import { getLineUp, type FootballMatch } from '$lib/service/fantamaster/lineUp';
+	import { marked } from 'marked';
 	import { onMount } from 'svelte';
 
 	let lineUp: FootballMatch | undefined = undefined;
@@ -52,7 +53,7 @@
 
 	async function showMessage(description: string) {
 		for (let i = 0; i < description.length; i++) {
-			aiPresentationWritingEffect = description.substring(0, i + 1);
+			aiPresentationWritingEffect = marked.parse(description.substring(0, i + 1));
 			await sleep(25);
 		}
 	}
@@ -114,7 +115,7 @@
 			{/if}
 
 			{#if aiPresentationWritingEffect}
-				<p>{aiPresentationWritingEffect}</p>
+				<p>{@html aiPresentationWritingEffect}</p>
 			{/if}
 		</div>
 	</div>

@@ -3,6 +3,7 @@
 	import PlayerCard from '$lib/components/atoms/playerCard/PlayerCard.svelte';
 	import { getStatsDataById, type PlayerCompleteStats } from '$lib/service/fantaicalcio/getStats';
 	import { onMount } from 'svelte';
+	import * as marked from 'marked';
 
 	export let player_id: number;
 	export let season_id: number;
@@ -16,7 +17,7 @@
 	onMount(async () => {
 		if (player_id) {
 			const data = await getStatsDataById(player_id, season_id, team_id);
-			console.log('PLAYER DATA', data);
+
 			playerData = data;
 			let playerStats = data?.player_statistic;
 
@@ -69,6 +70,6 @@
 			/>
 		{/if}
 
-		<p>{opinion}</p>
+		<p>{@html opinion}</p>
 	</div>
 {/if}

@@ -6,7 +6,7 @@
 from openai import AzureOpenAI
 
 ROLE = """
-The main goal is to optimize decisions regarding team formation, 
+The main goal is to optimize decisions regarding team formation in markdown (only h5, h6 and p are allowed), 
 player transfers, and sales, taking into account variables such as players' past performances, 
 injury probabilities, current form, upcoming opponents, and gameplay strategies. 
 The model should be able to offer personalized suggestions based on user preferences 
@@ -43,7 +43,7 @@ def main(args):
     
     chat = Chatbot(args)
     # read input
-    inp = "My input is a json that describe 2 player stats. Please prepare for me a commment of these players. Use italian language, please. " + str(args.get("input"))
+    inp = "My input is a json that describe 2 player stats. Please prepare for me a commment of these players. Use italian language in markdown h5, h6 and p, please. " + str(args.get("input"))
     # produce output
     out = chat.ask(inp)
     # prepare res

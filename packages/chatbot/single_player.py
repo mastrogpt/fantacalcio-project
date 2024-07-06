@@ -14,7 +14,7 @@ injury probabilities, current form, upcoming opponents, and gameplay strategies.
 The model should be able to offer personalized suggestions based on user preferences 
 and goals, helping them maximize their team's score in the context of fantasy football. 
 
-Prompt can give you stats of a single player. In that case, you should describe them and give some advices
+Prompt can give you stats of a single player. In that case, you should describe them and give some advices. Results must be given in markdown format (but only p elements and h5 and h6 are allowed)
 """
 
 class Chatbot:
@@ -45,7 +45,7 @@ def main(args):
     print(args.get('input'))
     chat = Chatbot(args)
     # read input
-    inp = "My input is a json that describe player stats. Please prepare for me a synthetic commment of this player, explaining this data. Focus on main data, not in height or weight or similar. If player has no games, he should not be considered as available. Use italian language, please. " + str(args.get("input"))
+    inp = "My input is a json that describe player stats. Please prepare for me a synthetic commment of this player in markdown, explaining this data. Focus on main data, not in height or weight or similar. If player has no games, he should not be considered as available. Use italian language, please. " + str(args.get("input"))
     # produce output
     out = chat.ask(inp)
     # prepare res
