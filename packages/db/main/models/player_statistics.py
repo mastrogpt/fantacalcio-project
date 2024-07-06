@@ -369,26 +369,14 @@ class PlayerStatistics(Base):
             from models.player import Player
             from models.team import Team
 
-            result = (session.query(PlayerStatistic, Player, Team)
-                .join(Player, PlayerStatistic.player_id == Player.id)
+            result = (session.query(PlayerStatistics, Player, Team)
+                .join(Player, PlayerStatistics.player_id == Player.id)
                 .filter(
-                    PlayerStatistic.player_id == player_id,
-                    PlayerStatistic.team_id == team_id,
-                    PlayerStatistic.season_id == season_id,
-                    Team.id == PlayerStatistic.team_id
+                    PlayerStatistics.player_id == player_id,
+                    PlayerStatistics.team_id == team_id,
+                    PlayerStatistics.season_id == season_id,
+                    Team.id == PlayerStatistics.team_id
                 ).one_or_none())
-            from models.player import Player 
-
-            # Esegui la query per recuperare PlayerStatistics con join su Player
-            result = session.query(PlayerStatistics, Player). \
-                filter(
-                PlayerStatistics.player_id == player_id,
-                PlayerStatistics.team_id == team_id,
-                PlayerStatistics.season_id == season_id
-            ). \
-                join(Player, PlayerStatistics.player_id == Player.id). \
-                first()
-
 
             if result:
 

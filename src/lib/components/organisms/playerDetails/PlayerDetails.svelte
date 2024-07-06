@@ -16,6 +16,7 @@
 	onMount(async () => {
 		if (player_id) {
 			const data = await getStatsDataById(player_id, season_id, team_id);
+			console.log('PLAYER DATA', data);
 			playerData = data;
 			let playerStats = data?.player_statistic;
 
