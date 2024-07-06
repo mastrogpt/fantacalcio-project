@@ -1,9 +1,8 @@
 <script>
-	import GreenButton from '$lib/components/atoms/buttons/GreenButton.svelte';
 	import BackButton from '$lib/components/atoms/buttons/BackButton.svelte';
-	import Join from '$lib/components/atoms/icons/Join.svelte';
-	import { sendMessage } from '$lib/service/slackNotifier';
+	import GreenButton from '$lib/components/atoms/buttons/GreenButton.svelte';
 	import Ok from '$lib/components/atoms/popup/Ok.svelte';
+	import { sendMessage } from '$lib/service/slackNotifier';
 	import Ko from '../atoms/popup/Ko.svelte';
 
 	let showModal = false;
@@ -37,9 +36,7 @@
 </script>
 
 <button on:click={() => showModalFun()}>
-	<div>
-		<Join />
-	</div>
+	👉🏻 <b class="underline font-bold">clicca qui</b> 👈🏻
 </button>
 
 {#if showModal}

@@ -7,7 +7,7 @@
 	import TeamsComparator from '$lib/components/organisms/teamsComparator/TeamsComparator.svelte';
 	import Loader from '$lib/components/atoms/Loader.svelte';
 	import { getArticlesList } from '$lib/service/getArticles';
-	import JoinButton from '$lib/components/molecules/JoinButton.svelte';
+	import JoinCta from '$lib/components/molecules/JoinCta.svelte';
 
 	let heroTitle: HTMLHeadingElement;
 	let heroSubtitle: HTMLHeadingElement;
@@ -70,7 +70,8 @@
 </section>
 
 <section
-	id="articles" class="articles-section flex flex-col items-center justify-center text-center my-10 py-20 gap-4 bg-accent"
+	id="articles"
+	class="articles-section flex flex-col items-center justify-center text-center my-10 py-20 gap-4 bg-accent"
 >
 	<h2 class="text-2xl md:text-4xl font-semibold" use:animateOnScroll>AIrticoli più discussi</h2>
 
@@ -88,7 +89,7 @@
 	<TableCard />
 </section>
 
-<section  class="lineup-section flex flex-col text-center gap-5" id="composition">
+<section class="lineup-section flex flex-col text-center gap-5 py-5" id="composition">
 	<TeamsComparator />
 </section>
 
@@ -104,7 +105,9 @@
 			Se sei almeno una di queste due cose, non esitare a contattarci!
 		</p>
 
-		<JoinButton />
+		<span class="flex gap-2">
+			Se vuoi unirti a noi, <JoinCta />
+		</span>
 	</div>
 </section>
 
