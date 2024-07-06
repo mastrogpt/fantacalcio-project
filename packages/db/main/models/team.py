@@ -126,6 +126,9 @@ class Team(Base):
             apifootball_ids = [int(id) for id in args['apifootball_ids'].split(',')]
             teams = Team.get_teams_by_apifootball_ids(session, apifootball_ids)
             return {"body": teams}
+        elif 'league_id' in args and 'season' in args:
+            teams = Team.get_teams_by_league_id_and_season(session, int(args['league_id']), int(args['season']))
+            return {"body": teams}            
         elif "current_serie_a_teams" in args:
             current_serie_a_teams = args.get("current_serie_a_teams")
             if current_serie_a_teams.lower() == "true":
@@ -312,6 +315,36 @@ class Team(Base):
             return {"statusCode": 500, "body": f"Error during fetching Serie A teams for current season: {e}"}
         finally:
             session.close()                       
+
+    @staticmethod
+    def get_teams_by_league_id_and_season(session, league_id, season):
+        """
+        Fetches all teams participating in a specific league for a given season.
+        
+        Args:
+            session (Session): The SQLAlchemy session used to connect to the database.
+            league_id (int): The ID of the league to filter teams by.
+            season (int): The year of the season to filter teams by.
+        
+        Returns:
+            list: A list of dictionaries, where each dictionary represents a team participating
+                  in the specified league and season, containing the team's attributes.
+            dict: In case of an error, returns a dictionary with a status code and an error message.
+        
+        Notes:
+        - **Crucial for ETL process**: This method should not be modified.
+        """
+        try:
+            teams = session.query(Team).join(TeamSeason).join(Season).join(League).filter(
+                League.id == league_id,
+                Season.year == season
+            ).all()
+            return [team._to_dict() for team in teams]
+        except Exception as e:
+            print(f"Error during fetching Serie A teams for current season: {e}")
+            return {"statusCode": 500, "body": f"Error during fetching Serie A teams for current season: {e}"}
+        finally:
+            session.close()   
 
     @staticmethod
     def update_team_by_id(session, team_id, update_fields):
