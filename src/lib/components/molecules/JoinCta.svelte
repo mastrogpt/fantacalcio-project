@@ -1,8 +1,7 @@
 <script>
-	import BackButton from '$lib/components/atoms/buttons/BackButton.svelte';
-	import GreenButton from '$lib/components/atoms/buttons/GreenButton.svelte';
 	import Ok from '$lib/components/atoms/popup/Ok.svelte';
 	import { sendMessage } from '$lib/service/slackNotifier';
+	import Button from '../atoms/button/button.svelte';
 	import Ko from '../atoms/popup/Ko.svelte';
 
 	let showModal = false;
@@ -43,12 +42,12 @@
 	<div class="fixed z-10 inset-0 flex items-center justify-center bg-black bg-opacity-50">
 		<section class="relative rounded-3xl shadow-2xl w-4/5 bg-white">
 			<div class="p-6 text-center sm:p-4">
-				<h2 class="mt-2">
+				<h5 class="mt-2">
 					Vuoi unirti al progetto? Inserisci la tua la mail e ti contatteremo al più presto!
-				</h2>
+				</h5>
 				<div>
 					<textarea
-						class="m-2 w-4/5 border border-primary rounded-lg border-gray-200 shadow-sm sm:text-sm"
+						class="m-4 p-2 w-4/5 border border-primary rounded-lg border-gray-200 shadow-sm sm:text-sm"
 						rows="2"
 						placeholder="Inserisci la tua mail..."
 						bind:value={userMessage}
@@ -56,9 +55,10 @@
 				</div>
 				<div class="flex-auto">
 					<div class="mt-2">
-						<BackButton text="Vedremo" clickAction={showModalFun} />
+						<Button variant="accent" label="Vedremo" onClick={showModalFun} />
+
 						{#if regexEmail.test(userMessage)}
-							<GreenButton text="Eccomi!" clickAction={postMessage} />
+							<Button label="Eccomi" onClick={postMessage} />
 						{/if}
 					</div>
 				</div>
