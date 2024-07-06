@@ -1,14 +1,14 @@
 <script lang="ts">
 	import Loader from '$lib/components/atoms/Loader.svelte';
 	import PlayerCard from '$lib/components/atoms/playerCard/PlayerCard.svelte';
-	import { getStatsDataById } from '$lib/service/fantaicalcio/getStats';
+	import { getStatsDataById, type PlayerCompleteStats } from '$lib/service/fantaicalcio/getStats';
 	import { onMount } from 'svelte';
 
 	export let player_id: number;
 	export let season_id: number;
 	export let team_id: number;
 
-	let playerData;
+	let playerData: PlayerCompleteStats | undefined;
 	let opinion = '';
 
 	let cardRow: any[] = [];
@@ -26,7 +26,7 @@
 				},
 				{
 					label: 'Assist',
-					value: playerStats?.goals_assists ? playerData?.goals_assists : '0'
+					value: playerStats?.goals_assists ? playerData?.player_statistic?.goals_assists : '0'
 				},
 				{
 					label: 'Goal',
@@ -59,7 +59,13 @@
 		{#if !playerData}
 			<p><Loader /></p>
 		{:else if playerData}
-			<PlayerCard {playerData} showAiOpinion {cardRow} />
+			<PlayerCard
+				imageUrl={playerData.player?.photo}
+				name={playerData.player?.name}
+				{playerData}
+				showAiOpinion
+				{cardRow}
+			/>
 		{/if}
 
 		<p>{opinion}</p>

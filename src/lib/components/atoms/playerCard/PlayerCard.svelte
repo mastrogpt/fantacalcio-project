@@ -12,6 +12,8 @@
 
 	export let showAiOpinion: boolean = false;
 	export let playerData: PlayerCompleteStats | undefined = undefined;
+	export let name: string = '';
+	export let imageUrl: string = '';
 	export let cardRow: { label?: string; value?: string; subRows?: ICardRowProps[] }[] = [];
 
 	let aiOpinion: string;
@@ -19,7 +21,6 @@
 	let isLoading = false;
 
 	const getAiOpinion = async () => {
-		//console.log('PLAYER COMPLETE DATA', playerData);
 		if (!playerData) return;
 
 		isLoading = true;
@@ -41,10 +42,10 @@
 </script>
 
 <div class="player-card flex flex-col w-[300px]">
-	<div class="card-title py-2">{playerData?.player?.name}</div>
+	<div class="card-title py-2">{name}</div>
 
 	<div class="card-profile-img">
-		<img src={playerData?.player?.photo} alt={imgFallback} />
+		<img src={imageUrl || imgFallback} alt={name} />
 	</div>
 
 	<div class="card-stats flex flex-col">
@@ -114,11 +115,6 @@
 		min-height: 150px;
 		justify-content: center;
 		align-items: center;
-	}
-
-	.card-profile-img img {
-		width: 50%;
-		height: 50%;
 		object-fit: cover;
 	}
 
@@ -128,20 +124,6 @@
 
 	.card-stats span:nth-child(even) {
 		border-left: solid 1px rgb(var(--primary));
-	}
-
-	.card-row .card {
-		min-width: 8px;
-		min-height: 12px;
-		border-radius: 3px;
-	}
-
-	.card-row .card-red {
-		background: #f00;
-	}
-
-	.card-row .card-yellow {
-		background: rgb(234, 255, 0);
 	}
 
 	.aipinion-text {
