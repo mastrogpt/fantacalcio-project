@@ -31,6 +31,7 @@ class Team(Base):
     player_statistics = relationship('PlayerStatistics', back_populates='team', cascade="all, delete-orphan")
     current_players_teams = relationship('CurrentPlayerTeam', back_populates='team', cascade="all, delete-orphan")
     team_statistics = relationship('TeamStatistics', back_populates='team', cascade="all, delete-orphan")
+    standings = relationship('Standings', back_populates='team', cascade="all, delete-orphan")
 
     def __init__(self, name, code, country, founded, national, logo, venue_name, venue_address, venue_city, venue_capacity, venue_surface, venue_image, apifootball_id):
         self.name = name
