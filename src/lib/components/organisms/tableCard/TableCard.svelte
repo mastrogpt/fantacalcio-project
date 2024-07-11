@@ -33,8 +33,6 @@
 		{ accessorKey: 'position', header: 'Ruolo' },
 		{ accessorKey: 'team', header: 'Squadra' },
 		{ accessorKey: 'available', header: 'Disponibile' }
-
-		//, { accessorKey: 'value', header: 'Valore' }
 	];
 
 	const unavailableCols = [
@@ -62,10 +60,18 @@
 		activeTab = val;
 	};
 
-	// Function to clear selection
 	const clearSelection = () => {
 		selectedRows.set(new Set());
 	};
+
+	// Function to check if the selected player has the same role as the already selected players
+	function canSelectPlayer(player) {
+		const currentSelections = Array.from($selectedRows);
+		if (currentSelections.length === 0) {
+			return true; // No selections yet, allow selection
+		}
+		return currentSelections.every((row) => row.role === player.role);
+	}
 </script>
 
 <div class="table-card container flex flex-col align-center justify-center">
@@ -93,11 +99,14 @@
 					columns={playersCols}
 					selectableRows
 					onRowClick={(row) => {
-						player_id = row.original.id;
-						season_id = row.original.season_id;
-						team_id = row.original.team_id;
-
-						toggleModal('DETAILS');
+						if (canSelectPlayer(row.original)) {
+							player_id = row.original.id;
+							season_id = row.original.season_id;
+							team_id = row.original.team_id;
+							toggleModal('DETAILS');
+						} else {
+							alert('Puoi selezionare solo giocatori con lo stesso ruolo.');
+						}
 					}}
 				/>
 			{:catch error}
@@ -111,8 +120,12 @@
 					{data}
 					columns={unavailableCols}
 					onRowClick={(row) => {
-						player_id = row.original.id;
-						toggleModal('DETAILS');
+						if (canSelectPlayer(row.original)) {
+							player_id = row.original.id;
+							toggleModal('DETAILS');
+						} else {
+							alert('Puoi selezionare solo giocatori con lo stesso ruolo.');
+						}
 					}}
 				/>
 			{:catch error}
