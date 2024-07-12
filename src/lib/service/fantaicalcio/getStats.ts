@@ -150,7 +150,7 @@ const getStatsDataByIdLabelMapper = {
 	goals_conceded: 'Goal concessi',
 	goals_saves: 'Goal savati',
 	goals_total: 'Goal totali',
-	passes_accuracy: 'Precisione passaggi',
+	passes_accuracy: 'Precisione passaggi (%)',
 	passes_key: 'Passaggi chiave',
 	passes_total: 'Passaggi totali',
 	penalty_committed: 'Rigori concessi',
