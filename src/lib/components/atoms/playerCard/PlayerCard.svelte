@@ -5,6 +5,7 @@
 	import Loader from '../Loader.svelte';
 	import imgFallback from '$lib/assets/player-img-fallback.jpeg';
 	import { marked } from 'marked';
+	import { goto } from '$app/navigation';
 
 	interface ICardRowProps {
 		label?: string;
@@ -16,9 +17,13 @@
 	export let name: string = '';
 	export let imageUrl: string = '';
 	export let cardRow: { label?: string; value?: string; subRows?: ICardRowProps[] }[] = [];
+	export let redirect: boolean = false;
+	export let player_id: number | undefined = undefined;
+	export let season_id: number | undefined = undefined;
+	export let team_id: number | undefined = undefined;
 
 	let aiOpinion: string;
-	let aiOpinionWritingEffect: string;
+	let aiOpinionWritingEffect: string | Promise<string>;
 	let isLoading = false;
 
 	const getAiOpinion = async () => {
@@ -40,10 +45,26 @@
 	const sleep = async (ms: number) => {
 		return new Promise((resolve) => setTimeout(resolve, ms));
 	};
+
+	const goToPlayerhandler = () => {
+		if (!playerData) return;
+
+		const data = {
+			player_id: String(player_id),
+			season_id: String(season_id),
+			team_id: String(team_id)
+		};
+
+		const searchParams = new URLSearchParams(data);
+
+		goto(`/players/${playerData?.player?.id}?` + searchParams);
+	};
 </script>
 
 <div class="player-card flex flex-col w-[300px]">
-	<div class="card-title py-2">{name}</div>
+	{#if name}
+		<div class="card-title py-2">{name}</div>
+	{/if}
 
 	<div class="card-profile-img">
 		<img src={imageUrl || imgFallback} alt={name} />
@@ -69,6 +90,12 @@
 		{/each}
 	</div>
 </div>
+
+{#if redirect}
+	<div class="mt-5">
+		<Button label="Vai al dettaglio" onClick={goToPlayerhandler} />
+	</div>
+{/if}
 
 {#if showAiOpinion}
 	<div class="flex flex-col justify-center items-center mt-5 w-[300px] gap-2">
@@ -117,6 +144,11 @@
 		justify-content: center;
 		align-items: center;
 		object-fit: cover;
+	}
+
+	.card-profile-img img {
+		max-width: 100%;
+		width: 100%;
 	}
 
 	.card-stats span {

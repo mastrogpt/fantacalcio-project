@@ -1,5 +1,7 @@
 <script lang="ts">
-	import { writable } from 'svelte/store';
+	import { selectedRows } from '$lib/store/store';
+	import { rankItem } from '@tanstack/match-sorter-utils';
+	import type { FilterFn, OnChangeFn, SortingState } from '@tanstack/svelte-table';
 	import {
 		createSvelteTable,
 		flexRender,
@@ -9,10 +11,7 @@
 		getSortedRowModel,
 		type TableOptions
 	} from '@tanstack/svelte-table';
-	import { rankItem } from '@tanstack/match-sorter-utils';
-	import type { FilterFn, OnChangeFn, SortingState } from '@tanstack/svelte-table';
-	import { selectedRows } from '$lib/store/store';
-	import Button from '$lib/components/atoms/button/button.svelte';
+	import { writable } from 'svelte/store';
 
 	// Props
 	export let data: any[] = [];
@@ -187,8 +186,9 @@
 								type="checkbox"
 								on:change={() => handleCheckboxChange(row)}
 								checked={Array.from($selectedRows).some((r) => r.id === row.original.id)}
-								disabled={Array.from($selectedRows).length >= 2 &&
-									!Array.from($selectedRows).some((r) => r.id === row.original.id)}
+								disabled={(Array.from($selectedRows).length >= 2 &&
+									!Array.from($selectedRows).some((r) => r.id === row.original.id)) ||
+									Array.from($selectedRows).some((r) => r.position !== row.original.position)}
 							/>
 						</td>
 					{/if}

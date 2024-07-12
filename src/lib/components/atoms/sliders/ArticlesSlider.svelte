@@ -10,9 +10,9 @@
 	export let data: IArticlesProps[] = [];
 
 	const sliderContainerCommonProps = {
-		'space-between': 50,
+		'space-between': 80,
 		pagination: false,
-		'slides-per-view': 3,
+		'slides-per-view': 'auto',
 		loop: true,
 		autoplay: {
 			delay: 3000,
@@ -81,7 +81,7 @@
 
 <style>
 	swiper-container {
-		width: 90vw;
+		width: 100vw;
 		height: 100%;
 	}
 
