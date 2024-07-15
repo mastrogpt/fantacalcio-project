@@ -137,7 +137,7 @@ class Player(Base):
         elif "current_serie_a_players" in args:
             current_serie_a_players = args.get("current_serie_a_players")
             if current_serie_a_players.lower() =="true":
-                return {"body": Player.get_current_serie_a_players(session)}
+                return {"body": Player.get_current_serie_a_players(session,args)}
             return {"statusCode": 500, "body": f"Value '{current_serie_a_players}' of current_serie_a_players param is not valid"} 
         elif "all_current_serie_a_players" in args:
             all_current_serie_a_players = args.get("all_current_serie_a_players")
@@ -145,7 +145,7 @@ class Player(Base):
                 return {"body": Player.get_all_current_serie_a_players(session,args)}
             return {"statusCode": 500, "body": f"Value '{all_current_serie_a_players}' of all_current_serie_a_players param is not valid"}                           
         else:
-            return {"body": Player.get_all(session)}
+            return {"body": Player.get_all(session,args)}
 
     @staticmethod
     def delete_handler(session, args):
@@ -155,10 +155,23 @@ class Player(Base):
             return {"body": Player.delete_all(session)}
 
     @staticmethod
-    def get_all(session):
+    def get_all(session,args):
         try:
-            players = session.query(Player).all()
-            return [player._to_dict() for player in players]
+            r = Redis_utils(args)
+            redisKey = Player.get_all.__name__
+            players = r.read(redisKey)
+            
+            if players != None:
+                return [player for player in players]
+
+            else:
+                players = session.query(Player).all()
+
+                playersToLoad = []
+                [playersToLoad.append(player._to_dict()) for player in players]
+
+                r.write(args, redisKey, playersToLoad)
+                return [player._to_dict() for player in players]
         except Exception as e:
             print("Error during players loading:", e)
             return []
@@ -371,7 +384,7 @@ class Player(Base):
             session.close()  
    
     @staticmethod
-    def get_current_serie_a_players(session):
+    def get_current_serie_a_players(session,args):
         ''' 
         This query returns all Serie A current players with their respective season and team details.
 
@@ -390,8 +403,15 @@ class Player(Base):
             - Suitable for scenarios where you need up-to-date information on Serie A players in current teams.
         '''
         try:
+            r = Redis_utils(args)
+            redisKey = Player.get_current_serie_a_players.__name__
+            players = r.read(redisKey)
+            
+            if players != None:
+                return [player for player in players]
 
-            players_teams = (session.query(Player, Team, Season, PlayerStatistics)
+            else:
+                players_teams = (session.query(Player, Team, Season, PlayerStatistics)
                  .join(PlayerStatistics, Player.id == PlayerStatistics.player_id)
                  .join(PlayerSeason, Player.id == PlayerSeason.player_id)
                  .join(Season, PlayerSeason.season_id == Season.id)
@@ -405,21 +425,22 @@ class Player(Base):
                  )
                  .all())
 
-            result = []
-            print("PLAYERS ARE", players_teams)
+                result = []
+                # print("PLAYERS ARE", players_teams)
 
-            for player in players_teams:
-                player_dict = player.Player._to_dict()
-                player_dict['team'] = player.Team.name
-                player_dict['team_logo'] = player.Team.logo
-                player_dict['team_id'] = player.Team.id
-                player_dict['season_id'] = player.Season.id
-                player_dict['position'] = player.PlayerStatistics.position
+                for player in players_teams:
+                    player_dict = player.Player._to_dict()
+                    player_dict['team'] = player.Team.name
+                    player_dict['team_logo'] = player.Team.logo
+                    player_dict['team_id'] = player.Team.id
+                    player_dict['season_id'] = player.Season.id
+                    player_dict['position'] = player.PlayerStatistics.position
     
-                #player_dict['statistics'] = player.PlayerStatistics._to_dict()
+                    #player_dict['statistics'] = player.PlayerStatistics._to_dict()
                 
-                result.append(player_dict)
-            return result
+                    result.append(player_dict)
+                r.write(args, redisKey, result)
+                return result
         except Exception as e:
             print(f"Error during fetching Serie A players for current season: {e}")
             return {"statusCode": 500, "body": f"Error during fetching Serie A players for current season: {e}"}
@@ -449,7 +470,7 @@ class Player(Base):
         '''
         try:
             r = Redis_utils(args)
-            redisKey = "get_all_current_serie_a_players"
+            redisKey = Player.get_all_current_serie_a_players.__name__
             players = r.read(redisKey)
             
             if players != None:

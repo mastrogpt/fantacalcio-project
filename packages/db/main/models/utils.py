@@ -43,6 +43,8 @@ class Redis_utils():
         if self.redis_.exists(redisKey):
             redisReturn = json.loads(self.redis_.get(redisKey))
             print("Read from Redis")
+
+        print("Readis key: " + redisKey)
         return redisReturn
 
     def write(self, args, key, payload):
@@ -58,3 +60,4 @@ class Redis_utils():
         redisKey = str(self.prefix_) + str(key)
         self.redis_.set(redisKey, json.dumps(payload), ex=self.REDIS_DATA_EXPIRATION_S)
         print("Wrote on Redis")
+        print("Readis key: " + redisKey)
