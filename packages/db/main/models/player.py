@@ -9,6 +9,7 @@ from models.league import League
 from models.player_season import PlayerSeason
 from models.player_statistics import PlayerStatistics
 from models.base import Base
+from models.utils import Redis_utils
 import uuid
 from datetime import datetime
 
@@ -141,7 +142,7 @@ class Player(Base):
         elif "all_current_serie_a_players" in args:
             all_current_serie_a_players = args.get("all_current_serie_a_players")
             if all_current_serie_a_players.lower() =="true":
-                return {"body": Player.get_all_current_serie_a_players(session)}
+                return {"body": Player.get_all_current_serie_a_players(session,args)}
             return {"statusCode": 500, "body": f"Value '{all_current_serie_a_players}' of all_current_serie_a_players param is not valid"}                           
         else:
             return {"body": Player.get_all(session)}
@@ -426,7 +427,7 @@ class Player(Base):
             session.close()    
 
     @staticmethod
-    def get_all_current_serie_a_players(session):
+    def get_all_current_serie_a_players(session, args):
         ''' 
         This query returns all Serie A current players for the current season.
     
@@ -447,12 +448,25 @@ class Player(Base):
               irrespective of their current team affiliation.
         '''
         try:
-            players = session.query(Player).join(PlayerSeason).join(Season).join(League).filter(
-                League.name == "Serie A",
-                League.country_name == "Italy",
-                Season.current == True
-            ).all()
-            return [player._to_dict() for player in players]
+            r = Redis_utils(args)
+            redisKey = "get_all_current_serie_a_players"
+            players = r.read(redisKey)
+            
+            if players != None:
+                return [player for player in players]
+
+            else:
+                players = session.query(Player).join(PlayerSeason).join(Season).join(League).filter(
+                    League.name == "Serie A",
+                    League.country_name == "Italy",
+                    Season.current == True
+                ).all()
+
+                playersToLoad = []
+                [playersToLoad.append(player._to_dict()) for player in players]
+
+                r.write(args, redisKey, playersToLoad)
+                return [player._to_dict() for player in players]
         except Exception as e:
             print(f"Error during fetching Serie A players for current season: {e}")
             return {"statusCode": 500, "body": f"Error during fetching Serie A players for current season: {e}"}
