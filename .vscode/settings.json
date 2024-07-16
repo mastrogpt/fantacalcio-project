@@ -8,6 +8,7 @@
     "titleBar.inactiveForeground": "#e7e7e799"
   },
   "conventionalCommits.scopes": [
-    "api"
+    "api",
+    "db"
   ]
 }

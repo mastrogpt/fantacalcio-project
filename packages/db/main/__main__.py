@@ -1,6 +1,10 @@
 #--web true
 #--kind python:default
 #--param POSTGRES_URL $POSTGRES_URL
+#--param REDIS_URL $REDIS_URL
+#--param REDIS_PREFIX $REDIS_PREFIX
+#--param REDIS_DATA_EXPIRATION_S $REDIS_DATA_EXPIRATION_S
+
 from dataclasses import dataclass
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -16,6 +20,7 @@ from models.player_statistics import PlayerStatistics
 from models.current_player_team import CurrentPlayerTeam
 from models.team_statistics import TeamStatistics
 from models.standings import Standings
+from models.fixtures import Fixture
 
 def main(args):
 
@@ -48,7 +53,9 @@ def main(args):
     elif(args.get("model") == "team_statistics"):
         return TeamStatistics.handler(db.session, args) 
     elif(args.get("model") == "standings"):
-        return Standings.handler(db.session, args)                                                                                                                             
+        return Standings.handler(db.session, args)
+    elif(args.get("model") == "fixture"):
+        return Fixture.handler(db.session, args)                                                                                                                                        
     else: 
         return {
         "body": "model and/or query not present"
