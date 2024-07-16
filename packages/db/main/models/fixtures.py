@@ -32,6 +32,7 @@ class Fixture(Base):
     season = relationship('Season', back_populates='fixtures')
     home_team = relationship('Team', foreign_keys=[home_team_id], back_populates='fixtures_home')
     away_team = relationship('Team', foreign_keys=[away_team_id], back_populates='fixtures_away')
+    fixture_statistics = relationship('FixtureStatistics', back_populates='fixture', cascade='all, delete-orphan')
 
 
     def __init__(self, **kwargs):
