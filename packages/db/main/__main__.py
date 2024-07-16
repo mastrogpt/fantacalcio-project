@@ -1,6 +1,10 @@
 #--web true
 #--kind python:default
 #--param POSTGRES_URL $POSTGRES_URL
+#--param REDIS_URL $REDIS_URL
+#--param REDIS_PREFIX $REDIS_PREFIX
+#--param REDIS_DATA_EXPIRATION_S $REDIS_DATA_EXPIRATION_S
+
 from dataclasses import dataclass
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
