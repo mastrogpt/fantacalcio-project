@@ -2,6 +2,8 @@ from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, UniqueCons
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import insert
 from models.base import Base
+from models.season import Season
+from models.league import League
 import uuid
 
 class Fixture(Base):
@@ -108,6 +110,9 @@ class Fixture(Base):
         if 'id' in args:
             fixture = Fixture.get_by_id(session, args['id'])
             return {"body": fixture if fixture else "Fixture not found"}
+        elif 'league_id' in args and 'season' in args:
+            fixtures = Fixture.get_fixtures_by_league_id_and_season(session, int(args['league_id']), int(args['season']))
+            return {"body": fixtures}               
         else:
             return {"body": Fixture.get_all(session)}
 
@@ -128,6 +133,36 @@ class Fixture(Base):
             return []
         finally:
             session.close()
+
+    @staticmethod
+    def get_fixtures_by_league_id_and_season(session, league_id, season):
+        """
+        Fetches all fixtures for a specific league in a given season.
+        
+        Args:
+            session (Session): The SQLAlchemy session used to connect to the database.
+            league_id (int): The ID of the league to filter fixtures by.
+            season (int): The year of the season to filter fixtures by.
+        
+        Returns:
+            list: A list of dictionaries, where each dictionary represents a fixture 
+                  of the specified league and season.
+            dict: In case of an error, returns a dictionary with a status code and an error message.
+        
+        Notes:
+        - **Crucial for ETL process**: This method should not be modified.
+        """
+        try:
+            fixtures = session.query(Fixture).join(Season).join(League).filter(
+                League.id == league_id,
+                Season.year == season
+            ).all()
+            return [fixture._to_dict() for fixture in fixtures]
+        except Exception as e:
+            print(f"Error during fetching fixtures for league {league_id} and season {season}: {e}")
+            return {"statusCode": 500, "body": f"Error during fetching fixtures for league {league_id} and season {season}: {e}"}
+        finally:
+            session.close()               
 
     @staticmethod
     def delete_all(session):
@@ -304,12 +339,12 @@ class Fixture(Base):
             'goals_home': self.goals_home,
             'goals_away': self.goals_away,            
             'referee': self.referee,
-            'event_datetime': self.event_datetime,
+            'event_datetime': self.event_datetime.isoformat() if self.event_datetime else None,
             'venue_name': self.venue_name,
             'venue_city': self.venue_city,
             'status_long': self.status_long,
             'status_short': self.status_short,
             'status_elapsed': self.status_elapsed,
-            'last_update': self.last_update,
+            'last_update': self.last_update.isoformat() if self.last_update else None,
             'apifootball_id': self.apifootball_id
         }
