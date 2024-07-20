@@ -502,10 +502,7 @@ class Player(Base):
         try:
             team = args.get('team')
             psurname = args.get('psurname')
-            
-
             print("Invoked all player with filter", team, psurname)
-
            
             players_teams = (session.query(Player, Team, Season, PlayerStatistics)
                 .join(PlayerStatistics, Player.id == PlayerStatistics.player_id)
@@ -524,7 +521,6 @@ class Player(Base):
                 .all())
 
             result = []
-                # print("PLAYERS ARE", players_teams)
 
             for player in players_teams:
                 player_dict = player.Player._to_dict()
@@ -539,21 +535,7 @@ class Player(Base):
                 result.append(player_dict)
 
             return result
-            # players = session.query(Player).join(PlayerSeason).join(Season).join(League).filter(
-            #         League.name == "Serie A",
-            #         League.country_name == "Italy",
-            #         Team.name == team,
-            #         #Player.name.like(f'%{psurname}%'),
-            #         Season.current == True
-            # ).all()
-            
-            #print("PLAYER TEAM IS", players_teams)
-           
-
-            #return players_teams #players_teams.json()
-            #[playersToLoad.append(player._to_dict()) for player in players_teams]     
-            #return [player._to_dict() for player in playersToLoad]
-        
+                       
         except Exception as e:
             print(f"Error during fetching Serie A players for current season: {e}")
             return {"statusCode": 500, "body": f"Error during fetching Serie A players for current season: {e}"}
