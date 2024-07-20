@@ -32,6 +32,9 @@ class Team(Base):
     current_players_teams = relationship('CurrentPlayerTeam', back_populates='team', cascade="all, delete-orphan")
     team_statistics = relationship('TeamStatistics', back_populates='team', cascade="all, delete-orphan")
     standings = relationship('Standings', back_populates='team', cascade="all, delete-orphan")
+    fixtures_home = relationship('Fixture', foreign_keys='Fixture.home_team_id', back_populates='home_team', cascade="all, delete-orphan")
+    fixtures_away = relationship('Fixture', foreign_keys='Fixture.away_team_id', back_populates='away_team', cascade="all, delete-orphan")
+
 
     def __init__(self, name, code, country, founded, national, logo, venue_name, venue_address, venue_city, venue_capacity, venue_surface, venue_image, apifootball_id):
         self.name = name

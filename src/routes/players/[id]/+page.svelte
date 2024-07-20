@@ -141,7 +141,8 @@
 		</div>
 	</div>
 
-	<div class="flex flex-col gap-[10px]">
+	<div class="flex flex-col gap-[10px] container">
+		
 		<h4>Articoli correlati</h4>
 
 		<div class="flex my-10">
