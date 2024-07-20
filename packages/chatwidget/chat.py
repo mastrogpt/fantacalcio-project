@@ -6,8 +6,10 @@
 import openai
 import requests
 import time
+import json
 
-class ChatBot:
+
+class ChatBot: 
 
     def __init__(self, args):
         self.ASSISTANT_ID = args.get('FANTACALCIO_ASSISTANT_ID')
@@ -55,7 +57,37 @@ class ChatBot:
         url = f"{self.base_url}/threads/{thread_id}/runs/{run_id}"
         response = requests.get(url, headers=self.headers)
         response.raise_for_status()
+        print("THREAD UPDATES: ", response.json())
         return response.json()
+
+    def handle_tools(self, ai_response):
+        
+        required_action = ai_response['required_action']
+        tool_calls = required_action['submit_tool_outputs']['tool_calls']
+        
+        for call in tool_calls:
+            if call['function']['name'] == 'getPlayerStats':
+                arguments = json.loads(call['function']['arguments'])
+                surname = arguments['surname']
+                team = arguments['team']
+                #TODO CALL BACKEND
+                result = f"Surname asked is: {surname}, Team asked is: {team}"
+                self.submit_tool_outputs(result, ai_response['thread_id'], ai_response['id'], call['id'])
+
+    def submit_tool_outputs(self, result, thread_id, run_id, tool_id):
+        url = f"{self.base_url}/threads/{thread_id}/runs/{run_id}/submit_tool_outputs"
+        data = {
+        "tool_outputs": [
+            {
+                "tool_call_id": tool_id,
+                "output": "Leao ha segnato 1000 gol!"
+            }
+        ]
+        }
+        response = requests.post(url, headers=self.headers, json=data)
+        response.raise_for_status()
+        return response.json()
+                
 
 def main(args):
     try:
@@ -72,17 +104,23 @@ def main(args):
         
         run_id = ai_instance.run_thread(thread_id)['id']
         
-        timeout = 30  
+        timeout = 15 
         interval = 1 
         start_time = time.time()
 
 
         while True:
-            thread_status = ai_instance.run_thread_updates(thread_id, run_id)['status']
+            ai_response = ai_instance.run_thread_updates(thread_id, run_id)
+            thread_status = ai_response['status']
             if thread_status == 'in_progress':
                 print('thread in progress')
+                time.sleep(1)
+                continue
+
             elif thread_status == 'requires_action':
                 print('thread required action')
+                ai_instance.handle_tools(ai_response)
+
             messages = ai_instance.list_messages(thread_id)
 
 
