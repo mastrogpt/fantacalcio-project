@@ -146,8 +146,8 @@ class Player(Base):
             if all_current_serie_a_players.lower() =="true":
                 return {"body": Player.get_all_current_serie_a_players(session,args)}
             return {"statusCode": 500, "body": f"Value '{all_current_serie_a_players}' of all_current_serie_a_players param is not valid"} 
-        elif "all_current_serie_a_filtered" in args:
-                return {"body": Player.get_all_current_serie_a_players_filtered(session,args)}
+        elif "current_serie_a_players_filtered_by_surname_and_team" in args:
+                return {"body": Player.current_serie_a_players_filtered_by_surname_and_team(session,args)}
         return {"body": Player.get_all(session,args)}
 
     @staticmethod
@@ -498,7 +498,7 @@ class Player(Base):
             session.close()        
 
     @staticmethod
-    def get_all_current_serie_a_players_filtered(session, args):
+    def current_serie_a_players_filtered_by_surname_and_team(session, args):
         try:
             team = args.get('team')
             psurname = args.get('psurname')
@@ -521,7 +521,7 @@ class Player(Base):
                     Team.name.ilike(f'%{team}%'),
                     func.unaccent(Player.name).ilike(f'%{psurname}%'),
                  )
-                 .all())
+                .all())
 
             result = []
                 # print("PLAYERS ARE", players_teams)
