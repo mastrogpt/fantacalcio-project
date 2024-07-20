@@ -48,8 +48,6 @@ class ChatBot:
             "assistant_id": self.ASSISTANT_ID
         }
         response = requests.post(url, headers=self.headers, json=data)
-        #print("thread runned with run id: " , response.json()['id'])
-        #run_id = response.data.id
         response.raise_for_status()
         return response.json()
 
@@ -80,7 +78,7 @@ class ChatBot:
         "tool_outputs": [
             {
                 "tool_call_id": tool_id,
-                "output": "Leao ha segnato 1000 gol!"
+                "output": "Leao ha segnato 1000 gol! Un caro saluto a ivan del fatti!"
             }
         ]
         }
@@ -108,13 +106,11 @@ def main(args):
         interval = 1 
         start_time = time.time()
 
-
         while True:
             ai_response = ai_instance.run_thread_updates(thread_id, run_id)
             thread_status = ai_response['status']
             if thread_status == 'in_progress':
                 print('thread in progress')
-                time.sleep(1)
                 continue
 
             elif thread_status == 'requires_action':
