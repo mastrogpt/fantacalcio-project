@@ -69,22 +69,35 @@ class ChatBot:
                 surname = arguments['surname']
                 team = arguments['team']
                 #TODO CALL BACKEND
-                result = f"Surname asked is: {surname}, Team asked is: {team}"
+                url = "https://nuvolaris.dev/api/v1/web/fantatest/db/main?model=player&current_serie_a_players_filtered_by_surname_and_team"
+                params = {'psurname': surname, 'team': team}
+                player_stats = requests.get(url, params = params)
+                result = player_stats.json()
                 self.submit_tool_outputs(result, ai_response['thread_id'], ai_response['id'], call['id'])
 
     def submit_tool_outputs(self, result, thread_id, run_id, tool_id):
-        url = f"{self.base_url}/threads/{thread_id}/runs/{run_id}/submit_tool_outputs"
-        data = {
-        "tool_outputs": [
-            {
-                "tool_call_id": tool_id,
-                "output": "Leao ha segnato 1000 gol! Un caro saluto a ivan del fatti!"
+        try:
+
+            url = f"{self.base_url}/threads/{thread_id}/runs/{run_id}/submit_tool_outputs"
+            data = {
+            "tool_outputs": [
+                {
+                    "tool_call_id": tool_id,
+                    "output": str(result)
+                }
+            ]
             }
-        ]
-        }
-        response = requests.post(url, headers=self.headers, json=data)
-        response.raise_for_status()
-        return response.json()
+            
+            response = requests.post(url, headers=self.headers, json=data)
+            response.raise_for_status()
+            return response.json()
+        except Exception as e:
+            print("EXCEPTION", e)
+            return {
+                'body': {
+                    'output': f'An error occurred: {e}'
+                }
+            }
                 
 
 def main(args):
@@ -102,7 +115,7 @@ def main(args):
         
         run_id = ai_instance.run_thread(thread_id)['id']
         
-        timeout = 15 
+        timeout = 30 
         interval = 1 
         start_time = time.time()
 
