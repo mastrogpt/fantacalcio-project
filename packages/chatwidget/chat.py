@@ -54,7 +54,7 @@ class ChatBot:
         url = f"{self.base_url}/threads/{thread_id}/runs/{run_id}"
         response = requests.get(url, headers=self.headers)
         response.raise_for_status()
-        print("THREAD UPDATES: ", response.json())
+       
         return response.json()
 
     def handle_tools(self, ai_response):
@@ -63,7 +63,6 @@ class ChatBot:
         
         tool_outputs = []
         for call in tool_calls:
-            print("CALL IS", call)
             if call['function']['name'] == 'getPlayerStats':
                 arguments = json.loads(call['function']['arguments'])
                 surname = arguments['surname']
@@ -85,14 +84,12 @@ class ChatBot:
     def submit_tool_outputs(self, thread_id, run_id, tool_outputs):
         try:
             url = f"{self.base_url}/threads/{thread_id}/runs/{run_id}/submit_tool_outputs"
-            print("Calling GPT WITH URL", url)
             data = {
                 "tool_outputs": tool_outputs
             }
-            print("DATA SUBMITTING IS", json.dumps(data, indent=4))
+            #print("DATA SUBMITTING IS", json.dumps(data, indent=4))
             
             response = requests.post(url, headers=self.headers, json=data)
-            print("RESPONSE OK")
             response.raise_for_status()
             return response.json()
         except Exception as e:
@@ -138,8 +135,7 @@ def main(args):
 
             if messages['data']:
                 last_message = messages['data'][0]
-                print("last message", messages)
-                
+               
                 if last_message['role'] == 'assistant' and last_message['content']:
                     return {
                         'body': {
