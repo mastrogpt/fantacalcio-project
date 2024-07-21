@@ -7,6 +7,7 @@ from models.team import Team
 from models.current_player_team import CurrentPlayerTeam
 from models.league import League
 from models.player_season import PlayerSeason
+from models.team_season import TeamSeason
 from models.player_statistics import PlayerStatistics
 from models.base import Base
 from models.utils import Redis_utils
@@ -387,19 +388,19 @@ class Player(Base):
             session.close()  
    
     @staticmethod
-    def get_current_serie_a_players(session,args):
+    def get_current_serie_a_players(session, args):
         ''' 
         This query returns all Serie A current players with their respective season and team details.
-
+    
         This method retrieves players who are currently active in Serie A teams, including their team
         information and statistics for the current season.
-
+    
         Returns:
             A list of dictionaries, each containing player details along with team and season information.
-
+    
         Raises:
             Exception: If there's an error during the data retrieval process.
-
+    
         Notes:
             - The query ensures players are currently associated with Serie A teams.
             - It includes team name, logo, ID, season ID, and player statistics such as position.
@@ -409,46 +410,56 @@ class Player(Base):
             r = Redis_utils(args)
             redisKey = Player.get_current_serie_a_players.__name__
             players = r.read(redisKey)
-            
-            if players != None:
-                return [player for player in players]
-
-            else:
-                players_teams = (session.query(Player, Team, Season, PlayerStatistics)
-                 .join(PlayerStatistics, Player.id == PlayerStatistics.player_id)
-                 .join(PlayerSeason, Player.id == PlayerSeason.player_id)
-                 .join(Season, PlayerSeason.season_id == Season.id)
-                 .join(League, Season.league_id == League.id)
-                 .join(CurrentPlayerTeam, Player.id == CurrentPlayerTeam.player_id)
-                 .join(Team, CurrentPlayerTeam.team_id == Team.id)
-                 .filter(
-                     League.name == "Serie A",
-                     League.country_name == "Italy",
-                     Season.current == True
-                 )
-                 .all())
-
-                result = []
-                # print("PLAYERS ARE", players_teams)
-
-                for player in players_teams:
-                    player_dict = player.Player._to_dict()
-                    player_dict['team'] = player.Team.name
-                    player_dict['team_logo'] = player.Team.logo
-                    player_dict['team_id'] = player.Team.id
-                    player_dict['season_id'] = player.Season.id
-                    player_dict['position'] = player.PlayerStatistics.position
     
-                    #player_dict['statistics'] = player.PlayerStatistics._to_dict()
-                
+            if players is not None:
+                return [player for player in players]
+    
+            else:
+                # Subquery to get current Serie A season IDs
+                subquery = session.query(Season.id).join(League).filter(
+                    League.name == "Serie A",
+                    League.country_name == "Italy",
+                    Season.current == True
+                ).subquery()
+    
+                # Main query to fetch player details
+                players_teams = (session.query(
+                        Player,
+                        Team,
+                        Season,
+                        CurrentPlayerTeam.number,
+                        CurrentPlayerTeam.position
+                    )
+                    .join(CurrentPlayerTeam, Player.id == CurrentPlayerTeam.player_id)
+                    .join(Team, CurrentPlayerTeam.team_id == Team.id)
+                    .join(TeamSeason, Team.id == TeamSeason.team_id)
+                    .join(Season, TeamSeason.season_id == Season.id)
+                    .filter(
+                        TeamSeason.season_id.in_(subquery),
+                        CurrentPlayerTeam.number.isnot(None)
+                    )
+                    .all())
+    
+                result = []
+    
+                for player, team, season, number, position in players_teams:
+                    player_dict = player._to_dict()
+                    player_dict['team'] = team.name
+                    player_dict['team_logo'] = team.logo
+                    player_dict['team_id'] = team.id
+                    player_dict['season_id'] = season.id
+                    player_dict['number'] = number
+                    player_dict['position'] = position
+                    
                     result.append(player_dict)
+    
                 r.write(args, redisKey, result)
                 return result
         except Exception as e:
             print(f"Error during fetching Serie A players for current season: {e}")
             return {"statusCode": 500, "body": f"Error during fetching Serie A players for current season: {e}"}
         finally:
-            session.close()    
+            session.close()
 
     @staticmethod
     def get_all_current_serie_a_players(session, args):
