@@ -7,8 +7,7 @@ import openai
 import requests
 import time
 import json
-
-
+import traceback
 class ChatBot: 
 
     def __init__(self, args):
@@ -59,43 +58,47 @@ class ChatBot:
         return response.json()
 
     def handle_tools(self, ai_response):
-        
         required_action = ai_response['required_action']
         tool_calls = required_action['submit_tool_outputs']['tool_calls']
         
+        tool_outputs = []
         for call in tool_calls:
+            print("CALL IS", call)
             if call['function']['name'] == 'getPlayerStats':
                 arguments = json.loads(call['function']['arguments'])
                 surname = arguments['surname']
                 team = arguments['team']
-                #TODO CALL BACKEND
+                
                 url = "https://nuvolaris.dev/api/v1/web/fantatest/db/main?model=player&current_serie_a_players_filtered_by_surname_and_team"
                 params = {'psurname': surname, 'team': team}
-                player_stats = requests.get(url, params = params)
+                player_stats = requests.get(url, params=params)
                 result = player_stats.json()
-                self.submit_tool_outputs(result, ai_response['thread_id'], ai_response['id'], call['id'])
+                tool_outputs.append(
+                    {
+                        "tool_call_id": call['id'],
+                        "output": str(result) if isinstance(result, dict) else str(result[0])
+                    }
+                )
+            
+        self.submit_tool_outputs(ai_response['thread_id'], ai_response['id'], tool_outputs)
 
-    def submit_tool_outputs(self, result, thread_id, run_id, tool_id):
+    def submit_tool_outputs(self, thread_id, run_id, tool_outputs):
         try:
-
             url = f"{self.base_url}/threads/{thread_id}/runs/{run_id}/submit_tool_outputs"
+            print("Calling GPT WITH URL", url)
             data = {
-            "tool_outputs": [
-                {
-                    "tool_call_id": tool_id,
-                    "output": str(result)
-                }
-            ]
+                "tool_outputs": tool_outputs
             }
+            print("DATA SUBMITTING IS", json.dumps(data, indent=4))
             
             response = requests.post(url, headers=self.headers, json=data)
+            print("RESPONSE OK")
             response.raise_for_status()
             return response.json()
         except Exception as e:
-            print("EXCEPTION", e)
             return {
                 'body': {
-                    'output': f'An error occurred: {e}'
+                    'output': f'An error occurred: {repr(e)}'
                 }
             }
                 
@@ -155,6 +158,7 @@ def main(args):
             time.sleep(interval)
 
     except Exception as e:
+        
         return {
             'body': {
                 'output': f'An error occurred: {e}'
