@@ -63,8 +63,8 @@
 
 	swiper-slide img {
 		display: block;
-		object-fit: cover;
-		height: 450px;
+		object-fit: contain;
+		width: 100%;
 		border-radius: 20px;
 	}
 </style>

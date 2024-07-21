@@ -11,11 +11,13 @@
 
 <!-- svelte-ignore a11y-no-static-element-interactions -->
 <!-- svelte-ignore a11y-click-events-have-key-events -->
-<swiper-slide on:click={onClick}>
+<swiper-slide class="mx-[20px]" on:click={onClick}>
 	<div class="article-card">
 		<div class="text-wrapper">
 			<h4 class="article-title font-bold">{sliderData?.title}</h4>
+
 			<p class="article-subtitle">{sliderData?.subtitle}</p>
+
 			<small class="article-meta">
 				Di {sliderData?.author} il {new Date(sliderData?.creationDate || '').toLocaleDateString()}
 			</small>
@@ -37,6 +39,12 @@
 		cursor: pointer;
 		background: var(--card-bg-gradient);
 		box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+	}
+
+	@media screen and (max-width: 768px) {
+		swiper-slide {
+			width: 92%;
+		}
 	}
 
 	swiper-slide:hover {

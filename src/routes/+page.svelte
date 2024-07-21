@@ -8,10 +8,13 @@
 	import Loader from '$lib/components/atoms/Loader.svelte';
 	import { getArticlesList } from '$lib/service/fantaicalcio/getArticles';
 	import JoinCta from '$lib/components/molecules/JoinCta.svelte';
+	import Carousel from '$lib/components/atoms/sliders/Carousel.svelte';
+	import ArticleSliderSlide from '$lib/components/atoms/sliders/partials/ArticleSliderSlide.svelte';
 
 	let heroTitle: HTMLHeadingElement;
 	let heroSubtitle: HTMLHeadingElement;
 	let heroSlider: HTMLDivElement;
+	let colors = ['red', 'orange', 'yellow', 'green', 'blue', 'purple'];
 
 	onMount(async () => {
 		anime
@@ -78,8 +81,36 @@
 	{#await getArticlesList()}
 		<Loader />
 	{:then data}
-		<ArticlesSlider {data} />
+		<Carousel autoplay={2000}>
+			{#each data as { author, creation_date, subtitle, title }, index (index)}
+				<ArticleSliderSlide
+					onClick={() => console.log('')}
+					sliderData={{ author, creationDate: creation_date, subtitle, title }}
+				/>
+			{/each}
+
+			<span slot="left-control">Left</span>
+			<span slot="right-control">Right</span>
+		</Carousel>
 	{/await}
+
+	<!-- 
+	<Carousel autoplay={2000}>
+		{#await getArticlesList()}
+			<Loader />
+		{:then data}
+			{#each data as { author, creation_date, subtitle, title }, index (index)}
+				<ArticleSliderSlide
+					onClick={() => console.log('')}
+					sliderData={{ author, creationDate: creation_date, subtitle, title }}
+				/>
+			{/each}
+		{/await}
+
+
+		<span slot="left-control">Left</span>
+		<span slot="right-control">Right</span>
+	</Carousel> -->
 </section>
 
 <section
