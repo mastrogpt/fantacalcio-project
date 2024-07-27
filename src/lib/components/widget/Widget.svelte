@@ -59,7 +59,7 @@
 			...messages,
 			{
 				type: 'ai',
-				text: "Welcome to NuvBot! 🤓 For information on Nuvolaris and MastroGPT, just ask, I'll fetch it from the clouds! For assistance, enter your request and email into this chat.",
+				text: "Benvenuto! 🤓 Te serve 'n consiglio pe' l'asta? Voi fa' 'na chiacchierata? Dimme 'n po'!",
 				id: messages.length
 			}
 		];
