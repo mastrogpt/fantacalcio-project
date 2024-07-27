@@ -43,11 +43,11 @@
 					class={`nav-link text-lg font-medium hover:text-accent transition duration-300 ease-in-out ${currentPath === $page.url.origin + '/' ? 'active' : ''}`}
 					>Home</a
 				>
-				<a
+				<!-- <a
 					href="/about"
 					class={`nav-link text-lg font-medium hover:text-accent transition duration-300 ease-in-out ${currentPath === $page.url.origin + '/about' ? 'active' : ''}`}
 					>Chi siamo</a
-				>
+				> -->
 				<a
 					href="/#players"
 					class={`nav-link text-lg font-medium hover:text-accent transition duration-300 ease-in-out ${currentPath === $page.url.origin + '/#players' ? 'active' : ''}`}

@@ -133,16 +133,10 @@
 		<p class="text-base md:text-lg">
 			Fare il fantallenatore è stressante, fare il developer ancora di più, farle entrambe è da
 			matti. <br />
-			Se sei almeno una di queste due cose, non esitare a contattarci!
+			Se sei almeno una di queste due cose <JoinCta />
 		</p>
-
-		<span class="flex gap-2">
-			Se vuoi unirti a noi, <JoinCta />
-		</span>
 	</div>
 </section>
-
-<!-- ><Chatbot /> -->
 
 <style>
 	.hero {

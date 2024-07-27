@@ -3,28 +3,27 @@
 	import { register } from 'swiper/element/bundle';
 	import HeroSliderSlide from './partials/HeroSliderSlide.svelte';
 	import { goto } from '$app/navigation';
-	import calcio3d from '$lib/assets/calcio3d.png'
-	import confrontoGiocatori from '$lib/assets/confrontoGiocatori.png'
-	import articlesImg from '$lib/assets/articlesImg.jpg'
-	import lineups from '$lib/assets/lineups.jpg'
-
+	import calcio3d from '$lib/assets/calcio3d.png';
+	import confrontoGiocatori from '$lib/assets/confrontoGiocatori.png';
+	import articlesImg from '$lib/assets/articlesImg.jpg';
+	import lineups from '$lib/assets/lineups.jpg';
 
 	register();
 
 	const data = [
-		{
-			title: 'Benvenuto su FantAIcalcio!',
-			description: 'La piattaforma che ti aiuta a vincere divertendoti',
-			buttonLabel: 'Chi siamo',
-			buttonOnClick: () => goto("/about"),
-			imageUrl: calcio3d,
-			imageAlt: 'img 1'
-		},
+		// {
+		// 	title: 'Benvenuto su FantAIcalcio!',
+		// 	description: 'La piattaforma che ti aiuta a vincere divertendoti',
+		// 	buttonLabel: 'Chi siamo',
+		// 	buttonOnClick: () => goto("/about"),
+		// 	imageUrl: calcio3d,
+		// 	imageAlt: 'img 1'
+		// },
 		{
 			title: 'Confronta i giocatori',
 			description: 'Usa i nostri dati e la nostra AI',
 			buttonLabel: 'Vai ai giocatori',
-			buttonOnClick: () => goto("#players"),
+			buttonOnClick: () => goto('#players'),
 			imageUrl: confrontoGiocatori,
 			imageAlt: 'img 2'
 		},
@@ -32,7 +31,7 @@
 			title: 'Informati con gli AIrticoli',
 			description: 'Articoli della nostra redaizione fatti apposta per te',
 			buttonLabel: 'Leggi gli airticoli',
-			buttonOnClick: () => goto("#articles"),
+			buttonOnClick: () => goto('#articles'),
 			imageUrl: articlesImg,
 			imageAlt: 'img 3'
 		},
@@ -40,7 +39,7 @@
 			title: 'Scopri le formazioni',
 			description: 'I pronostici e le ultime',
 			buttonLabel: 'Probabili formazioni',
-			buttonOnClick: () => goto("#composition"),
+			buttonOnClick: () => goto('#composition'),
 			imageUrl: lineups,
 			imageAlt: 'img 4'
 		}

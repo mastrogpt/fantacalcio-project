@@ -107,7 +107,7 @@
 				bind:value={userMessage}
 				on:keypress={handleKeyPress}
 			/>
-			<Button variant="accent" label="Submit" onClick={postMessage} />
+			<Button size="small" variant="accent" label="Submit" onClick={postMessage} />
 		</div>
 	</div>
 {/if}
