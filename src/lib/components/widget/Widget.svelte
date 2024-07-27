@@ -1,7 +1,7 @@
 <!-- Chat.svelte -->
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { chat, notifySlack } from '$lib/service/assistantApi';
+	import { chat } from '$lib/service/nuvBot';
 	import MinimizedIcon from './MinimizedIcon.svelte';
 	import MaximizeIcon from './MaximizeIcon.svelte';
 	import ChatMessage from './ChatMessage.svelte';
@@ -14,6 +14,7 @@
 	let isLoading = false;
 	let isMinimized = true;
 	let lastMessageIsUser = true;
+	let threadId = '';
 
 	const regexEmail = /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/;
 
@@ -25,28 +26,17 @@
 
 	async function postMessage() {
 		lastMessageIsUser = true;
-		if (regexEmail.test(userMessage)) {
-			isLoading = true;
-			const aiResponse = await chat(
-				"user has sent its email, maybe he need assistance. Tell him that we'll provide it as soon as possible. Use user language. User message is: " +
-					userMessage
-			);
-			isLoading = false;
-			await notifySlack('Someone sent this message from nuvolaris widget: ' + userMessage);
-			messages = [...messages, { type: 'ai', text: aiResponse, id: messages.length }];
-			lastMessageIsUser = false;
-			userMessage = '';
-
-			showMessage();
-			return;
-		}
 		messages = [...messages, { type: 'user', text: userMessage, id: messages.length }];
 
 		isLoading = true;
-		const aiResponse = await chat(userMessage);
+		const aiResponse = await chat(userMessage, threadId);
+		threadId = aiResponse?.data?.id;
 
 		isLoading = false;
-		messages = [...messages, { type: 'ai', text: aiResponse, id: messages.length }];
+		messages = [
+			...messages,
+			{ type: 'ai', text: aiResponse?.data?.output[0]?.text?.value, id: messages.length }
+		];
 		lastMessageIsUser = false;
 		userMessage = '';
 
