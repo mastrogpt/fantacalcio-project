@@ -16,7 +16,7 @@
 			title: `<h2>Benvenuto su FantaBalùn! </h2> <h6> Powered by Nuvolaris </h6></p>`,
 			description: `
             <p>Anche se è importante <strong>vincere</strong>, a volte puoi solo <strong>imprecare</strong> <br> Con noi farai
- <strong><span style="font-size: 24px;"> entrambe le cose !</span></strong></p>
+ <strong><span style="font-size: 24px;"> entrambe le cose!</span></strong></p>
             `,
 			buttonLabel: 'Il progetto',
 			buttonOnClick: () => goto('/about'),
