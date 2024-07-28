@@ -159,13 +159,13 @@
 
 					<input
 						type="text"
-						class="flex-1 border rounded-md px-2 py-2 focus:outline-none focus:ring focus:border-blue-300"
+						class="flex-1 border rounded-md px-2 py-2 focus:outline-none focus:ring focus:border-blue-300 min-w-[140px]"
 						placeholder="Scrivi il tuo messaggio..."
 						bind:value={userMessage}
 						on:keypress={handleKeyPress}
 					/>
 					{#if !isLoading}
-						<button id="search-button" on:click={postMessage}>
+						<button class="px-2" id="search-button" on:click={postMessage}>
 							<SendMessageIcon />
 						</button>
 					{/if}

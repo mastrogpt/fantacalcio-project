@@ -17,22 +17,27 @@
 	});
 </script>
 
-<div class="flex gap-3 my-4 text-gray-600 text-sm flex-1">
+<div class="flex flex-col gap-3 my-4 text-gray-600 text-sm flex-1">
 	{#if message.type === 'ai'}
-		<span
-			class="relative flex shrink-0 overflow-hidden rounded-full w-8 h-8 bg-gray-100 border p-1"
-		>
-			<AiWidgetIcon />
-		</span>
-		<p class="leading-relaxed font-bold text-gray-700">AI</p>
+		<div class="flex itemx-center gap-2">
+			<span
+				class="relative flex shrink-0 overflow-hidden rounded-full w-8 h-8 bg-gray-100 border p-1"
+			>
+				<AiWidgetIcon />
+			</span>
+			<p class="leading-relaxed font-bold text-gray-700">AI</p>
+		</div>
 	{:else if message.type === 'user'}
-		<span
-			class="relative flex shrink-0 overflow-hidden rounded-full w-8 h-8 bg-gray-100 border p-1"
-		>
-			<UserWidgetIcon />
-		</span>
-		<p class="leading-relaxed font-bold text-gray-700">You</p>
+		<div class="flex itemx-center gap-2">
+			<span
+				class="relative flex shrink-0 overflow-hidden rounded-full w-8 h-8 bg-gray-100 border p-1"
+			>
+				<UserWidgetIcon />
+			</span>
+			<p class="leading-relaxed font-bold text-primary">Tu</p>
+		</div>
 	{/if}
+
 	{#if formattedMessage}
 		{#if imageMessage}
 			<div class="flex flex-col">
