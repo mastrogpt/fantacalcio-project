@@ -69,7 +69,12 @@
 		<HeroSlider />
 	</div>
 </section>
-
+<section
+	class="table-section flex align-center justify-center text-center my-10 py-20 gap-4"
+	id="players"
+>
+	<TableCard />
+</section>
 <section
 	id="articles"
 	class="articles-section flex flex-col items-center justify-center text-center my-10 py-20 gap-4 bg-accent"
@@ -109,13 +114,6 @@
 		<span slot="left-control">Left</span>
 		<span slot="right-control">Right</span>
 	</Carousel> -->
-</section>
-
-<section
-	class="table-section flex align-center justify-center text-center my-10 py-20 gap-4"
-	id="players"
->
-	<TableCard />
 </section>
 
 <!-- <section class="lineup-section flex flex-col text-center gap-5 py-5" id="composition">
