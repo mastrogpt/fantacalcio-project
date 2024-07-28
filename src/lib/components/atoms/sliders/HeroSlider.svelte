@@ -11,37 +11,41 @@
 	register();
 
 	const data = [
-		// {
-		// 	title: 'Benvenuto su FantAIcalcio!',
-		// 	description: 'La piattaforma che ti aiuta a vincere divertendoti',
-		// 	buttonLabel: 'Chi siamo',
-		// 	buttonOnClick: () => goto("/about"),
-		// 	imageUrl: calcio3d,
-		// 	imageAlt: 'img 1'
-		// },
 		{
-			title: 'Confronta i giocatori',
-			description: 'Usa i nostri dati e la nostra AI',
+			title: 'Benvenuto su FantaBalùn! &#x26BD',
+			description: `
+            <p>Anche se è importante vincere, a volte puoi solo imprecare. Qui dentro, 
+ <strong><span style="font-size: 24px;"> farai entrambe le cose !</span></strong></p>
+            `,
+			buttonLabel: 'Il progetto',
+			buttonOnClick: () => goto('/about'),
+			imageUrl: calcio3d,
+			imageAlt: 'img 1'
+		},
+		{
+			title: 'Chiedilo ar Bot &#x1F916',
+			description:
+				'<strong> Chiedigli quello che ti pare </strong>, come faresti con un amico al bar &#x1F37A <br> Chiedi un parere su un calciatore o un confronto tra due calciatori <br> Oppure, <strong> allega uno screenshot </strong> di una conversazione in cui un fantallenatore ti offre uno scambio. <br> FantaBalunbot sarà in grado di capire come aiutarti a vincere! <br> No, <strong> non scola la pasta </strong>  &#x1F35D A questo non ci siamo ancora arrivati.',
+			imageUrl: lineups,
+			imageAlt: 'img 4'
+		},
+		{
+			title: 'Confronta i giocatori &#x2696',
+			description:
+				'Tanto alla fine sceglierai quello che avevi già in mente, però almeno così fingerai di averla soppesata bene',
 			buttonLabel: 'Vai ai giocatori',
 			buttonOnClick: () => goto('#players'),
 			imageUrl: confrontoGiocatori,
 			imageAlt: 'img 2'
 		},
 		{
-			title: 'Informati con gli AIrticoli',
-			description: 'Articoli della nostra redaizione fatti apposta per te',
+			title: 'Informati con gli AIrticoli &#x1F4F0',
+			description:
+				'Siamo molto pigri per scrivere ogni giorno, ma vogliamo comunque stare al passo. I nostri scraper automatici generano articoli di attualità basandosi sulle ultime notizie. Non dar loro retta, a volte non  ci azzeccano. Come? Nemmeno i giornalisti veri? Ah no?',
 			buttonLabel: 'Leggi gli airticoli',
 			buttonOnClick: () => goto('#articles'),
 			imageUrl: articlesImg,
 			imageAlt: 'img 3'
-		},
-		{
-			title: 'Scopri le formazioni',
-			description: 'I pronostici e le ultime',
-			buttonLabel: 'Probabili formazioni',
-			buttonOnClick: () => goto('#composition'),
-			imageUrl: lineups,
-			imageAlt: 'img 4'
 		}
 	];
 </script>

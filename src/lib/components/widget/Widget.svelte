@@ -122,8 +122,8 @@
 		</button>
 
 		<div class="flex flex-col space-y-1.5 pb-6">
-			<h2 class="font-semibold text-lg tracking-tight">🌧️ 🖥️ 🌩️</h2>
-			<p class="text-sm text-[#6b7280] leading-3"><strong> Ciao da FantaCarcio! 👋</strong></p>
+			<h2 class="font-semibold text-lg tracking-tight">👋</h2>
+			<p class="text-sm text-[#6b7280] leading-3"><strong> Ciao da Fantabalùn! 👋</strong></p>
 		</div>
 
 		<!-- Chat Messages -->
