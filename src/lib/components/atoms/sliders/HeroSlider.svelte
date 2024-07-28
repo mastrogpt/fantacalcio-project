@@ -26,7 +26,7 @@
 		{
 			title: 'Chiedilo ar Bot &#x1F916',
 			description:
-				'<strong> Chiedigli quello che ti pare </strong>, come faresti con un amico al bar &#x1F37A <br> Un parere o un confronto tra due calciatori <br> Oppure, <strong> allega uno screenshot </strong> di una conversazione in cui un fantallenatore ti offre uno scambio. <br> FantaBalunbot sarà in grado di capire come aiutarti a vincere! <br> No, <strong> non scola la pasta </strong>  &#x1F35D A questo non ci siamo ancora arrivati.',
+				'<strong> Chiedi ciò che vuoi </strong>, come ad un amico al bar &#x1F37A: un parere, un confronto tra due calciatori <br> Oppure, <strong> allega uno screen </strong> di un messaggio in cui un fantallenatore ti propone uno scambio. <br> il bot sarà in grado di aiutarti! <br> No, <strong> non scola la pasta </strong>  &#x1F35D A questo non ci siamo ancora arrivati',
 			imageUrl: fantabalunbot,
 			buttonLabel: 'Chiedilo ar bot',
 			buttonOnClick: () => openChatWithMessage(),
