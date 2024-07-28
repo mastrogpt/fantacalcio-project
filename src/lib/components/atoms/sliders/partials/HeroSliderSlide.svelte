@@ -15,10 +15,10 @@
 	<div class="flex flex-col text-left justify-start hero-text gap-10">
 		<div class="flex flex-col gap-4">
 			<h2>
-				{sliderData?.title}
+				{@html sliderData?.title}
 			</h2>
 
-			<p>{sliderData?.description}</p>
+			<p>{@html sliderData?.description}</p>
 		</div>
 
 		{#if sliderData?.buttonLabel && Boolean(sliderData?.buttonOnClick)}
