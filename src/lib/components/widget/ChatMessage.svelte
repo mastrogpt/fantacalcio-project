@@ -9,9 +9,11 @@
 	export let message;
 
 	let formattedMessage = '';
+	let imageMessage = '';
 
 	onMount(() => {
 		formattedMessage = marked.parse(message.text);
+		imageMessage = message?.file;
 	});
 </script>
 
@@ -32,6 +34,14 @@
 		<p class="leading-relaxed font-bold text-gray-700">You</p>
 	{/if}
 	{#if formattedMessage}
-		<p class="leading-relaxed">{@html formattedMessage}</p>
+		{#if imageMessage}
+			<div class="flex flex-col">
+				<img src={imageMessage} class="object-contain h-20 w-auto mx-auto" alt="Preview" />
+
+				<p class="leading-relaxed">{@html formattedMessage}</p>
+			</div>
+		{:else}
+			<p class="leading-relaxed">{@html formattedMessage}</p>
+		{/if}
 	{/if}
 </div>

@@ -8,6 +8,7 @@
 	import Loader from '../atoms/Loader.svelte';
 	import Button from '../atoms/button/button.svelte';
 	import UploadIcon from './UploadIcon.svelte';
+	import SendMessageIcon from './SendMessageIcon.svelte';
 
 	let messages: { type: string; text: string; id: number; file?: string }[] = [];
 	let userMessage: string = '';
@@ -41,6 +42,7 @@
 		};
 
 		messages = [...messages, message];
+
 		isLoading = true;
 
 		let fileBase64 = '';
@@ -163,7 +165,9 @@
 						on:keypress={handleKeyPress}
 					/>
 					{#if !isLoading}
-						<Button size="small" variant="accent" label="Submit" onClick={postMessage} />
+						<button id="search-button" on:click={postMessage}>
+							<SendMessageIcon />
+						</button>
 					{/if}
 				</div>
 			</div>

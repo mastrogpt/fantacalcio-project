@@ -2,7 +2,7 @@
 	width="24"
 	height="24"
 	viewBox="0 0 24 24"
-	fill="#1A1A1A"
+	fill="#10987D"
 	xmlns="http://www.w3.org/2000/svg"
 	class="i8-icon i8-button__icon"
 	data-v-9fb50a61=""
