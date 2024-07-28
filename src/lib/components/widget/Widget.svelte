@@ -8,6 +8,7 @@
 	import Loader from '../atoms/Loader.svelte';
 	import Button from '../atoms/button/button.svelte';
 	import UploadIcon from './UploadIcon.svelte';
+	import SendMessageIcon from './SendMessageIcon.svelte';
 
 	let messages: { type: string; text: string; id: number; file?: string }[] = [];
 	let userMessage: string = '';
@@ -41,6 +42,7 @@
 		};
 
 		messages = [...messages, message];
+
 		isLoading = true;
 
 		let fileBase64 = '';
@@ -157,13 +159,15 @@
 
 					<input
 						type="text"
-						class="flex-1 border rounded-md px-2 py-2 focus:outline-none focus:ring focus:border-blue-300"
+						class="flex-1 border rounded-md px-2 py-2 focus:outline-none focus:ring focus:border-blue-300 min-w-[140px]"
 						placeholder="Scrivi il tuo messaggio..."
 						bind:value={userMessage}
 						on:keypress={handleKeyPress}
 					/>
 					{#if !isLoading}
-						<Button size="small" variant="accent" label="Submit" onClick={postMessage} />
+						<button class="px-2" id="search-button" on:click={postMessage}>
+							<SendMessageIcon />
+						</button>
 					{/if}
 				</div>
 			</div>
