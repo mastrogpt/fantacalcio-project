@@ -4,23 +4,9 @@
 
 	let isOpen = false;
 	let currentPath = '';
-	let prova = '';
 
 	function toggleMenu() {
 		isOpen = !isOpen;
-	}
-
-	function scrollToSection(event) {
-		event.preventDefault();
-		const targetId = event.currentTarget.getAttribute('href').substring(1);
-		const targetElement = document.getElementById(targetId);
-
-		console.log('🔎 [navbar][targetId] =>', targetId);
-		console.log('🔎 [navbar][targetElement] =>', targetElement);
-
-		if (targetElement) {
-			targetElement.scrollIntoView({ behavior: 'smooth' });
-		}
 	}
 
 	onMount(() => {
@@ -35,7 +21,7 @@
 	<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 		<div class="flex justify-between h-16 items-center">
 			<a href="/" class="flex-shrink-0 flex items-center">
-				<h2 class="text-2xl font-bold">FantaAICalcio</h2>
+				<h2 class="text-2xl font-bold">FantaBalùn &#x26BD</h2>
 			</a>
 			<div class="hidden md:flex md:space-x-8">
 				<a

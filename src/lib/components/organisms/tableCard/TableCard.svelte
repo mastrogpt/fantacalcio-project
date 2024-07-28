@@ -19,13 +19,14 @@
 
 	let tabs = [
 		{
-			label: 'Tutti',
+			label: 'FantaBalùn',
 			value: 'all'
-		},
-		{
-			label: 'Indisponibili',
-			value: 'unavailable'
 		}
+		//,
+		// {
+		// 	label: 'Indisponibili',
+		// 	value: 'unavailable'
+		// }
 	];
 
 	const playersCols = [
@@ -84,9 +85,11 @@
 	<hr />
 
 	<p class="my-5 px-10">
-		Noi ti forniamo la lista dei giocatori, i dati e le statistiche più interessanti. Tu decidi chi
-		mandare in campo. Se hai dei dubbi, seleziona due calciatori e comparali. <br /> Magari ti confonderemo
-		idee, o magari ti aiuteremo a vincere!
+		Noi ti forniamo la lista dei giocatori, i dati e le <strong>
+			statistiche più interessanti</strong
+		>
+		Tu decidi chi mandare in campo. Se hai dei dubbi, seleziona due calciatori e comparali. <br /> Magari
+		ti confonderemo le idee!
 	</p>
 
 	<div class="table-card-content">

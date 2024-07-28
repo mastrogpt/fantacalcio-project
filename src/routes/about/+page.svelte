@@ -2,44 +2,11 @@
 	import aboutImage from '$lib/assets/about.png';
 	import Loader from '$lib/components/atoms/Loader.svelte';
 	import JoinCta from '$lib/components/molecules/JoinCta.svelte';
-	import { getAiPresentationFromBackend } from '$lib/service/ai/aiPresentation';
-	import { marked } from 'marked';
-	import { onMount } from 'svelte';
-
-	let aiPresentation: string;
-	let aiPresentationWritingEffect: string = '';
-	let isLoading = false;
-
-	async function showMessage() {
-		for (let i = 0; i < aiPresentation.length; i++) {
-			aiPresentationWritingEffect = marked.parse(aiPresentation.substring(0, i + 1));
-			await sleep(25);
-		}
-	}
-
-	function sleep(ms: number) {
-		return new Promise((resolve) => setTimeout(resolve, ms));
-	}
-
-	async function getAiPresentation() {
-		isLoading = true;
-		aiPresentation = await getAiPresentationFromBackend();
-		showMessage();
-		isLoading = false;
-	}
-
-	onMount(async () => {
-		await getAiPresentation();
-	});
 </script>
 
 <div class="min-h-screen flex flex-col items-center justify-center p-5">
-	<div class="max-w-4xl w-full p-8">
-		<h2 class="text-5xl font-bold text-dark mb-6">Chi siamo 👋🏻</h2>
-
-		<hr class="mb-6" />
-
-		<div class="text-section mb-8">
+	<div class="max-w-4xl w-full p-8 shadow-lg rounded-lg">
+		<div class="mb-8">
 			<h2 class="text-3xl font-semibold mb-4">La nostra passione</h2>
 
 			<p class="text-lg">
@@ -47,23 +14,40 @@
 			</p>
 		</div>
 
-		<div class="flex flex-col items-center md:flex-row">
-			<div class="text-section w-[100%] md:w-[60%]">
-				<h2 class="text-3xl font-semibold mb-4">Il nostro progetto</h2>
+		<div class="flex flex-col items-center md:flex-row mb-8">
+			<div class="w-full md:w-3/5">
+				<h3 class="text-3xl font-semibold mb-4">Il nostro progetto</h3>
 
 				<p class="text-lg mb-4">
-					Attraverso questo progetto, vogliamo offrire ai Fantallenatori di tutta Italia un
-					consigliere fidato, un AI che somigli all'amico a cui chiedere consiglio il giovedì sera
-					davanti ad una birra su che calciatore schierare o su chi comprare all'asta.
+					Offrire ai Fantallenatori un consigliere, un AI che somigli all'amico a cui chiedere
+					consiglio il giovedì sera davanti ad una birra su che calciatore schierare o su chi
+					comprare all'asta.
+					<br />
+					L'attuale versione, presenta la bozza della nostra vera e propria prima release. Prossimamente,
+					sarà disponibile una piattaforma con varie funzionalità tra cui:
+					<br />
+					<li>
+						<strong>Statistiche calciatori comprese di grafici</strong> raggruppati per gruppo di giornate
+					</li>
+					<li>Valutazione Rosa: <strong>carichi la tua rosa e ti generiamo uno score</strong></li>
+					<li>
+						Voice suggestions: se le immagini e i testi non bastano, potrai <strong
+							>chiedere al FantaBalùnBot consigli direttamente a voce!</strong
+						>
+					</li>
+					<li>
+						<strong>Statistiche dettagliate dei team </strong>
+					</li>
 				</p>
 			</div>
 
-			<div class="w-[85%] md:w-[40%]">
-				<img src={aboutImage} alt="About Us" class=" h-auto rounded-lg" />
+			<div class="w-full md:w-2/5 flex justify-center">
+				<img src={aboutImage} alt="About Us" class="h-auto rounded-lg shadow-lg" />
 			</div>
 		</div>
-		<div class="text-section mb-8">
-			<h2 class="text-3xl font-semibold mb-4">La nostra filosofia</h2>
+
+		<div class=" mb-8">
+			<h4 class="text-3xl font-semibold mb-4">La nostra filosofia</h4>
 
 			<p class="text-lg mb-4">
 				L'amico che ne sa, ma che non pretende di aver sempre ragione, perché il fantacalcio è arte
@@ -71,28 +55,14 @@
 				fortuna!
 			</p>
 		</div>
-		<div class="text-section mb-8 italic">
+
+		<div class="text-section mb-8 italic text-center">
 			<p class="text-lg">
 				Usiamo Nuvolaris come piattaforma, il serverless come filosofia. Se vuoi unirti a noi,<br />
 
 				<JoinCta />
 			</p>
 		</div>
-
-		<hr />
-
-		<h2 class="text-3xl font-semibold mb-4 mt-4">Chi è MastroGPT?</h2>
-
-		<div class="mt-4">
-			{#if aiPresentation}
-				<p>{@html aiPresentationWritingEffect}</p>
-			{:else}
-				<Loader />
-			{/if}
-		</div>
-		<div
-			class="bubble-container absolute inset-0 flex justify-center items-center pointer-events-none"
-		></div>
 	</div>
 </div>
 

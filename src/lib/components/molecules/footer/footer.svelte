@@ -1,22 +1,17 @@
-
 <div class="footer">
 	<div class="footer-content flex justify-between">
 		<div class="footer-section">
 			<h2 class="footer-title text-primary">FantaAICalcio</h2>
-			<a href="mailto:info@nuvolaris.io" class="footer-email">info@nuvolaris.io
-			</a>
+			<a href="mailto:info@nuvolaris.io" class="footer-email">info@nuvolaris.io </a>
 		</div>
 		<div class="footer-section align-end justify-end text-right">
 			<h2 class="footer-title">Quick Links</h2>
 			<ul class="footer-links">
 				<li><a href="/"> Home</a></li>
-				<li>  <a href="/about"> Chi siamo </a>
-				</li>
+				<li><a href="/about"> Chi siamo </a></li>
 				<li><a href="/#players">Giocatori</a></li>
-				<li><a href="/#composition">Probabili formazioni</a></li>
 			</ul>
 		</div>
-		
 	</div>
 	<div class="footer-bottom flex space-x-0">
 		<div class="footer-social">
@@ -25,9 +20,12 @@
 		</div>
 
 		<div class="text-center">
-			<p>A product of <br /> <span class="footer-brand">
-				
-				<a href="https://mastrogpt.nuvolaris.dev/"> Mastrogpt </a></span></p>
+			<p>
+				A product of <br />
+				<span class="footer-brand">
+					<a href="https://mastrogpt.nuvolaris.dev/"> Mastrogpt </a></span
+				>
+			</p>
 		</div>
 
 		<div>

@@ -13,7 +13,6 @@
 	let heroTitle: HTMLHeadingElement;
 	let heroSubtitle: HTMLHeadingElement;
 	let heroSlider: HTMLDivElement;
-	let colors = ['red', 'orange', 'yellow', 'green', 'blue', 'purple'];
 
 	onMount(async () => {
 		anime
@@ -119,9 +118,9 @@
 	<TableCard />
 </section>
 
-<section class="lineup-section flex flex-col text-center gap-5 py-5" id="composition">
+<!-- <section class="lineup-section flex flex-col text-center gap-5 py-5" id="composition">
 	<TeamsComparator />
-</section>
+</section> -->
 
 <section
 	class="flex flex-col align-center justify-center items-center text-center my-10 gap-4 py-10"

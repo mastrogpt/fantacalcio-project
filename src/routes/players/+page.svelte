@@ -26,8 +26,8 @@
 </script>
 
 <svelte:head>
-	<title>MastroGPT - Fantamaster</title>
-	<meta name="og:title" content="MastroGPT" />
+	<title>FantaBalùn</title>
+	<meta name="og:title" content="FantaBalùn" />
 </svelte:head>
 
 <section class="py-10 flex flex-column items-center justify-center">
