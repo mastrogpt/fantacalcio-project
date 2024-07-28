@@ -3,6 +3,7 @@ from sqlalchemy import Column, Integer, String, Text, ARRAY, DateTime
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.sql import delete
 from models.base import Base
+from sqlalchemy import desc
 
 from datetime import datetime
 
@@ -70,7 +71,7 @@ class Article(Base):
     
     def get_all_articles(session):
         try:
-            articles = session.query(Article).all()
+            articles = session.query(Article).order_by(desc(Article.creation_date)).all()
             return [article.to_dict() for article in articles]
         except Exception as e:
             print("Error during articles loading:", e)
