@@ -119,10 +119,6 @@
 			{/if}
 		</button>
 
-		<div class="flex flex-col space-y-1.5 pb-6">
-			<p class="text-sm text-[#6b7280] leading-3"><strong> Ciao da Fantabalùn! 👋</strong></p>
-		</div>
-
 		<!-- Chat Messages -->
 		<div class="pr-2 flex-1 overflow-auto">
 			{#each messages as message}

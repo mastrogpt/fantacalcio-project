@@ -13,10 +13,10 @@
 
 	const data = [
 		{
-			title: 'Benvenuto su FantaBalùn! &#x26BD',
+			title: `<h2>Benvenuto su FantaBalùn! </h2> <h6> Powered by Nuvolaris </h6></p>`,
 			description: `
-            <p>Anche se è importante vincere, a volte puoi solo imprecare. Qui dentro, 
- <strong><span style="font-size: 24px;"> farai entrambe le cose !</span></strong></p>
+            <p>Anche se è importante <strong>vincere</strong>, a volte puoi solo <strong>imprecare</strong> <br> Con noi farai
+ <strong><span style="font-size: 24px;"> entrambe le cose !</span></strong></p>
             `,
 			buttonLabel: 'Il progetto',
 			buttonOnClick: () => goto('/about'),
@@ -26,7 +26,7 @@
 		{
 			title: 'Chiedilo ar Bot &#x1F916',
 			description:
-				'<strong> Chiedigli quello che ti pare </strong>, come faresti con un amico al bar &#x1F37A <br> Chiedi un parere su un calciatore o un confronto tra due calciatori <br> Oppure, <strong> allega uno screenshot </strong> di una conversazione in cui un fantallenatore ti offre uno scambio. <br> FantaBalunbot sarà in grado di capire come aiutarti a vincere! <br> No, <strong> non scola la pasta </strong>  &#x1F35D A questo non ci siamo ancora arrivati.',
+				'<strong> Chiedigli quello che ti pare </strong>, come faresti con un amico al bar &#x1F37A <br> Un parere o un confronto tra due calciatori <br> Oppure, <strong> allega uno screenshot </strong> di una conversazione in cui un fantallenatore ti offre uno scambio. <br> FantaBalunbot sarà in grado di capire come aiutarti a vincere! <br> No, <strong> non scola la pasta </strong>  &#x1F35D A questo non ci siamo ancora arrivati.',
 			imageUrl: lineups,
 			buttonLabel: 'Chiedilo ar bot',
 			buttonOnClick: () => openChatWithMessage(),
@@ -43,8 +43,7 @@
 		},
 		{
 			title: 'Informati con gli AIrticoli &#x1F4F0',
-			description:
-				'Siamo molto pigri per scrivere ogni giorno, ma vogliamo comunque stare al passo. I nostri scraper automatici generano articoli di attualità basandosi sulle ultime notizie. Non dar loro retta, a volte non  ci azzeccano. Come? Nemmeno i giornalisti veri? Ah no?',
+			description: `Siamo pigri per scriverli noi, ma vogliamo stare al passo! I nostri <strong> scraper generano articoli basandosi sulle ultime notizie </strong> <br> Non dar loro retta, a volte non ci azzeccano. Come dici? Nemmeno i giornalisti veri? Ah no? &#x1F62D`,
 			buttonLabel: 'Leggi gli airticoli',
 			buttonOnClick: () => goto('#articles'),
 			imageUrl: articlesImg,
