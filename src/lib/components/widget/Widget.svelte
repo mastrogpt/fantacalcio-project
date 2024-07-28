@@ -172,7 +172,7 @@
 	</div>
 {/if}
 
-{#if isMinimized}
+{#if !$isChatOpen}
 	<div id="chat-container" class="fixed bottom-4 right-4 p-6 rounded-lg w-[30px] h-[30px] z-20">
 		<button class="absolute bottom-4 right-4" on:click={openChatWithMessage}>
 			<MessageIcon />
