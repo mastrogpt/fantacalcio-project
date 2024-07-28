@@ -1,6 +1,5 @@
 <script lang="ts">
-	import aboutImage from '$lib/assets/about.png';
-	import Loader from '$lib/components/atoms/Loader.svelte';
+	import fantabalun from '$lib/assets/fantabalun.png';
 	import JoinCta from '$lib/components/molecules/JoinCta.svelte';
 </script>
 
@@ -42,7 +41,7 @@
 			</div>
 
 			<div class="w-full md:w-2/5 flex justify-center">
-				<img src={aboutImage} alt="About Us" class="h-auto rounded-lg shadow-lg" />
+				<img src={fantabalun} alt="About Us" class="h-auto rounded-lg shadow-lg" />
 			</div>
 		</div>
 

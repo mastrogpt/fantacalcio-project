@@ -3,10 +3,10 @@
 	import { register } from 'swiper/element/bundle';
 	import HeroSliderSlide from './partials/HeroSliderSlide.svelte';
 	import { goto } from '$app/navigation';
-	import calcio3d from '$lib/assets/calcio3d.png';
-	import confrontoGiocatori from '$lib/assets/confrontoGiocatori.png';
-	import articlesImg from '$lib/assets/articlesImg.jpg';
-	import lineups from '$lib/assets/lineups.jpg';
+	import fantabalunbot from '$lib/assets/fantabalunbot.png';
+	import fantabalun from '$lib/assets/fantabalun.png';
+	import compare2 from '$lib/assets/compare2.png';
+	import news from '$lib/assets/news.png';
 	import { openChatWithMessage } from '$lib/store/store';
 
 	register();
@@ -20,14 +20,14 @@
             `,
 			buttonLabel: 'Il progetto',
 			buttonOnClick: () => goto('/about'),
-			imageUrl: calcio3d,
+			imageUrl: fantabalun,
 			imageAlt: 'img 1'
 		},
 		{
 			title: 'Chiedilo ar Bot &#x1F916',
 			description:
 				'<strong> Chiedigli quello che ti pare </strong>, come faresti con un amico al bar &#x1F37A <br> Un parere o un confronto tra due calciatori <br> Oppure, <strong> allega uno screenshot </strong> di una conversazione in cui un fantallenatore ti offre uno scambio. <br> FantaBalunbot sarà in grado di capire come aiutarti a vincere! <br> No, <strong> non scola la pasta </strong>  &#x1F35D A questo non ci siamo ancora arrivati.',
-			imageUrl: lineups,
+			imageUrl: fantabalunbot,
 			buttonLabel: 'Chiedilo ar bot',
 			buttonOnClick: () => openChatWithMessage(),
 			imageAlt: 'img 4'
@@ -38,7 +38,7 @@
 				'Tanto alla fine sceglierai quello che avevi già in mente, però almeno così fingerai di averla soppesata bene',
 			buttonLabel: 'Vai ai giocatori',
 			buttonOnClick: () => goto('#players'),
-			imageUrl: confrontoGiocatori,
+			imageUrl: compare2,
 			imageAlt: 'img 2'
 		},
 		{
@@ -46,7 +46,7 @@
 			description: `Siamo pigri per scriverli noi, ma vogliamo stare al passo! I nostri <strong> scraper generano articoli basandosi sulle ultime notizie </strong> <br> Non dar loro retta, a volte non ci azzeccano. Come dici? Nemmeno i giornalisti veri? Ah no? &#x1F62D`,
 			buttonLabel: 'Leggi gli airticoli',
 			buttonOnClick: () => goto('#articles'),
-			imageUrl: articlesImg,
+			imageUrl: news,
 			imageAlt: 'img 3'
 		}
 	];
