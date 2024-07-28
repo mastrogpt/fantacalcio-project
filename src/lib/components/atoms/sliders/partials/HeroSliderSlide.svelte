@@ -24,7 +24,7 @@
 		{#if sliderData?.buttonLabel && Boolean(sliderData?.buttonOnClick)}
 			<Button
 				label={sliderData?.buttonLabel}
-				onClick={sliderData?.buttonOnClick}
+				onClick={() => sliderData?.buttonOnClick}
 				variant="accent"
 			/>
 		{/if}
