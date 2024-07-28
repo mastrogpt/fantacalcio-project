@@ -9,6 +9,7 @@
 	import Button from '../atoms/button/button.svelte';
 	import UploadIcon from './UploadIcon.svelte';
 	import SendMessageIcon from './SendMessageIcon.svelte';
+	import { isChatOpen, openChatWithMessage } from '$lib/store/store';
 
 	let messages: { type: string; text: string; id: number; file?: string }[] = [];
 	let userMessage: string = '';
@@ -84,6 +85,7 @@
 	}
 
 	onMount(() => {
+		console.log('IS CHAT OPEN ON COMPONENT? ', isChatOpen);
 		showMessage();
 		messages = [
 			...messages,
@@ -101,20 +103,16 @@
 			chatContainer.scrollTop = chatContainer.scrollHeight;
 		}
 	}
-
-	function toggleMinimize() {
-		isMinimized = !isMinimized;
-	}
 </script>
 
-{#if !isMinimized}
+{#if $isChatOpen}
 	<div
 		id="chat-container"
 		class="flex flex-col fixed bottom-4 right-4 bg-white p-2 rounded-lg border border-[#e5e7eb] shadow z-20
     w-[90vw] h-[70vh] sm:w-[80vw] sm:h-[60vh] md:w-[60vw] md:h-[50vh] lg:w-[440px] lg:h-[534px]"
 	>
-		<button class="absolute top-2 right-2" on:click={toggleMinimize}>
-			{#if isMinimized}
+		<button class="absolute top-2 right-2" on:click={openChatWithMessage}>
+			{#if isChatOpen}
 				<MaximizeIcon />
 			{:else}
 				<MinimizedIcon />
@@ -122,7 +120,6 @@
 		</button>
 
 		<div class="flex flex-col space-y-1.5 pb-6">
-			<h2 class="font-semibold text-lg tracking-tight">👋</h2>
 			<p class="text-sm text-[#6b7280] leading-3"><strong> Ciao da Fantabalùn! 👋</strong></p>
 		</div>
 
@@ -177,7 +174,7 @@
 
 {#if isMinimized}
 	<div id="chat-container" class="fixed bottom-4 right-4 p-6 rounded-lg w-[30px] h-[30px] z-20">
-		<button class="absolute bottom-4 right-4" on:click={toggleMinimize}>
+		<button class="absolute bottom-4 right-4" on:click={openChatWithMessage}>
 			<MessageIcon />
 		</button>
 	</div>

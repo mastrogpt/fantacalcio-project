@@ -7,6 +7,7 @@
 	import confrontoGiocatori from '$lib/assets/confrontoGiocatori.png';
 	import articlesImg from '$lib/assets/articlesImg.jpg';
 	import lineups from '$lib/assets/lineups.jpg';
+	import { openChatWithMessage } from '$lib/store/store';
 
 	register();
 
@@ -27,6 +28,8 @@
 			description:
 				'<strong> Chiedigli quello che ti pare </strong>, come faresti con un amico al bar &#x1F37A <br> Chiedi un parere su un calciatore o un confronto tra due calciatori <br> Oppure, <strong> allega uno screenshot </strong> di una conversazione in cui un fantallenatore ti offre uno scambio. <br> FantaBalunbot sarà in grado di capire come aiutarti a vincere! <br> No, <strong> non scola la pasta </strong>  &#x1F35D A questo non ci siamo ancora arrivati.',
 			imageUrl: lineups,
+			buttonLabel: 'Chiedilo ar bot',
+			buttonOnClick: () => openChatWithMessage(),
 			imageAlt: 'img 4'
 		},
 		{
