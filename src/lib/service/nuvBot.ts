@@ -1,26 +1,29 @@
 import axios from "axios";
 
-export async function chat(input: string, threadId: string): Promise<any> {
+export interface ChatInput {
+  message: string;
+  file?: any; 
+  threadId?: string;
+}
+
+export async function chat(input: ChatInput): Promise<any> {
+  //console.log("INPUT", input);
   const apiUrl = "https://nuvolaris.dev/api/v1/web/fantatest/chatwidget/chat";
   const headers = {
     "Content-Type": "application/json",
   };
-  let requestData;
-  if (threadId) requestData = {
-    thread_id: threadId,
-    message: input,
+
+  const requestData = {
+    message: input.message,
+    ...(input.threadId && { thread_id: input.threadId }),
+    ...(input.file && { attachments: input.file }),
   };
-  else requestData = {
-     message: input,
-  }
 
   try {
     const response = await axios.post(apiUrl, requestData, { headers });
-    return response
+    return response;
   } catch (error) {
     console.error("Error:", error);
     throw error;
   }
 }
-
-

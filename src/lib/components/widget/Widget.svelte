@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { chat } from '$lib/service/nuvBot';
+	import { chat, type ChatInput } from '$lib/service/nuvBot';
 	import MinimizedIcon from './MinimizedIcon.svelte';
 	import MaximizeIcon from './MaximizeIcon.svelte';
 	import ChatMessage from './ChatMessage.svelte';
@@ -14,18 +14,15 @@
 	let isLoading = false;
 	let isMinimized = true;
 	let lastMessageIsUser = true;
-	let threadId = '';
+	let threadId: string | undefined;
+	let payload: ChatInput;
 
 	let files: FileList | null = null;
 	let filePreview: string | null = null;
 
 	const regexEmail = /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/;
 
-	$: if (files && files.length > 0) {
-		filePreview = URL.createObjectURL(files[0]);
-	} else {
-		filePreview = null;
-	}
+	$: filePreview = files && files.length > 0 ? URL.createObjectURL(files[0]) : null;
 
 	function handleKeyPress(event: KeyboardEvent) {
 		if (event.key === 'Enter' && !isLoading) {
@@ -50,14 +47,16 @@
 
 		if (files && files.length > 0) {
 			fileBase64 = await toBase64(files[0]);
+			//('FILES base64 is', fileBase64);
 		}
 
-		const payload = {
+		payload = {
 			message: userMessage,
-			file: fileBase64
+			threadId: threadId,
+			file: fileBase64 || undefined
 		};
 
-		const aiResponse = await chat(payload, threadId);
+		const aiResponse = await chat(payload);
 		threadId = aiResponse?.data?.id;
 
 		isLoading = false;
@@ -88,7 +87,7 @@
 			...messages,
 			{
 				type: 'ai',
-				text: "Benvenuto! 🤓 Te serve 'n consiglio pe' l'asta? Voi fa' 'na chiacchierata? Dimme 'n po'!",
+				text: "Che te serve? 'N consiglio pe' l'asta? Una chiacchierata? Dime! T'hanno proposto uno scambio?",
 				id: messages.length
 			}
 		];
@@ -163,8 +162,9 @@
 						bind:value={userMessage}
 						on:keypress={handleKeyPress}
 					/>
-
-					<Button size="small" variant="accent" label="Submit" onClick={postMessage} />
+					{#if !isLoading}
+						<Button size="small" variant="accent" label="Submit" onClick={postMessage} />
+					{/if}
 				</div>
 			</div>
 		</div>
