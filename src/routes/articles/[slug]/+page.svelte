@@ -2,6 +2,8 @@
 	import { goto } from '$app/navigation';
 	import Loader from '$lib/components/atoms/Loader.svelte';
 	import ArticlesSlider from '$lib/components/atoms/sliders/ArticlesSlider.svelte';
+	import Carousel from '$lib/components/atoms/sliders/Carousel.svelte';
+	import ArticleSliderSlide from '$lib/components/atoms/sliders/partials/ArticleSliderSlide.svelte';
 	import { getArticlesList, type IArticlesProps } from '$lib/service/fantaicalcio/getArticles';
 
 	export let data: IArticlesProps;
@@ -47,13 +49,18 @@
 <div class="flex flex-col justify-center items-center my-20">
 	<h3>Altri articoli</h3>
 
-	<div class="flex my-10">
-		{#await getArticlesList()}
-			<Loader />
-		{:then data}
-			<ArticlesSlider {data} />
-		{/await}
-	</div>
+	{#await getArticlesList()}
+		<Loader />
+	{:then data}
+		<Carousel autoplay={2000}>
+			{#each data as { id, author, creation_date, subtitle, title }, index (index)}
+				<ArticleSliderSlide
+					onClick={(e) => goto('/articles/' + e)}
+					sliderData={{ id, author, creationDate: creation_date, subtitle, title }}
+				/>
+			{/each}
+		</Carousel>
+	{/await}
 </div>
 
 <style>

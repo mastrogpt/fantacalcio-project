@@ -1,15 +1,14 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import { chat, type ChatInput } from '$lib/service/nuvBot';
-	import MinimizedIcon from './MinimizedIcon.svelte';
-	import MaximizeIcon from './MaximizeIcon.svelte';
-	import ChatMessage from './ChatMessage.svelte';
-	import MessageIcon from './MessageIcon.svelte';
-	import Loader from '../atoms/Loader.svelte';
-	import Button from '../atoms/button/button.svelte';
-	import UploadIcon from './UploadIcon.svelte';
-	import SendMessageIcon from './SendMessageIcon.svelte';
 	import { isChatOpen, openChatWithMessage } from '$lib/store/store';
+	import { onMount } from 'svelte';
+	import Loader from '../atoms/Loader.svelte';
+	import ChatMessage from './ChatMessage.svelte';
+	import MaximizeIcon from './MaximizeIcon.svelte';
+	import MessageIcon from './MessageIcon.svelte';
+	import MinimizedIcon from './MinimizedIcon.svelte';
+	import SendMessageIcon from './SendMessageIcon.svelte';
+	import UploadIcon from './UploadIcon.svelte';
 
 	let messages: { type: string; text: string; id: number; file?: string }[] = [];
 	let userMessage: string = '';

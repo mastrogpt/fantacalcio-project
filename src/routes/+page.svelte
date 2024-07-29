@@ -1,14 +1,14 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
-	import anime from 'animejs';
-	import HeroSlider from '$lib/components/atoms/sliders/HeroSlider.svelte';
-	import TableCard from '$lib/components/organisms/tableCard/TableCard.svelte';
-	import TeamsComparator from '$lib/components/organisms/teamsComparator/TeamsComparator.svelte';
+	import { goto } from '$app/navigation';
 	import Loader from '$lib/components/atoms/Loader.svelte';
-	import { getArticlesList } from '$lib/service/fantaicalcio/getArticles';
-	import JoinCta from '$lib/components/molecules/JoinCta.svelte';
 	import Carousel from '$lib/components/atoms/sliders/Carousel.svelte';
+	import HeroSlider from '$lib/components/atoms/sliders/HeroSlider.svelte';
 	import ArticleSliderSlide from '$lib/components/atoms/sliders/partials/ArticleSliderSlide.svelte';
+	import JoinCta from '$lib/components/molecules/JoinCta.svelte';
+	import TableCard from '$lib/components/organisms/tableCard/TableCard.svelte';
+	import { getArticlesList } from '$lib/service/fantaicalcio/getArticles';
+	import anime from 'animejs';
+	import { onMount } from 'svelte';
 
 	let heroTitle: HTMLHeadingElement;
 	let heroSubtitle: HTMLHeadingElement;
@@ -75,6 +75,7 @@
 >
 	<TableCard />
 </section>
+
 <section
 	id="articles"
 	class="articles-section flex flex-col items-center justify-center text-center my-10 py-20 gap-4 bg-accent"
@@ -85,35 +86,14 @@
 		<Loader />
 	{:then data}
 		<Carousel autoplay={2000}>
-			{#each data as { author, creation_date, subtitle, title }, index (index)}
+			{#each data as { id, author, creation_date, subtitle, title }, index (index)}
 				<ArticleSliderSlide
-					onClick={() => console.log('')}
-					sliderData={{ author, creationDate: creation_date, subtitle, title }}
+					onClick={(e) => goto('/articles/' + e)}
+					sliderData={{ id, author, creationDate: creation_date, subtitle, title }}
 				/>
 			{/each}
-
-			<span slot="left-control">Left</span>
-			<span slot="right-control">Right</span>
 		</Carousel>
 	{/await}
-
-	<!-- 
-	<Carousel autoplay={2000}>
-		{#await getArticlesList()}
-			<Loader />
-		{:then data}
-			{#each data as { author, creation_date, subtitle, title }, index (index)}
-				<ArticleSliderSlide
-					onClick={() => console.log('')}
-					sliderData={{ author, creationDate: creation_date, subtitle, title }}
-				/>
-			{/each}
-		{/await}
-
-
-		<span slot="left-control">Left</span>
-		<span slot="right-control">Right</span>
-	</Carousel> -->
 </section>
 
 <!-- <section class="lineup-section flex flex-col text-center gap-5 py-5" id="composition">

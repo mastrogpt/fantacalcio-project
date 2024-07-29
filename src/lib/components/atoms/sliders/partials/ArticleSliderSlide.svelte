@@ -1,17 +1,18 @@
 <script lang="ts">
 	export let sliderData: {
+		id?: number;
 		title?: string;
 		subtitle?: string;
 		author?: string;
 		creationDate?: string;
 	} = {};
 
-	export let onClick: () => void;
+	export let onClick: (id: number) => void;
 </script>
 
 <!-- svelte-ignore a11y-no-static-element-interactions -->
 <!-- svelte-ignore a11y-click-events-have-key-events -->
-<swiper-slide class="mx-[20px]" on:click={onClick}>
+<swiper-slide class="mx-[20px]" on:click={() => onClick(sliderData.id || 0)}>
 	<div class="article-card">
 		<div class="text-wrapper">
 			<h4 class="article-title font-bold">{sliderData?.title}</h4>
