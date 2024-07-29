@@ -29,11 +29,13 @@
 						<strong>Statistiche calciatori comprese di grafici</strong> raggruppati per gruppo di giornate
 					</li>
 					<li>Valutazione Rosa: <strong>carichi la tua rosa e ti generiamo uno score</strong></li>
+					<br />
 					<li>
 						Voice suggestions: se le immagini e i testi non bastano, potrai <strong
 							>chiedere al FantaBalùnBot consigli direttamente a voce!</strong
 						>
 					</li>
+					<br />
 					<li>
 						<strong>Statistiche dettagliate dei team </strong>
 					</li>
@@ -50,14 +52,14 @@
 
 			<p class="text-lg mb-4">
 				L'amico che ne sa, ma che non pretende di aver sempre ragione, perché il fantacalcio è arte
-				e improvvisazione, oltre che strategia. E noi, oltre i buoni consigli, vogliamo portare
+				e improvvisazione, oltre che strategia. E noi, oltre ai buoni consigli, vogliamo portare
 				fortuna!
 			</p>
 		</div>
 
 		<div class="text-section mb-8 italic text-center">
 			<p class="text-lg">
-				Usiamo Nuvolaris come piattaforma, il serverless come filosofia. Se vuoi unirti a noi,<br />
+				Usiamo Nuvolaris come piattaforma, il serverless come filosofia. Se vuoi unirti a noi<br />
 
 				<JoinCta />
 			</p>
