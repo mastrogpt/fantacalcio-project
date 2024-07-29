@@ -42,7 +42,7 @@
 			imageAlt: 'img 2'
 		},
 		{
-			title: 'Informati con gli AIrticoli &#x1F4F0',
+			title: 'Leggi gli AIrticoli &#x1F4F0',
 			description: `Siamo pigri per scriverli noi, ma vogliamo stare al passo! I nostri <strong>scraper generano articoli basandosi sulle ultime news</strong> <br>Sono precisi, ma a volte possono prendere un granchio. Come dici? Anche i giornalisti reali? &#x1F62D`,
 			buttonLabel: 'Leggi gli airticoli',
 			buttonOnClick: () => goto('#articles'),
