@@ -15,8 +15,8 @@
 		{
 			title: `<h2>Benvenuto su FantaBalùn! </h2> <h6> Powered by Nuvolaris </h6></p>`,
 			description: `
-            <p>Anche se è importante <strong>vincere</strong>, a volte puoi solo <strong>imprecare</strong> <br> Con noi farai
- <strong><span style="font-size: 24px;"> entrambe le cose!</span></strong></p>
+            <p>È importante <span style="font-size: 20px;"><strong>vincere</strong></span>, ma volte puoi solo <span style="font-size: 20px;"><strong>imprecare</strong></span>. <br> Con noi farai
+ <strong><span style="font-size: 20px;"> entrambe le cose!</span></strong></p>
             `,
 			buttonLabel: 'Il progetto',
 			buttonOnClick: () => goto('/about'),
@@ -24,18 +24,18 @@
 			imageAlt: 'img 1'
 		},
 		{
-			title: 'Chiedilo ar Bot &#x1F916',
+			title: 'Chiedilo al Bot &#x1F916',
 			description:
-				'<strong> Chiedi ciò che vuoi </strong>, come ad un amico al bar &#x1F37A: un parere, un confronto tra due calciatori <br> Oppure, <strong> allega uno screen </strong> di un messaggio in cui un fantallenatore ti propone uno scambio. <br> il bot sarà in grado di aiutarti! <br> No, <strong> non scola la pasta </strong>  &#x1F35D A questo non ci siamo ancora arrivati',
+				'<strong>Chiedi ciò che vuoi</strong>, come ad un amico al bar. Un parere, un confronto tra calciatori... Oppure, <strong>allega uno screen</strong> di un messaggio in cui un fantallenatore ti propone uno scambio.<br>Il bot sarà in grado di aiutarti!<br>No, <strong>non scola la pasta!</strong>&#x1F35D A questo non siamo ancora arrivati',
 			imageUrl: fantabalunbot,
-			buttonLabel: 'Chiedilo ar bot',
+			buttonLabel: 'Chiedilo al bot',
 			buttonOnClick: () => openChatWithMessage(),
 			imageAlt: 'img 4'
 		},
 		{
 			title: 'Confronta i giocatori &#x2696',
 			description:
-				'Tanto alla fine sceglierai quello che avevi già in mente, però almeno così fingerai di averla soppesata bene',
+				'Tanto alla fine sceglierai quello che avevi già in mente, però almeno così fingerai di averla <span style="font-size: 20px;"><strong>soppesata bene!</strong></span></p>',
 			buttonLabel: 'Vai ai giocatori',
 			buttonOnClick: () => goto('#players'),
 			imageUrl: compare2,
@@ -43,7 +43,7 @@
 		},
 		{
 			title: 'Informati con gli AIrticoli &#x1F4F0',
-			description: `Siamo pigri per scriverli noi, ma vogliamo stare al passo! I nostri <strong> scraper generano articoli basandosi sulle ultime notizie </strong> <br> Non dar loro retta, a volte non ci azzeccano. Come dici? Nemmeno i giornalisti veri? Ah no? &#x1F62D`,
+			description: `Siamo pigri per scriverli noi, ma vogliamo stare al passo! I nostri <strong>scraper generano articoli basandosi sulle ultime news</strong> <br>Sono precisi, ma a volte possono prendere un granchio. Come dici? Anche i giornalisti reali? &#x1F62D`,
 			buttonLabel: 'Leggi gli airticoli',
 			buttonOnClick: () => goto('#articles'),
 			imageUrl: news,
