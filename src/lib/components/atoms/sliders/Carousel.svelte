@@ -137,6 +137,10 @@
 		align-items: center;
 	}
 
+	.carousel > div.slides {
+		width: 95%;
+	}
+
 	.slides {
 		width: 100%;
 		overflow: hidden;
@@ -148,6 +152,9 @@
 	}
 
 	.navigation {
+		position: absolute;
+		top: 50%;
+		transform: translateY(-50%);
 		display: flex;
 		justify-content: space-between;
 		width: 100%;
