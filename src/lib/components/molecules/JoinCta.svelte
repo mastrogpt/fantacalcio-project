@@ -55,10 +55,10 @@
 				</div>
 				<div class="flex-auto">
 					<div class="mt-2">
-						<Button variant="accent" label="Vedremo" onClick={showModalFun} />
+						<Button variant="accent" label="Annulla" onClick={showModalFun} />
 
 						{#if regexEmail.test(userMessage)}
-							<Button label="Eccomi" onClick={postMessage} />
+							<Button label="Conferma" onClick={postMessage} />
 						{/if}
 					</div>
 				</div>
