@@ -36,6 +36,11 @@
 					>Giocatori</a
 				>
 				<a
+					href="/#articles"
+					class={`nav-link text-lg font-medium hover:text-accent transition duration-300 ease-in-out ${currentPath === $page.url.origin + '/about' ? 'active' : ''}`}
+					>Gli AIrticoli</a
+				>
+				<a
 					href="/about"
 					class={`nav-link text-lg font-medium hover:text-accent transition duration-300 ease-in-out ${currentPath === $page.url.origin + '/about' ? 'active' : ''}`}
 					>Il progetto</a
@@ -77,6 +82,11 @@
 				href="/#players"
 				class={`nav-link block text-lg font-medium hover:text-accent transition duration-300 py-2 ease-in-out ${currentPath === $page.url.origin + '/#players' ? 'active' : ''}`}
 				>Giocatori</a
+			>
+			<a
+				href="/#articles"
+				class={`nav-link text-lg font-medium hover:text-accent transition duration-300 ease-in-out ${currentPath === $page.url.origin + '/about' ? 'active' : ''}`}
+				>Gli AIrticoli</a
 			>
 			<a
 				href="/about"
