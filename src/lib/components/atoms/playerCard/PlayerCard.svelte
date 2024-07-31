@@ -6,6 +6,7 @@
 	import imgFallback from '$lib/assets/player-img-fallback.jpeg';
 	import { marked } from 'marked';
 	import { goto } from '$app/navigation';
+	import { openChatWithMessage } from '$lib/store/store';
 
 	interface ICardRowProps {
 		label?: string;
@@ -32,6 +33,7 @@
 		isLoading = true;
 		aiOpinion = await getAiOpinionFromBackend(playerData);
 		showMessage();
+		openChatWithMessage();
 		isLoading = false;
 	};
 

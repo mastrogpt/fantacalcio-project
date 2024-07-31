@@ -85,7 +85,7 @@
 	{#await getArticlesList()}
 		<Loader />
 	{:then data}
-		<Carousel autoplay={2000}>
+		<Carousel autoplay={4000}>
 			{#each data as { id, author, creation_date, subtitle, title }, index (index)}
 				<ArticleSliderSlide
 					onClick={(e) => goto('/articles/' + e)}

@@ -103,11 +103,6 @@
 		{/if}
 
 		<div class="flex flex-col items-center justify-center gap-10 max-w-screen-lg">
-			<p>
-				Non che ci azzecchi spesso, ma puoi chiedere una piccola previsione della partita al nostro
-				ainalist...
-			</p>
-
 			{#if aiOpinionLoading && !aiPresentationWritingEffect}
 				<Loader />
 			{:else}

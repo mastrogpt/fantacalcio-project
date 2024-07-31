@@ -62,7 +62,7 @@
 	centeredSlides={true}
 	slides-per-view="auto"
 	autoplay={{
-		delay: 5000,
+		delay: 7000,
 		disableOnInteraction: true,
 		pauseOnMouseEnter: true
 	}}
