@@ -15,7 +15,7 @@
 		{
 			title: `<h2>Benvenuto su FantaBalùn! </h2> <h6> Powered by Nuvolaris </h6></p>`,
 			description: `
-            <p>È importante <span style="font-size: 20px;"><strong>vincere</strong></span>, ma volte puoi solo <span style="font-size: 20px;"><strong>imprecare</strong></span>. <br> Con noi farai
+            <p>È importante <span style="font-size: 20px;"><strong>vincere</strong></span>, ma a volte puoi solo <span style="font-size: 20px;"><strong>imprecare</strong></span>. <br> Con noi farai
  <strong><span style="font-size: 20px;"> entrambe le cose!</span></strong></p>
             `,
 			buttonLabel: 'Il progetto',
