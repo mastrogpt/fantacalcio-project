@@ -2,13 +2,13 @@
 	import { chat, type ChatInput } from '$lib/service/nuvBot';
 	import { isChatOpen, openChatWithMessage } from '$lib/store/store';
 	import { onMount } from 'svelte';
-	import Loader from '../atoms/Loader.svelte';
 	import ChatMessage from './ChatMessage.svelte';
 	import MaximizeIcon from './MaximizeIcon.svelte';
 	import MessageIcon from './MessageIcon.svelte';
 	import MinimizedIcon from './MinimizedIcon.svelte';
 	import SendMessageIcon from './SendMessageIcon.svelte';
 	import UploadIcon from './UploadIcon.svelte';
+	import SpeakingLoader from '../atoms/SpeakingLoader.svelte';
 
 	let messages: { type: string; text: string; id: number; file?: string }[] = [];
 	let userMessage: string = '';
@@ -84,7 +84,6 @@
 	}
 
 	onMount(() => {
-		console.log('IS CHAT OPEN ON COMPONENT? ', isChatOpen);
 		showMessage();
 		messages = [
 			...messages,
@@ -124,7 +123,7 @@
 				<ChatMessage {message} />
 			{/each}
 			{#if lastMessageIsUser && isLoading}
-				<Loader />
+				<SpeakingLoader />
 			{/if}
 		</div>
 
