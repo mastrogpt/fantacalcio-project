@@ -5,7 +5,7 @@
 	import Tab from '$lib/components/atoms/tab/Tab.svelte';
 	import Table from '$lib/components/molecules/table/table.svelte';
 	import { getPlayersList, getUnavailablePlayers } from '$lib/service/fantaicalcio/getPlayers';
-	import { selectedRows } from '$lib/store/store';
+	import { selectedRows, isPlayerCardOpen, handlePlayerCardOpening } from '$lib/store/store';
 	import ComparePlayers from '../comparePlayers/ComparePlayers.svelte';
 	import PlayerDetails from '../playerDetails/PlayerDetails.svelte';
 
@@ -13,7 +13,6 @@
 	let season_id: number;
 	let team_id: number;
 
-	let showModal = false;
 	let activeTab = 'all';
 	let modalContent;
 
@@ -22,11 +21,6 @@
 			label: 'FantaBalùn',
 			value: 'all'
 		}
-		//,
-		// {
-		// 	label: 'Indisponibili',
-		// 	value: 'unavailable'
-		// }
 	];
 
 	const playersCols = [
@@ -44,14 +38,13 @@
 	];
 
 	const toggleModal = (modalContentEnum: 'DETAILS' | 'COMPARE') => {
-		showModal = !showModal;
+		handlePlayerCardOpening();
 
 		switch (modalContentEnum) {
 			case 'DETAILS':
 				return (modalContent = PlayerDetails);
 			case 'COMPARE':
 				return (modalContent = ComparePlayers);
-
 			default:
 				break;
 		}
@@ -65,11 +58,10 @@
 		selectedRows.set(new Set());
 	};
 
-	// Function to check if the selected player has the same role as the already selected players
 	function canSelectPlayer(player) {
 		const currentSelections = Array.from($selectedRows);
 		if (currentSelections.length === 0) {
-			return true; // No selections yet, allow selection
+			return true;
 		}
 		return currentSelections.every((row) => row.role === player.role);
 	}
@@ -78,12 +70,9 @@
 <div class="table-card container flex flex-col align-center justify-center">
 	<div class="flex justify-between items-center gap-5 mb-5 flex-col md:flex-row">
 		<h2 class="text-2xl font-bold mb-4 text-white">Lista giocatori</h2>
-
 		<Tab {tabs} {activeTab} onTabClick={handleTabChange} />
 	</div>
-
 	<hr />
-
 	<p class="my-5 px-10">
 		Noi ti forniamo la lista dei giocatori, i dati e le <strong>
 			statistiche più interessanti</strong
@@ -91,7 +80,6 @@
 		Tu decidi chi mandare in campo. Se hai dei dubbi, seleziona due calciatori e comparali. <br /> Magari
 		ti confonderemo le idee!
 	</p>
-
 	<div class="table-card-content">
 		{#if activeTab === 'all'}
 			{#await getPlayersList()}
@@ -136,11 +124,9 @@
 			{/await}
 		{/if}
 	</div>
-
 	{#if Array.from($selectedRows).length > 0}
 		<div class="mt-4">
 			<h3 class="text-xl font-bold mb-2">Giocatori selezionati:</h3>
-
 			{#if Array.from($selectedRows).length === 0}
 				<p>Non hai s.</p>
 			{:else if Array.from($selectedRows).length === 2}
@@ -149,7 +135,6 @@
 						<li>{row.name}</li>
 					{/each}
 				</ul>
-
 				<div class="flex flex-col gap-5 justify-center items-center my-2">
 					<Button
 						label="Cancella selezione"
@@ -158,7 +143,6 @@
 						size="small"
 						onClick={clearSelection}
 					/>
-
 					<Button
 						label="Compara"
 						size="small"
@@ -172,14 +156,13 @@
 						<li>{row.name}</li>
 					{/each}
 				</ul>
-
 				<Button label="Cancella selezione" outline noBorder onClick={clearSelection} />
 			{/if}
 		</div>
 	{/if}
 </div>
 
-{#if showModal}
+{#if $isPlayerCardOpen}
 	<Modal
 		{toggleModal}
 		{modalContent}

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { chat, type ChatInput } from '$lib/service/nuvBot';
-	import { isChatOpen, openChatWithMessage } from '$lib/store/store';
+	import { isChatOpen, openChat, type Message } from '$lib/store/store';
 	import { onMount } from 'svelte';
 	import ChatMessage from './ChatMessage.svelte';
 	import MaximizeIcon from './MaximizeIcon.svelte';
@@ -9,11 +9,11 @@
 	import SendMessageIcon from './SendMessageIcon.svelte';
 	import UploadIcon from './UploadIcon.svelte';
 	import SpeakingLoader from '../atoms/SpeakingLoader.svelte';
+	import { messages, updateMessages } from '$lib/store/store';
 
-	let messages: { type: string; text: string; id: number; file?: string }[] = [];
+	//let messages: { type: string; text: string; id: number; file?: string }[] = [];
 	let userMessage: string = '';
 	let isLoading = false;
-	let isMinimized = true;
 	let lastMessageIsUser = true;
 	let threadId: string | undefined;
 	let payload: ChatInput;
@@ -34,14 +34,14 @@
 	async function postMessage() {
 		lastMessageIsUser = true;
 
-		const message = {
+		const message: Message = {
 			type: 'user',
 			text: userMessage,
-			id: messages.length,
+			id: messages.subscribe.length,
 			file: filePreview
 		};
 
-		messages = [...messages, message];
+		updateMessages(message);
 
 		isLoading = true;
 
@@ -62,10 +62,8 @@
 		threadId = aiResponse?.data?.id;
 
 		isLoading = false;
-		messages = [
-			...messages,
-			{ type: 'ai', text: aiResponse?.data?.output[0]?.text?.value, id: messages.length }
-		];
+		updateMessages({ type: 'ai', text: aiResponse?.data?.output[0]?.text?.value });
+
 		lastMessageIsUser = false;
 		userMessage = '';
 		files = null;
@@ -85,15 +83,20 @@
 
 	onMount(() => {
 		showMessage();
-		messages = [
-			...messages,
-			{
-				type: 'ai',
-				text: "Che te serve? 'N consiglio pe' l'asta? Una chiacchierata? Dime! T'hanno proposto uno scambio?",
-				id: messages.length
-			}
-		];
+		updateMessages({
+			type: 'ai',
+			text: "Che te serve? 'N consiglio pe' l'asta? Una chiacchierata? Dime! T'hanno proposto uno scambio?",
+			id: messages.subscribe.length
+		});
 	});
+
+	export function postAiMessageOnWidget(aiMessage: string) {
+		updateMessages({
+			type: 'ai',
+			text: aiMessage,
+			id: messages.subscribe.length
+		});
+	}
 
 	function showMessage() {
 		const chatContainer = document.getElementById('chat-container');
@@ -109,7 +112,7 @@
 		class="flex flex-col fixed bottom-4 right-4 bg-white p-2 rounded-lg border border-[#e5e7eb] shadow z-20
     w-[90vw] h-[70vh] sm:w-[80vw] sm:h-[60vh] md:w-[60vw] md:h-[50vh] lg:w-[440px] lg:h-[534px]"
 	>
-		<button class="absolute top-2 right-2" on:click={openChatWithMessage}>
+		<button class="absolute top-2 right-2" on:click={openChat}>
 			{#if isChatOpen}
 				<MaximizeIcon />
 			{:else}
@@ -119,7 +122,7 @@
 
 		<!-- Chat Messages -->
 		<div class="pr-2 flex-1 overflow-auto">
-			{#each messages as message}
+			{#each $messages as message}
 				<ChatMessage {message} />
 			{/each}
 			{#if lastMessageIsUser && isLoading}
@@ -168,7 +171,7 @@
 
 {#if !$isChatOpen}
 	<div id="chat-container" class="fixed bottom-4 right-4 p-6 rounded-lg w-[30px] h-[30px] z-20">
-		<button class="absolute bottom-4 right-4" on:click={openChatWithMessage}>
+		<button class="absolute bottom-4 right-4" on:click={openChat}>
 			<MessageIcon />
 		</button>
 	</div>

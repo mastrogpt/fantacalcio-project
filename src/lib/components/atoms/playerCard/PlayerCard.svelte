@@ -2,11 +2,12 @@
 	import { getAiOpinionFromBackend } from '$lib/service/ai/aiOpinion';
 	import type { PlayerCompleteStats } from '$lib/service/fantaicalcio/getStats';
 	import Button from '../button/button.svelte';
-	import Loader from '../Loader.svelte';
 	import imgFallback from '$lib/assets/player-img-fallback.jpeg';
 	import { marked } from 'marked';
 	import { goto } from '$app/navigation';
-	import { openChatWithMessage } from '$lib/store/store';
+	import { openChatWithAIMessage, handlePlayerCardOpening } from '$lib/store/store';
+	import type { Message } from '$lib/store/store';
+	import SpeakingLoader from '../SpeakingLoader.svelte';
 
 	interface ICardRowProps {
 		label?: string;
@@ -27,13 +28,21 @@
 	let aiOpinionWritingEffect: string | Promise<string>;
 	let isLoading = false;
 
+	let aiMessage: Message;
+
 	const getAiOpinion = async () => {
 		if (!playerData) return;
 
 		isLoading = true;
 		aiOpinion = await getAiOpinionFromBackend(playerData);
-		showMessage();
-		openChatWithMessage();
+		handlePlayerCardOpening();
+
+		aiMessage = {
+			text: aiOpinion,
+			type: 'ai'
+		};
+
+		openChatWithAIMessage(aiMessage);
 		isLoading = false;
 	};
 
@@ -110,7 +119,7 @@
 		{/if}
 
 		{#if isLoading}
-			<Loader />
+			<SpeakingLoader />
 		{/if}
 
 		{#if aiOpinionWritingEffect && !isLoading}
