@@ -30,7 +30,7 @@
 	}
 
 	function sendMessage(message) {
-		console.log('🔎 [Chatbot][message] =>', message);
+		//console.log('🔎 [Chatbot][message] =>', message);
 		// Implementa la logica per inviare un messaggio
 	}
 

@@ -16,11 +16,11 @@
 	onMount(async () => {
 		if (player_id) {
 			const data = await getStatsDataById(player_id, season_id, team_id);
-			console.log('🔎 [PlayerDetails][data] =>', data);
+			//console.log('🔎 [PlayerDetails][data] =>', data);
 
 			playerData = data;
 			let playerStats = data?.player_statistic;
-			console.log('🔎 [PlayerDetails][playerStats] =>', playerStats);
+			//console.log('🔎 [PlayerDetails][playerStats] =>', playerStats);
 
 			cardRow = [
 				{
