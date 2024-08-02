@@ -53,6 +53,9 @@
 			file: fileBase64 || undefined,
 			threadId: $threadId || undefined
 		};
+		fileBase64 = '';
+		filePreview = null;
+		files = null;
 		await nuvbotChat(payload);
 
 		isLoading = false;

@@ -37,6 +37,7 @@ export function nuvbotChat(userMessage: ChatInput): Promise<string> {
 
     if (currentThreadId) {
         payload.threadId = currentThreadId;
+        payload.file = userMessage.file || undefined;
     }
 
     return chat(payload)
