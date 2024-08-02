@@ -1,9 +1,8 @@
 <script lang="ts">
-	import { getAiComparison } from '$lib/service/ai/aiComparator';
 	import { getStatsData } from '$lib/service/fantamaster/getStats';
 	import { onMount } from 'svelte';
-	import { nuvbotChat, selectedRows, type Message } from '$lib/store/store';
-	import { openChatWithAIMessage, handlePlayerCardOpening } from '$lib/store/store';
+	import { nuvbotChat, selectedRows } from '$lib/store/store';
+	import { handleNuvBotChatOpening, handlePlayerCardOpening } from '$lib/store/store';
 	import SpeakingLoader from '$lib/components/atoms/SpeakingLoader.svelte';
 	import type { ChatInput } from '$lib/service/nuvBot';
 
@@ -27,7 +26,7 @@
 		aiComparsion = await nuvbotChat(message);
 
 		loading = false;
-		openChatWithAIMessage(true);
+		handleNuvBotChatOpening(true);
 
 		handlePlayerCardOpening();
 	});

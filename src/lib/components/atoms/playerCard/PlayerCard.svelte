@@ -4,7 +4,7 @@
 	import imgFallback from '$lib/assets/player-img-fallback.jpeg';
 	import { marked } from 'marked';
 	import { goto } from '$app/navigation';
-	import { openChatWithAIMessage, handlePlayerCardOpening, nuvbotChat } from '$lib/store/store';
+	import { handleNuvBotChatOpening, handlePlayerCardOpening, nuvbotChat } from '$lib/store/store';
 	import type { Message } from '$lib/store/store';
 	import SpeakingLoader from '../SpeakingLoader.svelte';
 	import type { ChatInput } from '$lib/service/nuvBot';
@@ -46,7 +46,7 @@
 			type: 'ai'
 		};
 
-		openChatWithAIMessage(true);
+		handleNuvBotChatOpening(true);
 		isLoading = false;
 	};
 

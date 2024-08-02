@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { type ChatInput } from '$lib/service/nuvBot';
-	import { isChatOpen, nuvbotChat, openChat, type Message } from '$lib/store/store';
+	import { isChatOpen, nuvbotChat, handleNuvBotChatOpening, type Message } from '$lib/store/store';
 	import { onMount } from 'svelte';
 	import ChatMessage from './ChatMessage.svelte';
 	import MaximizeIcon from './MaximizeIcon.svelte';
@@ -101,7 +101,7 @@
 		class="flex flex-col fixed bottom-4 right-4 bg-white p-2 rounded-lg border border-[#e5e7eb] shadow z-20
     w-[90vw] h-[70vh] sm:w-[80vw] sm:h-[60vh] md:w-[60vw] md:h-[50vh] lg:w-[440px] lg:h-[534px]"
 	>
-		<button class="absolute top-2 right-2" on:click={openChat}>
+		<button class="absolute top-2 right-2" on:click={() => handleNuvBotChatOpening()}>
 			{#if $isChatOpen}
 				<MaximizeIcon />
 			{:else}
@@ -160,7 +160,7 @@
 
 {#if !$isChatOpen}
 	<div id="chat-container" class="fixed bottom-4 right-4 p-6 rounded-lg w-[30px] h-[30px] z-20">
-		<button class="absolute bottom-4 right-4" on:click={openChat}>
+		<button class="absolute bottom-4 right-4" on:click={() => handleNuvBotChatOpening()}>
 			<MessageIcon />
 		</button>
 	</div>

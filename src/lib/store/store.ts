@@ -8,11 +8,8 @@ export const selectedRows = writable(new Set());
 export const isPlayerCardOpen = writable(false);
 export const threadId = writable<string | null>(null);
 
-export function openChat() {
-    isChatOpen.update(value => !value);
-}
 
-export function openChatWithAIMessage(open ?: boolean) {
+export function handleNuvBotChatOpening(open?: boolean) {
     if(open) {
         isChatOpen.set(open);
     }

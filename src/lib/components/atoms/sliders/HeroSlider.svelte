@@ -7,7 +7,7 @@
 	import fantabalun from '$lib/assets/fantabalun.png';
 	import compare2 from '$lib/assets/compare2.png';
 	import news from '$lib/assets/news.png';
-	import { openChat } from '$lib/store/store';
+	import { handleNuvBotChatOpening } from '$lib/store/store';
 
 	register();
 
@@ -29,7 +29,7 @@
 				'<strong>Chiedi ciò che vuoi</strong>, come ad un amico al bar. Un parere, un confronto tra calciatori... Oppure, <strong>allega uno screen</strong> di un messaggio in cui un fantallenatore ti propone uno scambio.<br>Il bot sarà in grado di aiutarti!<br>No, <strong>non scola la pasta!</strong>&#x1F35D A questo non siamo ancora arrivati',
 			imageUrl: fantabalunbot,
 			buttonLabel: 'Chiedilo al bot',
-			buttonOnClick: () => openChat(),
+			buttonOnClick: () => handleNuvBotChatOpening(true),
 			imageAlt: 'img 4'
 		},
 		{
