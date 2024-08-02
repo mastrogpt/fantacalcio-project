@@ -2,14 +2,15 @@
 	import { getAiComparison } from '$lib/service/ai/aiComparator';
 	import { getStatsData } from '$lib/service/fantamaster/getStats';
 	import { onMount } from 'svelte';
-	import { selectedRows, type Message } from '$lib/store/store';
+	import { nuvbotChat, selectedRows, type Message } from '$lib/store/store';
 	import { openChatWithAIMessage, handlePlayerCardOpening } from '$lib/store/store';
 	import SpeakingLoader from '$lib/components/atoms/SpeakingLoader.svelte';
+	import type { ChatInput } from '$lib/service/nuvBot';
 
 	const playersToCompare = [];
 	let aiComparsion = '';
 	let loading = false;
-	let message: Message;
+	let message: ChatInput;
 
 	onMount(async () => {
 		loading = true;
@@ -19,15 +20,14 @@
 			playersToCompare.push(row);
 		});
 
-		aiComparsion = await getAiComparison(playersToCompare);
-
 		message = {
-			text: aiComparsion,
-			type: 'ai'
+			message: 'Mi fai un confronto tra questi due?' + JSON.stringify(playersToCompare)
 		};
 
+		aiComparsion = await nuvbotChat(message);
+
 		loading = false;
-		openChatWithAIMessage(message);
+		openChatWithAIMessage(true);
 
 		handlePlayerCardOpening();
 	});

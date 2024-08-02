@@ -1,13 +1,13 @@
 <script lang="ts">
-	import { getAiOpinionFromBackend } from '$lib/service/ai/aiOpinion';
 	import type { PlayerCompleteStats } from '$lib/service/fantaicalcio/getStats';
 	import Button from '../button/button.svelte';
 	import imgFallback from '$lib/assets/player-img-fallback.jpeg';
 	import { marked } from 'marked';
 	import { goto } from '$app/navigation';
-	import { openChatWithAIMessage, handlePlayerCardOpening } from '$lib/store/store';
+	import { openChatWithAIMessage, handlePlayerCardOpening, nuvbotChat } from '$lib/store/store';
 	import type { Message } from '$lib/store/store';
 	import SpeakingLoader from '../SpeakingLoader.svelte';
+	import type { ChatInput } from '$lib/service/nuvBot';
 
 	interface ICardRowProps {
 		label?: string;
@@ -29,12 +29,16 @@
 	let isLoading = false;
 
 	let aiMessage: Message;
+	let userMessage: ChatInput;
 
 	const getAiOpinion = async () => {
 		if (!playerData) return;
 
 		isLoading = true;
-		aiOpinion = await getAiOpinionFromBackend(playerData);
+		userMessage = {
+			message: ('mi dai un parere su questo calciatore? ' + JSON.stringify(playerData)) as string
+		};
+		aiOpinion = await nuvbotChat(userMessage);
 		handlePlayerCardOpening();
 
 		aiMessage = {
@@ -42,7 +46,7 @@
 			type: 'ai'
 		};
 
-		openChatWithAIMessage(aiMessage);
+		openChatWithAIMessage(true);
 		isLoading = false;
 	};
 

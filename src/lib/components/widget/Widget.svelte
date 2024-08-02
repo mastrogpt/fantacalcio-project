@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { chat, type ChatInput } from '$lib/service/nuvBot';
-	import { isChatOpen, openChat, type Message } from '$lib/store/store';
+	import { type ChatInput } from '$lib/service/nuvBot';
+	import { isChatOpen, nuvbotChat, openChat, type Message } from '$lib/store/store';
 	import { onMount } from 'svelte';
 	import ChatMessage from './ChatMessage.svelte';
 	import MaximizeIcon from './MaximizeIcon.svelte';
@@ -9,19 +9,17 @@
 	import SendMessageIcon from './SendMessageIcon.svelte';
 	import UploadIcon from './UploadIcon.svelte';
 	import SpeakingLoader from '../atoms/SpeakingLoader.svelte';
-	import { messages, updateMessages } from '$lib/store/store';
+	import { messages, updateMessages, threadId } from '$lib/store/store';
 
-	//let messages: { type: string; text: string; id: number; file?: string }[] = [];
 	let userMessage: string = '';
 	let isLoading = false;
 	let lastMessageIsUser = true;
-	let threadId: string | undefined;
 	let payload: ChatInput;
 
 	let files: FileList | null = null;
 	let filePreview: string | null = null;
 
-	const regexEmail = /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/;
+	$: isChatOpen;
 
 	$: filePreview = files && files.length > 0 ? URL.createObjectURL(files[0]) : null;
 
@@ -38,36 +36,27 @@
 			type: 'user',
 			text: userMessage,
 			id: messages.subscribe.length,
-			file: filePreview
+			file: filePreview || undefined
 		};
+		isLoading = true;
 
 		updateMessages(message);
-
-		isLoading = true;
 
 		let fileBase64 = '';
 
 		if (files && files.length > 0) {
 			fileBase64 = await toBase64(files[0]);
-			//('FILES base64 is', fileBase64);
 		}
 
 		payload = {
 			message: userMessage,
-			threadId: threadId,
-			file: fileBase64 || undefined
+			file: fileBase64 || undefined,
+			threadId: $threadId || undefined
 		};
-
-		const aiResponse = await chat(payload);
-		threadId = aiResponse?.data?.id;
+		await nuvbotChat(payload);
 
 		isLoading = false;
-		updateMessages({ type: 'ai', text: aiResponse?.data?.output[0]?.text?.value });
-
 		lastMessageIsUser = false;
-		userMessage = '';
-		files = null;
-		filePreview = null;
 
 		showMessage();
 	}
@@ -113,7 +102,7 @@
     w-[90vw] h-[70vh] sm:w-[80vw] sm:h-[60vh] md:w-[60vw] md:h-[50vh] lg:w-[440px] lg:h-[534px]"
 	>
 		<button class="absolute top-2 right-2" on:click={openChat}>
-			{#if isChatOpen}
+			{#if $isChatOpen}
 				<MaximizeIcon />
 			{:else}
 				<MinimizedIcon />

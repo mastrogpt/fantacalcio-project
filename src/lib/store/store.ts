@@ -1,34 +1,63 @@
+import { chat, type ChatInput } from '$lib/service/nuvBot';
 import { marked } from 'marked';
-import { writable } from 'svelte/store';
+import { writable, get } from 'svelte/store';
+
 export const isChatOpen = writable(false);
 export const messages = writable<Message[]>([]);
 export const selectedRows = writable(new Set());
 export const isPlayerCardOpen = writable(false);
+export const threadId = writable<string | null>(null);
 
 export function openChat() {
-	isChatOpen.update(value => !value);
+    isChatOpen.update(value => !value);
 }
 
-export function openChatWithAIMessage(aiMessage: Message) {
-	updateMessages(aiMessage)
-	isChatOpen.update(value => !value);
+export function openChatWithAIMessage(open ?: boolean) {
+    if(open) {
+        isChatOpen.set(open);
+    }
+    else {
+        isChatOpen.update(value => !value);
+    }
 }
 
 export function updateMessages(message: Message) {
-	
-	message.text = marked.parse(message.text) as string;
-
-	messages.update(currentMessages => [...currentMessages, message]);
+    message.text = marked.parse(message.text) as string;
+    messages.update(currentMessages => [...currentMessages, message]);
 }
+
 
 export function handlePlayerCardOpening() {
-	isPlayerCardOpen.update(open => !open);
+    isPlayerCardOpen.update(open => !open);
 }
 
+export function nuvbotChat(userMessage: ChatInput): Promise<string> {
+    const currentThreadId = get(threadId);
+
+    const payload: any = {
+        message: userMessage.message,
+    };
+
+    if (currentThreadId) {
+        payload.threadId = currentThreadId;
+    }
+
+    return chat(payload)
+        .then(aiResponse => {
+            threadId.set(aiResponse?.data?.id || null);
+            updateMessages({ type: 'ai', text: aiResponse?.data?.output[0]?.text?.value });
+            return aiResponse.data.output[0].text.value; 
+        })
+        .catch(error => {
+            console.error("Error in nuvbotChat:", error);
+            throw error; 
+        });
+}
+
+
 export type Message = {
-	text: string;
-	type: string;
-	id ?: number;
-	file?: string;
+    text: string;
+    type: string;
+    id?: number;
+    file?: string;
 };
-  
