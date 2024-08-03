@@ -33,11 +33,11 @@ export function nuvbotChat(userMessage: ChatInput): Promise<string> {
 
     const payload: any = {
         message: userMessage.message,
+        file : userMessage.file || undefined
     };
 
     if (currentThreadId) {
         payload.threadId = currentThreadId;
-        payload.file = userMessage.file || undefined;
     }
 
     return chat(payload)
