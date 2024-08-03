@@ -1,6 +1,7 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, PrimaryKeyConstraint, delete
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import insert 
+from sqlalchemy import func
 from models.base import Base
 import uuid
 
@@ -47,10 +48,11 @@ class CurrentPlayerTeam(Base):
                     return {"statusCode": 500, "body": "Failed to save records"}
             else:
                 return {"statusCode": 400, "body": "No records provided in the payload"}
-        else:
-            if 'team_id' in args and 'player_id' in args:
+        elif 'team_id' in args and 'player_id' in args:
                 return {"body": CurrentPlayerTeam.get_record_by_id(session, args['team_id'], args['player_id'])}
-            else:
+        elif 'with_names' in args:
+                return {"body": CurrentPlayerTeam.get_all_with_names(session, args.get('player_name'))}
+        else:
                 return {"body": CurrentPlayerTeam.get_all(session)}
 
     @staticmethod
@@ -89,6 +91,46 @@ class CurrentPlayerTeam(Base):
             return []
         finally:
             session.close()
+    
+    from sqlalchemy import func
+
+    @staticmethod
+    def get_all_with_names(session, player_name=None):
+        try:
+            from models.player import Player
+            from models.team import Team
+
+            query = session.query(CurrentPlayerTeam, Player.name.label('player_name'), Player.firstname.label('first_name'), Team.name.label('team_name')).join(
+                Player, Player.id == CurrentPlayerTeam.player_id
+            ).join(
+                Team, Team.id == CurrentPlayerTeam.team_id
+            )
+
+            if player_name:
+                
+                player_name_normalized = player_name.lower()
+                query = query.filter(
+                func.lower(func.unaccent(Player.name)).like(f"%{player_name_normalized}%")
+                )
+
+
+            records = query.all()
+
+            return [{
+                'team_id': record[0].team_id,
+                'player_id': record[0].player_id,
+                'player_first_name': record[2], 
+                'number': record[0].number,
+                'position': record[0].position,
+                'player_name': record[1],
+                'team_name': record[3]
+            } for record in records]
+        except Exception as e:
+            print("Error during records loading:", e)
+            return []
+        finally:
+            session.close()
+
 
     @staticmethod
     def delete_all(session):
