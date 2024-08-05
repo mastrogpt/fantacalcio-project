@@ -38,7 +38,7 @@
 				<a
 					href="/#articles"
 					class={`nav-link text-lg font-medium hover:text-accent transition duration-300 ease-in-out ${currentPath === $page.url.origin + '/about' ? 'active' : ''}`}
-					>Gli AIrticoli</a
+					>Gli AI-rticoli</a
 				>
 				<a
 					href="/about"
@@ -86,7 +86,7 @@
 			<a
 				href="/#articles"
 				class={`nav-link text-lg font-medium hover:text-accent transition duration-300 ease-in-out ${currentPath === $page.url.origin + '/about' ? 'active' : ''}`}
-				>Gli AIrticoli</a
+				>Gli AI-rticoli</a
 			>
 			<a
 				href="/about"

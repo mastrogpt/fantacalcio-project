@@ -47,6 +47,7 @@
 		};
 
 		handleNuvBotChatOpening(true);
+		showAiOpinion = false;
 		isLoading = false;
 	};
 
@@ -69,7 +70,6 @@
 			season_id: String(season_id),
 			team_id: String(team_id)
 		};
-
 		const searchParams = new URLSearchParams(data);
 
 		goto(`/players/${playerData?.player?.id}?` + searchParams);

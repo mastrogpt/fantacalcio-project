@@ -1,18 +1,12 @@
 <script lang="ts">
-	import Button from '$lib/components/atoms/button/button.svelte';
 	import Loader from '$lib/components/atoms/Loader.svelte';
 	import PlayerCard from '$lib/components/atoms/playerCard/PlayerCard.svelte';
 	import ArticlesSlider from '$lib/components/atoms/sliders/ArticlesSlider.svelte';
-	import { getAiOpinionFromBackend } from '$lib/service/ai/aiOpinion';
 	import { getArticlesList } from '$lib/service/fantaicalcio/getArticles';
 	import { getStatsDataById, type PlayerCompleteStats } from '$lib/service/fantaicalcio/getStats';
-	import { marked } from 'marked';
 	import { onMount } from 'svelte';
 
 	let playerData: PlayerCompleteStats | undefined = undefined;
-	let aiOpinion: string;
-	let aiOpinionWritingEffect: any;
-	let isLoading = false;
 
 	onMount(async () => {
 		const urlParams = new URLSearchParams(window.location.search);
@@ -27,24 +21,8 @@
 		}
 	});
 
-	const getAiOpinion = async () => {
-		if (!playerData) return;
-
-		isLoading = true;
-		aiOpinion = await getAiOpinionFromBackend(playerData);
-		showMessage();
-		isLoading = false;
-	};
-
 	const sleep = async (ms: number) => {
 		return new Promise((resolve) => setTimeout(resolve, ms));
-	};
-
-	const showMessage = async () => {
-		for (let i = 0; i < aiOpinion.length; i++) {
-			aiOpinionWritingEffect = marked.parse(aiOpinion.substring(0, i + 1));
-			await sleep(20);
-		}
 	};
 </script>
 
@@ -117,32 +95,9 @@
 		</div>
 
 		<hr />
-
-		<div class="flex flex-col justify-center items-center mt-5 gap-2 my-10 px-5">
-			<h5>Vuoi un parere?</h5>
-
-			<p class="text-2xl">👇🏻</p>
-
-			{#if !aiOpinion && !isLoading}
-				<Button variant="accent" label="AIpinion" onClick={getAiOpinion} />
-			{/if}
-
-			{#if isLoading}
-				<Loader variant="accent" />
-			{/if}
-
-			{#if aiOpinionWritingEffect && !isLoading}
-				<hr />
-
-				<div class="aipinion-text flex flex-col w-full p-[2px] mt-3 text-center gap-2">
-					{@html aiOpinionWritingEffect}
-				</div>
-			{/if}
-		</div>
 	</div>
 
 	<div class="flex flex-col gap-[10px] container">
-		
 		<h4>Articoli correlati</h4>
 
 		<div class="flex my-10">

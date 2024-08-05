@@ -3,11 +3,9 @@
 	import { fade, scale } from 'svelte/transition';
 
 	export let modalContent;
-	export let modalProps;
+	export let modalProps = {};
 	export let toggleModal;
 	export let title = '';
-
-	let Component = modalContent;
 
 	const handleEscape = (event) => {
 		if (event.key === 'Escape') {
@@ -16,12 +14,12 @@
 	};
 
 	onMount(() => {
-		document.body.style.overflow = 'hidden'; // Disable background scrolling
+		document.body.style.overflow = 'hidden';
 		window.addEventListener('keydown', handleEscape);
 	});
 
 	onDestroy(() => {
-		document.body.style.overflow = ''; // Re-enable background scrolling
+		document.body.style.overflow = ''; //
 		window.removeEventListener('keydown', handleEscape);
 	});
 
@@ -38,39 +36,37 @@
 	};
 </script>
 
-<!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
-<div
-	class="modal"
-	on:click={closeOnClickOutside}
-	on:keydown={handleKeyDown}
-	role="dialog"
-	aria-modal="true"
-	tabindex="-1"
-	transition:fade
->
-	<div class="modal-container" transition:scale={{ duration: 300 }}>
-		<div class="modal-header">
-			{#if title}
-				<h4>
-					{title}
-				</h4>
-			{/if}
+{#if modalContent}
+	<div
+		class="modal"
+		on:click={closeOnClickOutside}
+		on:keydown={handleKeyDown}
+		role="dialog"
+		aria-modal="true"
+		tabindex="-1"
+		transition:fade
+	>
+		<div class="modal-container" transition:scale={{ duration: 300 }}>
+			<div class="modal-header">
+				{#if title}
+					<h4>{title}</h4>
+				{/if}
 
-			<button class="close-button" on:click={toggleModal} aria-label="Close modal">
-				<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
-					<path
-						d="M18.3 5.71a1 1 0 00-1.42-1.42L12 9.59 7.11 4.69A1 1 0 105.69 6.11L10.59 12l-4.9 4.89a1 1 0 101.42 1.42L12 14.41l4.89 4.89a1 1 0 001.42-1.42L13.41 12l4.89-4.89z"
-					/>
-				</svg>
-			</button>
-		</div>
+				<button class="close-button" on:click={toggleModal} aria-label="Close modal">
+					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+						<path
+							d="M18.3 5.71a1 1 0 00-1.42-1.42L12 9.59 7.11 4.69A1 1 0 105.69 6.11L10.59 12l-4.9 4.89a1 1 0 101.42 1.42L12 14.41l4.89 4.89a1 1 0 001.42-1.42L13.41 12l4.89-4.89z"
+						/>
+					</svg>
+				</button>
+			</div>
 
-		<div class="modal-content">
-			<Component {...modalProps} />
-			<!-- <svelte:component this={modalContent} {...modalProps} /> -->
+			<div class="modal-content">
+				<svelte:component this={modalContent} {...modalProps} />
+			</div>
 		</div>
 	</div>
-</div>
+{/if}
 
 <style>
 	.modal {
