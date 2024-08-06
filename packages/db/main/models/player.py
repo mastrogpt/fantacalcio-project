@@ -567,11 +567,13 @@ class Player(Base):
     @staticmethod
     def season_goleadors(session, args):
         try:
+            print("INVOKED GOLEADORS")
+
             ps = aliased(PlayerStatistics)
             p = aliased(Player)
             t = aliased(Team)
             
-            players_teams = (session.query(
+            goleadors = (session.query(
                     ps,
                     p.name.label('player_name'),
                     p.photo.label('player_photo'),
@@ -586,9 +588,11 @@ class Player(Base):
                 .limit(5)
                 .all())
             
+            print("GOLEADORS ARRIVED", goleadors)
+            
             result = []
 
-            for ps, player_name, player_photo, team_name in players_teams:
+            for ps, player_name, player_photo, team_name in goleadors:
                 player_dict = ps._to_dict()
                 player_dict['player_name'] = player_name
                 player_dict['player_photo'] = player_photo
@@ -600,7 +604,7 @@ class Player(Base):
                         
         except Exception as e:
             print(f"Error during fetching Serie A goleadors for current season: {e}")
-            return {"statusCode": 500, "body": f"Error during fetching Serie A players for current season: {e}"}
+            return {"statusCode": 500, "body": f"Error during fetching Serie A Goleadors: {e}"}
         finally:
             session.close()
 
