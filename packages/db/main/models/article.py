@@ -1,13 +1,17 @@
 import uuid
-from sqlalchemy import Column, Integer, String, Text, ARRAY, DateTime
-from sqlalchemy.orm import sessionmaker
 from sqlalchemy.sql import delete
 from models.base import Base
 from sqlalchemy import desc
-
+from sqlalchemy import Column, Integer, String,Text, ARRAY, DateTime, Boolean, Date, insert, UniqueConstraint, delete
+from sqlalchemy.orm import sessionmaker, relationship
+from sqlalchemy.orm.exc import NoResultFound
+from sqlalchemy.dialects.postgresql import insert as pg_insert
+from sqlalchemy.orm import aliased
+from sqlalchemy import func
+from sqlalchemy import desc
+import uuid
 from datetime import datetime
-
-
+import json
 class Article(Base):
     __tablename__ = 'articles'
 
@@ -59,6 +63,8 @@ class Article(Base):
         if 'id' in args:
             article = Article.get_article_by_id(session, args['id'])
             return {"body": article if article else "Article not found"}
+        elif 'last' in args:
+            return {"body": Article.get_last_articles(session, args)}
         else:
             return {"body": Article.get_all_articles(session)}
 
@@ -78,6 +84,29 @@ class Article(Base):
             return []
         finally:
             session.close()
+
+    def get_last_articles(session, args):
+        try:
+            tag = args.get('tag', None)
+            print(f"Received tag: {tag}")
+            
+            query = session.query(Article).order_by(desc(Article.creation_date))
+            
+            if tag:
+                query = query.filter(Article.tag.any(tag))
+
+            limit = 5 if tag else 10
+            articles = query.limit(limit).all()
+            
+            print("Articles fetched:", articles)
+            
+            return [article.to_dict() for article in articles]
+        except Exception as e:
+            print("Error during articles loading:", e)
+            return []
+        finally:
+            session.close()
+
 
     def delete_all(session):
         try:
