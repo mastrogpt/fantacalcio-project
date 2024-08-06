@@ -2,6 +2,8 @@ from sqlalchemy import Column, Integer, String, Boolean, Date, insert, UniqueCon
 from sqlalchemy.orm import sessionmaker, relationship
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.dialects.postgresql import insert as pg_insert
+from sqlalchemy.orm import aliased
+from sqlalchemy import func
 from models.season import Season
 from models.team import Team
 from models.current_player_team import CurrentPlayerTeam
@@ -13,7 +15,6 @@ from models.base import Base
 from models.utils import Redis_utils
 import uuid
 from datetime import datetime
-from sqlalchemy import func
 import json
 
 class Player(Base):
@@ -71,6 +72,8 @@ class Player(Base):
             return Player.upsert_handler(session, args)            
         elif query_type == "update":
             return Player.update_handler(session, args)
+        elif query_type == "stats":
+            return Player.stats_handler(session, args)
         else:
             return Player.get_handler(session, args)
 
@@ -150,6 +153,14 @@ class Player(Base):
         elif "current_serie_a_players_filtered_by_surname_and_team" in args:
                 return {"body": Player.current_serie_a_players_filtered_by_surname_and_team(session,args)}
         return {"body": Player.get_all(session,args)}
+    
+    @staticmethod
+    def stats_handler(session, args):
+        if 'goleador' in args:
+            player = Player.season_goleadors(session, args)
+            return {"body": player if player else "Player not found"}
+        return {"body": Player.get_all(session,args)}
+    
 
     @staticmethod
     def delete_handler(session, args):
@@ -553,7 +564,46 @@ class Player(Base):
         finally:
             session.close()                
 
-    
+    @staticmethod
+    def season_goleadors(session, args):
+        try:
+            ps = aliased(PlayerStatistics)
+            p = aliased(Player)
+            t = aliased(Team)
+            
+            players_teams = (session.query(
+                    ps,
+                    p.name.label('player_name'),
+                    p.photo.label('player_photo'),
+                    t.name.label('team')
+                )
+                .join(p, p.id == ps.player_id)
+                .join(t, t.id == ps.team_id)
+                .join(PlayerSeason, p.id == PlayerSeason.player_id)
+                .join(Season, PlayerSeason.season_id == Season.id)
+                .filter(ps.goals_total.isnot(None), Season.current == True)
+                .order_by(ps.goals_total.desc(), ps.team_id.asc(), ps.season_id.asc())
+                .limit(5)
+                .all())
+            
+            result = []
+
+            for ps, player_name, player_photo, team_name in players_teams:
+                player_dict = ps._to_dict()
+                player_dict['player_name'] = player_name
+                player_dict['player_photo'] = player_photo
+                player_dict['team'] = team_name
+                
+                result.append(player_dict)
+
+            return result
+                        
+        except Exception as e:
+            print(f"Error during fetching Serie A goleadors for current season: {e}")
+            return {"statusCode": 500, "body": f"Error during fetching Serie A players for current season: {e}"}
+        finally:
+            session.close()
+
     @staticmethod
     def update_player_by_id(session, player_id, update_fields):
         try:
