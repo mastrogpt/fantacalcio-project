@@ -88,25 +88,26 @@ class Article(Base):
     def get_last_articles(session, args):
         try:
             tag = args.get('tag', None)
-            print(f"Received tag: {tag}")
             
-            query = session.query(Article).order_by(desc(Article.creation_date))
+            
+            query = session.query(Article.content).order_by(desc(Article.creation_date))
             
             if tag:
                 query = query.filter(Article.tag.any(tag))
 
             limit = 5 if tag else 10
-            articles = query.limit(limit).all()
+            results = query.limit(limit).all()
             
-            print("Articles fetched:", articles)
+            print("Articles fetched:", results)
             
-            return [article.to_dict() for article in articles]
+            articles = [{'content': r[0]} for r in results]
+            
+            return articles
         except Exception as e:
             print("Error during articles loading:", e)
             return []
         finally:
             session.close()
-
 
     def delete_all(session):
         try:
