@@ -645,8 +645,8 @@ class Player(Base):
                 .join(t, t.id == ps.team_id)
                 .join(PlayerSeason, p.id == PlayerSeason.player_id)
                 .join(Season, PlayerSeason.season_id == Season.id)
-                .filter(ps.games_appearences.isnot(None))
-                .order_by(desc(ps.games_appearences), desc(ps.rating), ps.team_id.asc(), ps.season_id.asc()))
+                .filter(ps.games_appearences.isnot(None), ps.games_lineups.isnot(None), ps.rating.isnot(None))
+                .order_by(desc(ps.goals_total), desc(ps.goals_assists), desc(ps.games_lineups), desc(ps.rating), ps.team_id.asc(), ps.season_id.asc()))
 
             # Apply season filter
             if season:
