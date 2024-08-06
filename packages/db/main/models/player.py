@@ -577,21 +577,29 @@ class Player(Base):
             ps = aliased(PlayerStatistics)
             p = aliased(Player)
             t = aliased(Team)
+
+            season = args.get('season')
             
-            goleadors = (session.query(
-                    ps,
-                    p.name.label('player_name'),
-                    p.photo.label('player_photo'),
-                    t.name.label('team')
-                )
-                .join(p, p.id == ps.player_id)
-                .join(t, t.id == ps.team_id)
-                .join(PlayerSeason, p.id == PlayerSeason.player_id)
-                .join(Season, PlayerSeason.season_id == Season.id)
-                .filter(ps.goals_total.isnot(None))
-                .order_by(ps.goals_total.desc(), ps.team_id.asc(), ps.season_id.asc())
-                .limit(5)
-                .all())
+            query = (session.query(
+                        ps,
+                        p.name.label('player_name'),
+                        p.photo.label('player_photo'),
+                        t.name.label('team')
+                    )
+                    .join(p, p.id == ps.player_id)
+                    .join(t, t.id == ps.team_id)
+                    .join(PlayerSeason, p.id == PlayerSeason.player_id)
+                    .join(Season, PlayerSeason.season_id == Season.id)
+                    .filter(ps.goals_total.isnot(None))
+                    .order_by(ps.goals_total.desc(), ps.team_id.asc(), ps.season_id.asc()))
+            
+            # Apply season filter
+            if season:
+                query = query.filter(Season.id == season)
+            else:
+                query = query.filter(Season.current == True)
+            
+            goleadors = query.limit(5).all()
             
             print("GOLEADORS ARRIVED", goleadors)
             
@@ -606,12 +614,13 @@ class Player(Base):
                 result.append(player_dict)
 
             return result
-                        
+
         except Exception as e:
-            print(f"Error during fetching Serie A goleadors for current season: {e}")
-            return {"statusCode": 500, "body": f"Error during fetching Serie A Goleadors: {e}"}
+            print(f"Error during fetching Serie A goleadors: {e}")
+            return {"statusCode": 500, "body": f"Error during fetching Serie A goleadors: {e}"}
         finally:
             session.close()
+
             
     
 
@@ -621,23 +630,29 @@ class Player(Base):
             print("INVOKED TOP PLAYERS BY TEAM AND ROLE")
             team = args.get("team")
             role = args.get("role")
+            season = args.get("season")
             ps = aliased(PlayerStatistics)
             p = aliased(Player)
             t = aliased(Team)
 
             query = (session.query(
-            ps,
-            p.name.label('player_name'),
-            p.photo.label('player_photo'),
-            t.name.label('team')
-            )
-            .join(p, p.id == ps.player_id)
-            .join(t, t.id == ps.team_id)
-            .join(PlayerSeason, p.id == PlayerSeason.player_id)
-            .join(Season, PlayerSeason.season_id == Season.id)
-            .filter(ps.games_appearences.isnot(None), Season.current == True)
-            .order_by(desc(ps.games_appearences), desc(ps.rating), ps.team_id.asc(), ps.season_id.asc()))
+                ps,
+                p.name.label('player_name'),
+                p.photo.label('player_photo'),
+                t.name.label('team')
+                )
+                .join(p, p.id == ps.player_id)
+                .join(t, t.id == ps.team_id)
+                .join(PlayerSeason, p.id == PlayerSeason.player_id)
+                .join(Season, PlayerSeason.season_id == Season.id)
+                .filter(ps.games_appearences.isnot(None))
+                .order_by(desc(ps.games_appearences), desc(ps.rating), ps.team_id.asc(), ps.season_id.asc()))
 
+            # Apply season filter
+            if season:
+                query = query.filter(Season.id == season)
+            else:
+                query = query.filter(Season.current == True)
 
             if team:
                 query = query.filter(t.name.ilike(f'%{team}%'))
@@ -649,7 +664,7 @@ class Player(Base):
 
             goleadors = query.all()
             
-            print("GOLEADORS ARRIVED", goleadors)
+            print("TOP PLAYERS ARRIVED", goleadors)
             
             result = []
 
@@ -669,6 +684,7 @@ class Player(Base):
             return {"statusCode": 500, "body": f"Error during fetching Serie A top players: {e}"}
         finally:
             session.close()
+
 
 
     @staticmethod
