@@ -4,6 +4,8 @@ from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.orm import aliased
 from sqlalchemy import func
+from sqlalchemy import desc
+
 from models.season import Season
 from models.team import Team
 from models.current_player_team import CurrentPlayerTeam
@@ -158,6 +160,9 @@ class Player(Base):
     def stats_handler(session, args):
         if 'goleador' in args:
             player = Player.season_goleadors(session, args)
+            return {"body": player if player else "Player not found"}
+        if 'top_players_by_team_and_role' in args:
+            player = Player.top_players_by_team_and_role(session, args)
             return {"body": player if player else "Player not found"}
         return {"body": Player.get_all(session,args)}
     
@@ -583,7 +588,7 @@ class Player(Base):
                 .join(t, t.id == ps.team_id)
                 .join(PlayerSeason, p.id == PlayerSeason.player_id)
                 .join(Season, PlayerSeason.season_id == Season.id)
-                .filter(ps.goals_total.isnot(None), Season.current == True)
+                .filter(ps.goals_total.isnot(None))
                 .order_by(ps.goals_total.desc(), ps.team_id.asc(), ps.season_id.asc())
                 .limit(5)
                 .all())
@@ -607,6 +612,64 @@ class Player(Base):
             return {"statusCode": 500, "body": f"Error during fetching Serie A Goleadors: {e}"}
         finally:
             session.close()
+            
+    
+
+    @staticmethod
+    def top_players_by_team_and_role(session, args):
+        try:
+            print("INVOKED TOP PLAYERS BY TEAM AND ROLE")
+            team = args.get("team")
+            role = args.get("role")
+            ps = aliased(PlayerStatistics)
+            p = aliased(Player)
+            t = aliased(Team)
+
+            query = (session.query(
+            ps,
+            p.name.label('player_name'),
+            p.photo.label('player_photo'),
+            t.name.label('team')
+            )
+            .join(p, p.id == ps.player_id)
+            .join(t, t.id == ps.team_id)
+            .join(PlayerSeason, p.id == PlayerSeason.player_id)
+            .join(Season, PlayerSeason.season_id == Season.id)
+            .filter(ps.games_appearences.isnot(None), Season.current == True)
+            .order_by(desc(ps.games_appearences), desc(ps.rating), ps.team_id.asc(), ps.season_id.asc()))
+
+
+            if team:
+                query = query.filter(t.name.ilike(f'%{team}%'))
+
+            if role:
+                query = query.filter(ps.position.ilike(f'%{role}%'))
+
+            query = query.limit(5)
+
+            goleadors = query.all()
+            
+            print("GOLEADORS ARRIVED", goleadors)
+            
+            result = []
+
+            for ps, player_name, player_photo, team_name in goleadors:
+                player_dict = ps._to_dict()
+                player_dict['player_name'] = player_name
+                player_dict['player_photo'] = player_photo
+                player_dict['team'] = team_name
+                
+                result.append(player_dict)
+
+            return result
+
+                            
+        except Exception as e:
+            print(f"Error during fetching Serie A top players: {e}")
+            return {"statusCode": 500, "body": f"Error during fetching Serie A top players: {e}"}
+        finally:
+            session.close()
+
 
     @staticmethod
     def update_player_by_id(session, player_id, update_fields):
