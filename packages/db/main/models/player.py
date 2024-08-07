@@ -159,11 +159,11 @@ class Player(Base):
     
     @staticmethod
     def stats_handler(session, args):
-        if 'top_players_by_team_and_role' in args:
-            player = Player.top_players_by_team_and_role(session, args)
-            return {"body": player if player else "Player not found"}
-        elif 'assist_man' in args:
+        if 'assist_man' in args:
             player = Player.best_assist_man(session, args)
+            return {"body": player if player else "Player not found"}
+        elif 'top_players_by_team_and_role' in args:
+            player = Player.top_players_by_team_and_role(session, args)
             return {"body": player if player else "Player not found"}
         return {"body": Player.get_all(session,args)}
     
