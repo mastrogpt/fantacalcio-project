@@ -78,7 +78,16 @@ class Article(Base):
             return {"body": Article.delete_all(session)}
 
     
-
+    def get_all_articles(session):
+        try:
+            articles = session.query(Article).order_by(desc(Article.creation_date)).all()
+            return [article.to_dict() for article in articles]
+        except Exception as e:
+            print("Error during articles loading:", e)
+            return []
+        finally:
+            session.close()
+            
     def get_last_articles(session, args):
         try:
             tag_search = args.get('tag', None)
