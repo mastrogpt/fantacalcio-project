@@ -12,6 +12,9 @@ from sqlalchemy import desc
 import uuid
 from datetime import datetime
 import json
+from sqlalchemy import func, literal_column, table, column
+from sqlalchemy.orm import aliased
+
 class Article(Base):
     __tablename__ = 'articles'
 
@@ -75,32 +78,34 @@ class Article(Base):
             return {"body": Article.delete_all(session)}
 
     
-    def get_all_articles(session):
-        try:
-            articles = session.query(Article).order_by(desc(Article.creation_date)).all()
-            return [article.to_dict() for article in articles]
-        except Exception as e:
-            print("Error during articles loading:", e)
-            return []
-        finally:
-            session.close()
 
     def get_last_articles(session, args):
         try:
-            tag = args.get('tag', None)
+            tag_search = args.get('tag', None)
             
+            query = session.query(Article).order_by(desc(Article.creation_date))
             
-            query = session.query(Article.content).order_by(desc(Article.creation_date))
+            if tag_search:
+                search_pattern = f"%{tag_search.lower()}%"
+                
+                subquery = (
+                    session.query(
+                        Article.id.label('article_id'), 
+                        func.unnest(Article.tag).label('tag')
+                    ).subquery()
+                )
+                
+                tags_alias = aliased(subquery)
+                
+                # Filter articles based on the unnest subquery
+                query = query.join(tags_alias, Article.id == tags_alias.c.article_id).filter(func.lower(tags_alias.c.tag).like(search_pattern))
             
-            if tag:
-                query = query.filter(Article.tag.any(tag))
-
-            limit = 5 if tag else 10
+            limit = 5 if tag_search else 10
             results = query.limit(limit).all()
             
             print("Articles fetched:", results)
             
-            articles = [{'content': r[0]} for r in results]
+            articles = [{'content': r.content} for r in results]
             
             return articles
         except Exception as e:
@@ -108,6 +113,7 @@ class Article(Base):
             return []
         finally:
             session.close()
+
 
     def delete_all(session):
         try:
