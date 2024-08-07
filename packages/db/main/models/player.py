@@ -1,3 +1,4 @@
+from models.fixtures import Fixture
 from sqlalchemy import Column, Integer, String, Boolean, Date, insert, UniqueConstraint, delete
 from sqlalchemy.orm import sessionmaker, relationship
 from sqlalchemy.orm.exc import NoResultFound
@@ -5,7 +6,7 @@ from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.orm import aliased
 from sqlalchemy import func
 from sqlalchemy import desc
-
+from sqlalchemy import case, func
 from models.season import Season
 from models.team import Team
 from models.current_player_team import CurrentPlayerTeam
@@ -628,12 +629,20 @@ class Player(Base):
     def top_players_by_team_and_role(session, args):
         try:
             print("INVOKED TOP PLAYERS BY TEAM AND ROLE")
+            min_rating = args.get('min_rating', 6.1)
+        
+            count_matches = Player.how_many_matches_until_now(session, args.get('season'))
+            matches_minimum_presence = Player.compute_matches_minum_presence(count_matches)
+            print("MINUM MATCHES IS", matches_minimum_presence)
             team = args.get("team")
             role = args.get("role")
             season = args.get("season")
             ps = aliased(PlayerStatistics)
             p = aliased(Player)
             t = aliased(Team)
+
+            if (role and role == "Goalkeeper"):
+                return Player.best_goalkeepers(session, matches_minimum_presence, args)
 
             query = (session.query(
                 ps,
@@ -645,8 +654,8 @@ class Player(Base):
                 .join(t, t.id == ps.team_id)
                 .join(PlayerSeason, p.id == PlayerSeason.player_id)
                 .join(Season, PlayerSeason.season_id == Season.id)
-                .filter(ps.games_appearences.isnot(None), ps.games_lineups.isnot(None), ps.rating.isnot(None))
-                .order_by(desc(ps.goals_total), desc(ps.goals_assists), desc(ps.games_lineups), desc(ps.rating), ps.team_id.asc(), ps.season_id.asc()))
+                .filter(ps.games_appearences.isnot(None), ps.games_appearences >= matches_minimum_presence, ps.games_lineups.isnot(None), ps.rating.isnot(None), ps.rating >= min_rating)
+                .order_by(desc(ps.goals_total), desc(ps.goals_assists), desc(ps.rating), desc(ps.games_lineups), ps.team_id.asc(), ps.season_id.asc()))
 
             # Apply season filter
             if season:
@@ -662,13 +671,19 @@ class Player(Base):
 
             query = query.limit(5)
 
-            goleadors = query.all()
+            top_players = query.all()
+
+            print("TOP PLAYERS", top_players)
+
+            if len(top_players) == 0:
+                args['min_rating'] = 5.95
+                return Player.top_players_by_team_and_role(session, args)
             
-            print("TOP PLAYERS ARRIVED", goleadors)
+            print("TOP PLAYERS ARRIVED", top_players)
             
             result = []
 
-            for ps, player_name, player_photo, team_name in goleadors:
+            for ps, player_name, player_photo, team_name in top_players:
                 player_dict = ps._to_dict()
                 player_dict['player_name'] = player_name
                 player_dict['player_photo'] = player_photo
@@ -684,7 +699,78 @@ class Player(Base):
             return {"statusCode": 500, "body": f"Error during fetching Serie A top players: {e}"}
         finally:
             session.close()
+    
 
+    @staticmethod
+    def best_goalkeepers(session, matches_minimum_presence, args):
+        try:
+            print("INVOKED BEST GOALKEEPERS")
+            min_rating = args.get('min_rating', 6.1)
+            team = args.get("team")
+            role = args.get("role")
+            season = args.get("season")
+            ps = aliased(PlayerStatistics)
+            p = aliased(Player)
+            t = aliased(Team)
+
+            query = (session.query(
+                        ps,
+                        p.name.label('player_name'),
+                        p.photo.label('player_photo'),
+                        t.name.label('team')
+                    )
+                    .join(p, p.id == ps.player_id)
+                    .join(t, t.id == ps.team_id)
+                    .join(PlayerSeason, p.id == PlayerSeason.player_id)
+                    .join(Season, PlayerSeason.season_id == Season.id)
+                    .filter(
+                        ps.games_lineups.isnot(None),
+                        ps.games_lineups >= matches_minimum_presence,
+                        ps.rating.isnot(None),
+                        ps.rating >= min_rating,
+                        ps.goals_saves.isnot(None),
+                        ps.goals_conceded.isnot(None)
+                    )
+                    .order_by(
+                        ps.goals_conceded.asc(),
+                        desc(ps.rating),
+                        desc(ps.goals_saves),
+                        desc(ps.games_lineups)
+                    )
+                    )
+
+            # Apply season filter
+            if season:
+                query = query.filter(Season.id == season)
+            else:
+                query = query.filter(Season.current == True)
+
+            if team:
+                query = query.filter(t.name.ilike(f'%{team}%'))
+
+            if role:
+                query = query.filter(ps.position.ilike(f'%{role}%'))
+
+            goleadors = query.limit(7)
+            print("Goalkeepers arrived", goleadors)
+
+            result = []
+            for ps_row in goleadors:
+                ps, player_name, player_photo, team_name = ps_row
+                player_dict = ps._to_dict() 
+                player_dict['player_name'] = player_name
+                player_dict['player_photo'] = player_photo
+                player_dict['team'] = team_name
+                
+                result.append(player_dict)
+
+            return result
+
+        except Exception as e:
+            print(f"Error during fetching Serie A top goalkeepers: {e}")
+            return {"statusCode": 500, "body": f"Error during fetching Serie A top players: {e}"}
+        finally:
+            session.close()
 
 
     @staticmethod
@@ -738,3 +824,25 @@ class Player(Base):
             'photo': self.photo,
             'apifootball_id': self.apifootball_id
         }
+
+    @staticmethod
+    def how_many_matches_until_now(session, season):
+        try:
+            if(season is None):
+                print("Cannot calculate matches number without season, setting default season to 2")
+                season = 2 #TODO handle this
+            matches = session.query(Fixture).filter(Fixture.season_id == season).count()
+            
+            print("MATCHES len", matches / 10)
+            return matches / 10
+          
+        except Exception as e:
+            print("Error while getting number of matches", e)
+            session.rollback()
+            return False
+        finally:
+            session.close()
+    
+    @staticmethod
+    def compute_matches_minum_presence(all_matches_count):
+        return all_matches_count * 0.7
