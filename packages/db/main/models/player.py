@@ -162,6 +162,9 @@ class Player(Base):
         if 'top_players_by_team_and_role' in args:
             player = Player.top_players_by_team_and_role(session, args)
             return {"body": player if player else "Player not found"}
+        elif 'assist_man' in args:
+            player = Player.best_assist_man(session, args)
+            return {"body": player if player else "Player not found"}
         return {"body": Player.get_all(session,args)}
     
 
@@ -718,6 +721,73 @@ class Player(Base):
         except Exception as e:
             print(f"Error during fetching Serie A top goalkeepers: {e}")
             return {"statusCode": 500, "body": f"Error during fetching Serie A top players: {e}"}
+        finally:
+            session.close()
+
+
+    @staticmethod
+    def best_assist_man(session, args):
+        try:
+            print("INVOKED BEST ASSISTMAN")
+            team = args.get("team")
+            role = args.get("role")
+            season = args.get("season")
+            ps = aliased(PlayerStatistics)
+            p = aliased(Player)
+            t = aliased(Team)
+
+            query = (session.query(
+                        ps,
+                        p.name.label('player_name'),
+                        p.photo.label('player_photo'),
+                        t.name.label('team')
+                    )
+                    .join(p, p.id == ps.player_id)
+                    .join(t, t.id == ps.team_id)
+                    .join(PlayerSeason, p.id == PlayerSeason.player_id)
+                    .join(Season, PlayerSeason.season_id == Season.id)
+                    .filter(
+                        ps.games_lineups.isnot(None),
+                        ps.rating.isnot(None),
+                        ps.goals_assists.isnot(None)
+                    )
+                    .order_by(
+                        desc(ps.goals_assists),
+                        desc(ps.rating)
+                    )
+                    )
+            # Apply season filter
+            if season:
+                query = query.filter(Season.id == season)
+            else:
+                query = query.filter(Season.current == True)
+
+            if team:
+                query = query.filter(t.name.ilike(f'%{team}%'))
+
+            if role:
+                query = query.filter(ps.position.ilike(f'%{role}%'))
+
+            print("QUERY IS", query)
+            assistman = query.limit(7).all()
+            print("Assistman arrived", assistman)
+
+            result = []
+            
+            for ps_row in assistman:
+                ps, player_name, player_photo, team_name = ps_row
+                player_dict = ps._to_dict() 
+                player_dict['player_name'] = player_name
+                player_dict['player_photo'] = player_photo
+                player_dict['team'] = team_name
+                
+                result.append(player_dict)
+
+            return result
+
+        except Exception as e:
+            print(f"Error during fetching Serie A top assistman: {e}")
+            return {"statusCode": 500, "body": f"Error during fetching Serie A top assistman: {e}"}
         finally:
             session.close()
 
