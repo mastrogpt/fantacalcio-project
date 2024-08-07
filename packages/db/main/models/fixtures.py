@@ -35,6 +35,7 @@ class Fixture(Base):
     home_team = relationship('Team', foreign_keys=[home_team_id], back_populates='fixtures_home')
     away_team = relationship('Team', foreign_keys=[away_team_id], back_populates='fixtures_away')
     fixture_statistics = relationship('FixtureStatistics', back_populates='fixture', cascade='all, delete-orphan')
+    fixture_player_statistics = relationship('FixturePlayerStatistics', back_populates='fixture', cascade='all, delete-orphan')
 
 
     def __init__(self, **kwargs):
@@ -111,8 +112,15 @@ class Fixture(Base):
             fixture = Fixture.get_by_id(session, args['id'])
             return {"body": fixture if fixture else "Fixture not found"}
         elif 'league_id' in args and 'season' in args:
-            fixtures = Fixture.get_fixtures_by_league_id_and_season(session, int(args['league_id']), int(args['season']))
-            return {"body": fixtures}               
+            if 'round' in args:
+                fixtures = Fixture.get_fixtures_by_round(session, int(args['league_id']), int(args['season']), int(args['round']))
+                return {"body": fixtures}
+            elif args.get('last_round'):
+                fixtures = Fixture.get_fixtures_last_round(session, int(args['league_id']), int(args['season']))
+                return {"body": fixtures}
+            else:
+                fixtures = Fixture.get_fixtures_by_league_id_and_season(session, int(args['league_id']), int(args['season']))
+                return {"body": fixtures}
         else:
             return {"body": Fixture.get_all(session)}
 
@@ -133,6 +141,91 @@ class Fixture(Base):
             return []
         finally:
             session.close()
+
+    @staticmethod
+    def get_fixtures_by_round(session, league_id, season, round):
+        """
+        Fetches all fixtures for a specific league, season, and round.
+
+        Args:
+            session (Session): The SQLAlchemy session used to connect to the database.
+            league_id (int): The ID of the league to filter fixtures by.
+            season (int): The year of the season to filter fixtures by.
+            round (int): The round to filter fixtures by.
+
+        Returns:
+            list: A list of dictionaries, where each dictionary represents a fixture 
+                  of the specified league, season, and round.
+            dict: In case of an error, returns a dictionary with a status code and an error message.
+
+        Notes:
+        - **Crucial for ETL process**: This method should not be modified.                    
+        """        
+        try:
+            fixtures = session.query(Fixture).join(Season).filter(
+                Fixture.league_round == round,
+                Fixture.season_id.in_(
+                    session.query(Season.id).join(League).filter(
+                        League.id == league_id,
+                        Season.year == season
+                    )
+                )
+            ).all()
+            return [fixture._to_dict() for fixture in fixtures]
+        except Exception as e:
+            print(f"Error during fetching fixtures for league {league_id}, season {season}, round {round}: {e}")
+            return {"statusCode": 500, "body": f"Error during fetching fixtures: {e}"}
+        finally:
+            session.close()
+
+    @staticmethod
+    def get_fixtures_last_round(session, league_id, season):
+        """
+        Fetches all fixtures for the last completed round of a specific league and season.
+
+        Args:
+            session (Session): The SQLAlchemy session used to connect to the database.
+            league_id (int): The ID of the league to filter fixtures by.
+            season (int): The year of the season to filter fixtures by.
+
+        Returns:
+            list: A list of dictionaries, where each dictionary represents a fixture 
+                  of the specified league, season, and last completed round.
+            dict: In case of an error, returns a dictionary with a status code and an error message.
+
+        Notes:
+        - **Crucial for ETL process**: This method should not be modified.            
+        """        
+        try:
+            last_round_subquery = session.query(
+                func.max(Fixture.league_round).label('max_league_round')
+            ).join(Season).filter(
+                Fixture.event_datetime < func.now(),
+                Fixture.season_id.in_(
+                    session.query(Season.id).join(League).filter(
+                        League.id == league_id,
+                        Season.year == season
+                    )
+                )
+            ).subquery()
+
+            fixtures = session.query(Fixture).join(Season).filter(
+                Fixture.league_round == last_round_subquery.c.max_league_round,
+                Fixture.event_datetime < func.now(),
+                Fixture.season_id.in_(
+                    session.query(Season.id).join(League).filter(
+                        League.id == league_id,
+                        Season.year == season
+                    )
+                )
+            ).all()
+
+            return [fixture._to_dict() for fixture in fixtures]
+        except Exception as e:
+            print(f"Error during fetching fixtures for the last round for league {league_id}, season {season}: {e}")
+            return {"statusCode": 500, "body": f"Error during fetching fixtures: {e}"}
+        finally:
+            session.close()            
 
     @staticmethod
     def get_fixtures_by_league_id_and_season(session, league_id, season):

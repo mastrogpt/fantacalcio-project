@@ -35,6 +35,7 @@ class Team(Base):
     fixtures_home = relationship('Fixture', foreign_keys='Fixture.home_team_id', back_populates='home_team', cascade="all, delete-orphan")
     fixtures_away = relationship('Fixture', foreign_keys='Fixture.away_team_id', back_populates='away_team', cascade="all, delete-orphan")
     fixture_statistics = relationship('FixtureStatistics', back_populates='team', cascade='all, delete-orphan')
+    fixture_player_statistics = relationship('FixturePlayerStatistics', back_populates='team', cascade='all, delete-orphan')
 
 
     def __init__(self, name, code, country, founded, national, logo, venue_name, venue_address, venue_city, venue_capacity, venue_surface, venue_image, apifootball_id):
