@@ -696,7 +696,7 @@ class Player(Base):
             if role:
                 query = query.filter(ps.position.ilike(f'%{role}%'))
 
-            goleadors = query.limit(7)
+            goleadors = query.limit(7).all()
             print("Goalkeepers arrived", goleadors)
 
             if len(goleadors) == 0:
