@@ -768,7 +768,6 @@ class Player(Base):
             if role:
                 query = query.filter(ps.position.ilike(f'%{role}%'))
 
-            print("QUERY IS", query)
             assistman = query.limit(7).all()
             print("Assistman arrived", assistman)
 
@@ -790,7 +789,6 @@ class Player(Base):
             return {"statusCode": 500, "body": f"Error during fetching Serie A top assistman: {e}"}
         finally:
             session.close()
-
 
     @staticmethod
     def update_player_by_id(session, player_id, update_fields):
