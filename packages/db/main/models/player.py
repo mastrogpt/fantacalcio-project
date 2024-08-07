@@ -159,9 +159,6 @@ class Player(Base):
     
     @staticmethod
     def stats_handler(session, args):
-        if 'goleador' in args:
-            player = Player.season_goleadors(session, args)
-            return {"body": player if player else "Player not found"}
         if 'top_players_by_team_and_role' in args:
             player = Player.top_players_by_team_and_role(session, args)
             return {"body": player if player else "Player not found"}
@@ -570,61 +567,7 @@ class Player(Base):
         finally:
             session.close()                
 
-    @staticmethod
-    def season_goleadors(session, args):
-        try:
-            print("INVOKED GOLEADORS")
-
-            ps = aliased(PlayerStatistics)
-            p = aliased(Player)
-            t = aliased(Team)
-
-            season = args.get('season')
             
-            query = (session.query(
-                        ps,
-                        p.name.label('player_name'),
-                        p.photo.label('player_photo'),
-                        t.name.label('team')
-                    )
-                    .join(p, p.id == ps.player_id)
-                    .join(t, t.id == ps.team_id)
-                    .join(PlayerSeason, p.id == PlayerSeason.player_id)
-                    .join(Season, PlayerSeason.season_id == Season.id)
-                    .filter(ps.goals_total.isnot(None))
-                    .order_by(ps.goals_total.desc(), ps.team_id.asc(), ps.season_id.asc()))
-            
-            # Apply season filter
-            if season:
-                query = query.filter(Season.id == season)
-            else:
-                query = query.filter(Season.current == True)
-            
-            goleadors = query.limit(5).all()
-            
-            print("GOLEADORS ARRIVED", goleadors)
-            
-            result = []
-
-            for ps, player_name, player_photo, team_name in goleadors:
-                player_dict = ps._to_dict()
-                player_dict['player_name'] = player_name
-                player_dict['player_photo'] = player_photo
-                player_dict['team'] = team_name
-                
-                result.append(player_dict)
-
-            return result
-
-        except Exception as e:
-            print(f"Error during fetching Serie A goleadors: {e}")
-            return {"statusCode": 500, "body": f"Error during fetching Serie A goleadors: {e}"}
-        finally:
-            session.close()
-
-            
-    
-
     @staticmethod
     def top_players_by_team_and_role(session, args):
         try:
@@ -640,6 +583,8 @@ class Player(Base):
             ps = aliased(PlayerStatistics)
             p = aliased(Player)
             t = aliased(Team)
+
+            print("ROLE IS", role)
 
             if (role and role == "Goalkeeper"):
                 return Player.best_goalkeepers(session, matches_minimum_presence, args)
@@ -676,7 +621,7 @@ class Player(Base):
             print("TOP PLAYERS", top_players)
 
             if len(top_players) == 0:
-                args['min_rating'] = 5.95
+                args['min_rating'] = min_rating - 0.5
                 return Player.top_players_by_team_and_role(session, args)
             
             print("TOP PLAYERS ARRIVED", top_players)
@@ -754,6 +699,10 @@ class Player(Base):
             goleadors = query.limit(7)
             print("Goalkeepers arrived", goleadors)
 
+            if len(goleadors) == 0:
+                args['min_rating'] = min_rating - 0.5
+                return Player.top_players_by_team_and_role(session, args)
+
             result = []
             for ps_row in goleadors:
                 ps, player_name, player_photo, team_name = ps_row
@@ -829,8 +778,8 @@ class Player(Base):
     def how_many_matches_until_now(session, season):
         try:
             if(season is None):
-                print("Cannot calculate matches number without season, setting default season to 2")
-                season = 2 #TODO handle this
+                print("Cannot calculate matches number without season, setting default season to 1")
+                season = 1 #TODO handle this
             matches = session.query(Fixture).filter(Fixture.season_id == season).count()
             
             print("MATCHES len", matches / 10)
