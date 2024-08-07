@@ -1,17 +1,14 @@
 <script lang="ts">
-	import type { PlayersStats } from '$lib/service/getStats';
-	import { getAiOpinionFromBackend } from '$lib/service/aiOpinion';
+	import { getAiOpinionFromBackend } from '$lib/service/ai/aiOpinion';
 	import Loader from '$lib/components/atoms/Loader.svelte';
-	import BackButton from '$lib/components/atoms/buttons/BackButton.svelte';
-	import GreenButton from '$lib/components/atoms/buttons/GreenButton.svelte';
-	import DisabledButton from '$lib/components/atoms/buttons/DisabledButton.svelte';
 	import Person from '$lib/components/atoms/icons/Person.svelte';
 	import Foot from '$lib/components/atoms/icons/Foot.svelte';
 	import Ball from '$lib/components/atoms/icons/Ball.svelte';
 	import Card from '$lib/components/atoms/icons/Card.svelte';
+	import type { PlayerCompleteStats } from '$lib/service/fantaicalcio/getStats';
 
 	export let data: {
-		playerData: PlayersStats;
+		playerData: PlayerCompleteStats;
 		playerName: string;
 	};
 
@@ -45,11 +42,11 @@
 	<div class="h-32 rounded-lg bg-gray-200 lg:col-span-2">
 		<div class="bg-gradient-to-r from-primary from-10% via-gray-200 via-30% to-gray-100 to-65%">
 			<h2 class="text-center mb-5">
-				<strong>{data.playerData.name}</strong> -
-				<strong class="text-primary">{data.playerData.team}</strong>
+				<strong>{data.playerData?.name}</strong> -
+				<strong class="text-primary">{data.playerData?.team}</strong>
 			</h2>
 			<div class="flex justify-end">
-				<BackButton href="/all" text="Indietro" />
+				<BackButton href="/players" text="Indietro" />
 				{#if !aiOpinion && !isLoading}
 					<GreenButton text="AIpinion" clickAction={getAiOpinion} />
 				{:else if isLoading || aiOpinion}
@@ -85,25 +82,26 @@
 					</thead>
 					<tbody>
 						<tr class="border-b">
-							<td class="whitespace-nowrap p-4 font-medium text-gray-900">{data.playerData.caps}</td
+							<td class="whitespace-nowrap p-4 font-medium text-gray-900"
+								>{data.playerData?.caps}</td
 							>
 							<td class="whitespace-nowrap p-4 font-medium text-gray-900"
-								>{data.playerData.assists}</td
+								>{data.playerData?.assists}</td
 							>
 							<td class="whitespace-nowrap p-4 font-medium text-gray-900"
-								>{data.playerData.goals}</td
+								>{data.playerData?.goals}</td
 							>
 							<td class="whitespace-nowrap p-4 font-medium text-gray-900"
-								>{data.playerData.markavg}</td
+								>{data.playerData?.markavg}</td
 							>
 							<td class="whitespace-nowrap p-4 font-medium text-gray-900"
-								>{data.playerData.fmarkavg}</td
+								>{data.playerData?.fmarkavg}</td
 							>
 							<td class="whitespace-nowrap p-2 font-medium text-gray-900"
-								>{data.playerData.rcards}</td
+								>{data.playerData?.rcards}</td
 							>
 							<td class="whitespace-nowrap p-2 font-medium text-gray-900"
-								>{data.playerData.ycards}</td
+								>{data.playerData?.ycards}</td
 							>
 						</tr>
 					</tbody>

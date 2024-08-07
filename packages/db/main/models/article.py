@@ -1,11 +1,19 @@
 import uuid
-from sqlalchemy import Column, Integer, String, Text, ARRAY, DateTime
-from sqlalchemy.orm import sessionmaker
 from sqlalchemy.sql import delete
 from models.base import Base
-
+from sqlalchemy import desc
+from sqlalchemy import Column, Integer, String,Text, ARRAY, DateTime, Boolean, Date, insert, UniqueConstraint, delete
+from sqlalchemy.orm import sessionmaker, relationship
+from sqlalchemy.orm.exc import NoResultFound
+from sqlalchemy.dialects.postgresql import insert as pg_insert
+from sqlalchemy.orm import aliased
+from sqlalchemy import func
+from sqlalchemy import desc
+import uuid
 from datetime import datetime
-
+import json
+from sqlalchemy import func, literal_column, table, column
+from sqlalchemy.orm import aliased
 
 class Article(Base):
     __tablename__ = 'articles'
@@ -58,6 +66,8 @@ class Article(Base):
         if 'id' in args:
             article = Article.get_article_by_id(session, args['id'])
             return {"body": article if article else "Article not found"}
+        elif 'last' in args:
+            return {"body": Article.get_last_articles(session, args)}
         else:
             return {"body": Article.get_all_articles(session)}
 
@@ -70,13 +80,49 @@ class Article(Base):
     
     def get_all_articles(session):
         try:
-            articles = session.query(Article).all()
+            articles = session.query(Article).order_by(desc(Article.creation_date)).all()
             return [article.to_dict() for article in articles]
         except Exception as e:
             print("Error during articles loading:", e)
             return []
         finally:
             session.close()
+            
+    def get_last_articles(session, args):
+        try:
+            tag_search = args.get('tag', None)
+            
+            query = session.query(Article).order_by(desc(Article.creation_date))
+            
+            if tag_search:
+                search_pattern = f"%{tag_search.lower()}%"
+                
+                subquery = (
+                    session.query(
+                        Article.id.label('article_id'), 
+                        func.unnest(Article.tag).label('tag')
+                    ).subquery()
+                )
+                
+                tags_alias = aliased(subquery)
+                
+                # Filter articles based on the unnest subquery
+                query = query.join(tags_alias, Article.id == tags_alias.c.article_id).filter(func.lower(tags_alias.c.tag).like(search_pattern))
+            
+            limit = 5 if tag_search else 10
+            results = query.limit(limit).all()
+            
+            print("Articles fetched:", results)
+            
+            articles = [{'content': r.content} for r in results]
+            
+            return articles
+        except Exception as e:
+            print("Error during articles loading:", e)
+            return []
+        finally:
+            session.close()
+
 
     def delete_all(session):
         try:

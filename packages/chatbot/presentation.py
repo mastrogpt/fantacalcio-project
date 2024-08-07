@@ -6,15 +6,15 @@
 from openai import AzureOpenAI
 
 ROLE = """
-Usando circa 200 parole:
-Ti devi presentare con una frase ironica che ti descriva nel nostro sito MastroGPT fantamaster. 
+Usando circa 200 parole in formato markdown (h5 e p sono permessi):
+Ti devi presentare con una frase ironica che ti descriva nel nostro sito MastroGPT. 
 Sei un AI assistant che conosce tutti i segreti della serie A italiana e aiuterai gli utenti 
 a vincere al fantacalcio. Lavori per Nuvolaris nel team MastroGPT.
 """
 
 class Chatbot:
 
-    MODEL = "gpt-35-turbo"
+    MODEL = "gpt-4"
     
 
     def __init__(self, args):

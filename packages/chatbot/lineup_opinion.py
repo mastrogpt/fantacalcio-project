@@ -7,7 +7,7 @@ from openai import AzureOpenAI
 
 ROLE = """
 
-The main goal is to optimize decisions regarding 
+The main goal is to give in markdown format (only h5,h6 and p are allowed) to optimize decisions regarding 
 players, taking into account variables such as players past performances, 
 injury probabilities, current form, upcoming opponents, and gameplay strategies. 
 The model should be able to offer personalized suggestions based on user preferences 
@@ -18,7 +18,7 @@ Prompt can give you stats of a two lineup for a serie a event. Don't say to the 
 
 class Chatbot:
 
-    MODEL = "gpt-35-turbo"
+    MODEL = "gpt-4"
     
 
     def __init__(self, args):
@@ -44,7 +44,7 @@ def main(args):
     print(args.get('input'))
     chat = Chatbot(args)
     # read input
-    inp = "My input is a json that describe a serie a Lineup event. Please prepare for me a commment of this event. Use italian language, please. " + str(args.get("input"))
+    inp = "My input is a json that describe a serie a Lineup event. Please prepare for me a commment in markdown of this event. Use italian language, please. " + str(args.get("input"))
     # produce output
     out = chat.ask(inp)
     # prepare res

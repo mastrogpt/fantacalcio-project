@@ -1,11 +1,16 @@
 <script>
-	import '../app.css';
 	import Header from '$lib/components/molecules/Header.svelte';
-	import Divider from '$lib/components/atoms/Divider.svelte';
+	import Footer from '$lib/components/molecules/footer/footer.svelte';
+	import Widget from '$lib/components/widget/Widget.svelte';
+	import '../app.css';
 </script>
 
 <Header />
-<Divider />
-<div class="p-2">
+
+<main>
 	<slot />
-</div>
+
+	<Widget />
+</main>
+
+<Footer />
