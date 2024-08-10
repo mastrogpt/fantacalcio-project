@@ -57,6 +57,6 @@
 	}
 
 	.text-accent {
-		color: #ffd700;
+		color: #10987d;
 	}
 </style>
