@@ -69,7 +69,7 @@ class Article(Base):
         elif 'last' in args:
             return {"body": Article.get_last_articles(session, args)}
         else:
-            return {"body": Article.get_all_articles(session)}
+            return {"body": Article.get_all_articles(session, args)}
 
     def delete_handler(session, args):
         if 'id' in args:
@@ -78,9 +78,13 @@ class Article(Base):
             return {"body": Article.delete_all(session)}
 
     
-    def get_all_articles(session):
+    def get_all_articles(session, args):
         try:
-            articles = session.query(Article).order_by(desc(Article.creation_date)).all()
+            limit = args.get('limit', None)
+            if limit:
+                articles = session.query(Article).order_by(desc(Article.creation_date)).limit(limit)
+            else :
+                articles = session.query(Article).order_by(desc(Article.creation_date)).all()
             return [article.to_dict() for article in articles]
         except Exception as e:
             print("Error during articles loading:", e)
