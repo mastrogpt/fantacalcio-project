@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { type ChatInput } from '$lib/service/nuvBot';
 	import { isChatOpen, nuvbotChat, handleNuvBotChatOpening, type Message } from '$lib/store/store';
-	import { onMount } from 'svelte';
+	import { onMount, tick } from 'svelte';
 	import ChatMessage from './ChatMessage.svelte';
 	import MaximizeIcon from './MaximizeIcon.svelte';
 	import MessageIcon from './MessageIcon.svelte';
@@ -18,6 +18,8 @@
 
 	let files: FileList | null = null;
 	let filePreview: string | null = null;
+	let chatContainer: HTMLElement;
+	let scrollableDiv: HTMLElement;
 
 	$: isChatOpen;
 
@@ -41,6 +43,8 @@
 		isLoading = true;
 
 		updateMessages(message);
+		await tick(); // Assicura che il DOM sia aggiornato
+		scrollToBottom();
 
 		let fileBase64 = '';
 
@@ -57,12 +61,16 @@
 		fileBase64 = '';
 		filePreview = null;
 		files = null;
+
+		userMessage = '';
+
 		await nuvbotChat(payload);
 
 		isLoading = false;
 		lastMessageIsUser = false;
 
-		showMessage();
+		await tick();
+		scrollToBottom();
 	}
 
 	function toBase64(file: File): Promise<string> {
@@ -75,7 +83,7 @@
 	}
 
 	onMount(() => {
-		showMessage();
+		scrollToBottom();
 		updateMessages({
 			type: 'ai',
 			text: "Che te serve? 'N consiglio pe' l'asta? Una chiacchierata? Dime! T'hanno proposto uno scambio?",
@@ -83,24 +91,31 @@
 		});
 	});
 
+	$: messages,
+		async () => {
+			await tick(); // Assicura che il DOM sia aggiornato
+			scrollToBottom();
+		};
+
 	export function postAiMessageOnWidget(aiMessage: string) {
 		updateMessages({
 			type: 'ai',
 			text: aiMessage,
 			id: messages.subscribe.length
 		});
+		scrollToBottom();
 	}
 
-	function showMessage() {
-		const chatContainer = document.getElementById('chat-container');
-		if (chatContainer) {
-			chatContainer.scrollTop = chatContainer.scrollHeight;
+	function scrollToBottom() {
+		if (scrollableDiv) {
+			scrollableDiv.scrollTop = scrollableDiv.scrollHeight;
 		}
 	}
 </script>
 
 {#if $isChatOpen}
 	<div
+		bind:this={chatContainer}
 		id="chat-container"
 		class="outline-primary outline flex flex-col fixed bottom-4 right-4 bg-white p-2 rounded-lg border border-[#e5e7eb] shadow z-20
     w-[90vw] h-[70vh] sm:w-[80vw] sm:h-[60vh] md:w-[60vw] md:h-[50vh] lg:w-[440px] lg:h-[534px]"
@@ -113,8 +128,10 @@
 			{/if}
 		</button>
 
-		<!-- Chat Messages -->
-		<div class="p-2 flex-1 overflow-auto border border-primary rounded">
+		<div
+			bind:this={scrollableDiv}
+			class="p-2 flex-1 overflow-y-auto border border-primary rounded h-full max-h-full"
+		>
 			{#each $messages as message}
 				<ChatMessage {message} />
 			{/each}
