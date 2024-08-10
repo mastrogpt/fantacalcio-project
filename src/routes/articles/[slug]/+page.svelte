@@ -47,7 +47,7 @@
 {/if}
 
 <div class="flex flex-col justify-center items-center my-20">
-	<h3>Altri articoli</h3>
+	<h3>Altri AI-rticoli</h3>
 
 	{#await getArticlesList()}
 		<Loader />

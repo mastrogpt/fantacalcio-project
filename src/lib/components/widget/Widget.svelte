@@ -102,7 +102,7 @@
 {#if $isChatOpen}
 	<div
 		id="chat-container"
-		class="flex flex-col fixed bottom-4 right-4 bg-white p-2 rounded-lg border border-[#e5e7eb] shadow z-20
+		class="outline-primary outline flex flex-col fixed bottom-4 right-4 bg-white p-2 rounded-lg border border-[#e5e7eb] shadow z-20
     w-[90vw] h-[70vh] sm:w-[80vw] sm:h-[60vh] md:w-[60vw] md:h-[50vh] lg:w-[440px] lg:h-[534px]"
 	>
 		<button class="absolute top-2 right-2" on:click={() => handleNuvBotChatOpening()}>
@@ -114,7 +114,7 @@
 		</button>
 
 		<!-- Chat Messages -->
-		<div class="pr-2 flex-1 overflow-auto">
+		<div class="p-2 flex-1 overflow-auto border border-primary rounded">
 			{#each $messages as message}
 				<ChatMessage {message} />
 			{/each}

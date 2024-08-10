@@ -80,7 +80,7 @@
 	id="articles"
 	class="articles-section flex flex-col items-center justify-center text-center my-10 py-20 gap-4 bg-accent"
 >
-	<h2 class="text-2xl md:text-4xl font-semibold" use:animateOnScroll>AIrticoli più discussi</h2>
+	<h2 class="text-2xl md:text-4xl font-semibold" use:animateOnScroll>AI-rticoli recenti</h2>
 
 	{#await getArticlesList()}
 		<Loader />

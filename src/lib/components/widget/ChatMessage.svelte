@@ -17,7 +17,7 @@
 	});
 </script>
 
-<div class="flex flex-col gap-3 my-4 text-gray-600 text-sm flex-1">
+<div class="flex flex-col gap-3 my-4 text-gray-600 text-sm flex-1 shadow-sm">
 	{#if message.type === 'ai'}
 		<div class="flex itemx-center gap-2">
 			<span
@@ -25,7 +25,7 @@
 			>
 				<AiWidgetIcon />
 			</span>
-			<p class="leading-relaxed font-bold text-gray-700">AI</p>
+			<p class="leading-relaxed font-bold text-[#de6d1c]">AI</p>
 		</div>
 	{:else if message.type === 'user'}
 		<div class="flex itemx-center gap-2">
