@@ -15,7 +15,7 @@ export interface IArticlesProps {
 export async function getArticlesList(): Promise<IArticlesProps[]> {
 	try {
 		const response = await axios.get(PUBLIC_URL_AI_ARTICLES, {
-			params: { model: 'article' }
+			params: { model: 'article', limit : 150 }
 		});
 		return response.data?.map((articles: IArticlesProps[]) => articles);
 	} catch (error) {
