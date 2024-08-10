@@ -1,7 +1,7 @@
 <div class="footer">
 	<div class="footer-content flex justify-between">
 		<div class="footer-section">
-			<h2 class="footer-title text-primary">FantaAICalcio</h2>
+			<h2 class="footer-title text-primary">Fantabalùn</h2>
 			<a href="mailto:info@nuvolaris.io" class="footer-email">info@nuvolaris.io </a>
 		</div>
 		<div class="footer-section align-end justify-end text-right">
