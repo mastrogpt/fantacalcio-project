@@ -26,8 +26,9 @@
 	const playersCols = [
 		{ accessorKey: 'name', header: 'Nome' },
 		{ accessorKey: 'position', header: 'Ruolo' },
-		{ accessorKey: 'team', header: 'Squadra' },
-		{ accessorKey: 'available', header: 'Disponibile' }
+		{ accessorKey: 'team', header: 'Squadra' }
+		// ,
+		// { accessorKey: 'available', header: 'Disponibile' }
 	];
 
 	const unavailableCols = [
