@@ -86,7 +86,7 @@
 		scrollToBottom();
 		updateMessages({
 			type: 'ai',
-			text: "Che te serve? 'N consiglio pe' l'asta? Una chiacchierata? Dime! T'hanno proposto uno scambio?",
+			text: '<p class="font-semibold">Che te serve? </p>',
 			id: messages.subscribe.length
 		});
 	});
