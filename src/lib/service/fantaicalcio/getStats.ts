@@ -4,7 +4,7 @@ import {
 	PUBLIC_FANTAICALCIO_FANTA_PLAYERS_STATS
 } from '$env/static/public';
 import type { Player } from '../fantamaster/getPlayers';
-
+import { roleMapping } from './getPlayers';
 export interface PlayerStats {
 	captain: boolean;
 	cards_red: number;
@@ -97,7 +97,6 @@ export function getStatsData(player_id, season_id, team_id): Promise<PlayerCompl
 			throw error;
 		});
 }
-
 export async function getStatsDataById(
 	player_id: number,
 	season_id: number,
@@ -106,6 +105,10 @@ export async function getStatsDataById(
 ): Promise<PlayerCompleteStats | undefined> {
 	try {
 		const playerStats = await getStatsData(player_id, season_id, team_id);
+
+		if (mapped && playerStats.player_statistic?.position) {
+			playerStats.player_statistic.position = roleMapping[playerStats.player_statistic.position] || playerStats.player_statistic.position;
+		}
 
 		const playerSpecs = Object.keys(playerStats?.player_statistic || {}).map((e) => ({
 			label: getStatsDataByIdLabelMapper[e],
@@ -131,13 +134,15 @@ export async function getStatsDataById(
 	}
 }
 
+
+
 const getStatsDataByIdLabelMapper = {
 	captain: 'Capitano',
 	cards_red: 'Cartellini rossi',
 	cards_yellow: 'Cartellini gialli',
 	dribbles_attempts: 'Dribbling tentati',
 	dribbles_past: 'Dribbling subiti',
-	dribbles_success: 'Dribbling riusicti',
+	dribbles_success: 'Dribbling riusciti',
 	duels_total: 'Duelli totali',
 	duels_won: 'Duelli vinti',
 	fouls_committed: 'Falli',

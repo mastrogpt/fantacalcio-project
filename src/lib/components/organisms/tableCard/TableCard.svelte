@@ -27,8 +27,6 @@
 		{ accessorKey: 'name', header: 'Nome' },
 		{ accessorKey: 'position', header: 'Ruolo' },
 		{ accessorKey: 'team', header: 'Squadra' }
-		// ,
-		// { accessorKey: 'available', header: 'Disponibile' }
 	];
 
 	const unavailableCols = [

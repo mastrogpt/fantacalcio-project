@@ -16,7 +16,6 @@ interface Player {
     available: string;
     season_id: number;
     team_id: number;
-    //value: number;
 }
 
 export interface PlayersList extends Array<Player> {}
@@ -37,11 +36,11 @@ export async function getPlayersList(): Promise<PlayersList> {
             photo: player.photo,
             cards_red: player.cards_red,
             cards_yellow: player.cards_yellow,
-            position: player?.position,
             available: player?.injured ? 'F' : 'Y',
             team_id: player?.team_id,
-            season_id: player?.season_id
-            //value: player.value
+            season_id: player?.season_id,
+            position: roleMapping[player.position] || player.position, 
+           
         }));
     } catch (error) {
         console.error(error);
@@ -74,7 +73,7 @@ export function getUnavailablePlayers(): Promise<UnavailablePlayers[]> {
         .then((response) => {
             return response.data.data.unavailable.map((player: any) => ({
                 team: player.team,
-                role: player.role,
+                role: roleMapping[player.role] || player.role, 
                 desc: player.desc,
                 name: player.name,
                 type: player.type,
@@ -89,3 +88,9 @@ export function getUnavailablePlayers(): Promise<UnavailablePlayers[]> {
         });
 }
 
+export const roleMapping: { [key: string]: string } = {
+    'Attacker': 'Attaccante',
+    'Defender': 'Difensore',
+    'Midfielder': 'Centrocampista',
+    'Goalkeeper': 'Portiere'
+};

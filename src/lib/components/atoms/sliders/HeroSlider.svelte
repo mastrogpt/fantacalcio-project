@@ -13,7 +13,7 @@
 
 	const data = [
 		{
-			title: '<h2> FantaBalùn  &#x1F916 </h2> <h6>il Bot che ne sa un Bot-to </h6> ',
+			title: '<h2> FantaBalùn  &#x1F916 </h2> <h6>er Bot che ne sa un Bot-to </h6> ',
 			description:
 				'<p class="sm:text-sm text-base md:text-lg">Chiedi <strong> ciò che vuoi</strong>, come ad un amico al bar. Pareri, confronti tra calciatori. <strong>Allega lo screen </strong> di un messaggio in cui ti si propone uno scambio: BalùnBot ti dirà se conviene. No, <strong>non scola la pasta!</strong> </p>',
 			imageUrl: fantabalunbot,

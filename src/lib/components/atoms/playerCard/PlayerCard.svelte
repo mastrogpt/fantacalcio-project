@@ -119,7 +119,7 @@
 		<p class="text-2xl">👇🏻</p>
 
 		{#if !aiOpinion && !isLoading}
-			<Button label="AIpinion" onClick={getAiOpinion} />
+			<Button label="AI-pinion" onClick={getAiOpinion} />
 		{/if}
 
 		{#if isLoading}
