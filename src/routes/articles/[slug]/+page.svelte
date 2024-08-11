@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import Loader from '$lib/components/atoms/Loader.svelte';
-	import ArticlesSlider from '$lib/components/atoms/sliders/ArticlesSlider.svelte';
 	import Carousel from '$lib/components/atoms/sliders/Carousel.svelte';
 	import ArticleSliderSlide from '$lib/components/atoms/sliders/partials/ArticleSliderSlide.svelte';
 	import { getArticlesList, type IArticlesProps } from '$lib/service/fantaicalcio/getArticles';

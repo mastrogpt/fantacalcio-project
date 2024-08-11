@@ -81,7 +81,12 @@
 	class="articles-section flex flex-col items-center justify-center text-center my-10 py-20 gap-4 bg-accent"
 >
 	<h2 class="text-2xl md:text-4xl font-semibold" use:animateOnScroll>AI-rticoli recenti</h2>
-
+	<p class="text-base text-xl text-left md:text-lg">
+		Gli AI-rticoli sono basati su scraper automatici che scovano notizie nel web ogni giorno.
+		<br /> Ci servono per istruire FantaBalùnBot, in modo che possa fornirti <br />
+		<strong>consigli</strong> basati non soltanto sulle <strong>statistiche</strong>, ma anche su
+		<strong>eventi recenti</strong>.
+	</p>
 	{#await getArticlesList()}
 		<Loader />
 	{:then data}
@@ -95,10 +100,6 @@
 		</Carousel>
 	{/await}
 </section>
-
-<!-- <section class="lineup-section flex flex-col text-center gap-5 py-5" id="composition">
-	<TeamsComparator />
-</section> -->
 
 <section
 	class="flex flex-col align-center justify-center items-center text-center my-10 gap-4 py-10"
