@@ -73,9 +73,9 @@ class Article(Base):
 
     def delete_handler(session, args):
         if 'id' in args:
-            return {"body": Article.delete_by_id(session, args['id'])}
+            return {"body": Article.delete_by_id(session, args)}
         else:
-            return {"body": Article.delete_all(session)}
+            return {"body": Article.delete_all(session, args)}
 
     
     def get_all_articles(session, args):
@@ -128,11 +128,14 @@ class Article(Base):
             session.close()
 
 
-    def delete_all(session):
+    def delete_all(session, args):
         try:
-            session.execute(delete(Article))
-            session.commit()
-            return "All articles deleted"
+            if args.get('FANTABALUN_API_KEY_TEST'):
+                session.execute(delete(Article))
+                session.commit()
+                return "All articles deleted"
+            else:
+               return "No API key provided"
         except Exception as e:
             print("Error while deleting articles:", e)
             session.rollback()
@@ -140,15 +143,18 @@ class Article(Base):
         finally:
             session.close()
 
-    def delete_by_id(session, article_id):
+    def delete_by_id(session, args):
         try:
-            article = session.query(Article).get(article_id)
-            if article:
-                session.delete(article)
-                session.commit()
-                return f"Article {article_id} deleted"
+            if args.get('FANTABALUN_API_KEY_TEST'):
+                article = session.query(Article).get(args.get('id'))
+                if article:
+                    session.delete(article)
+                    session.commit()
+                    return f"Article {args.get('id')} deleted"
+                else:
+                    return "Article not found"
             else:
-                return "Article not found"
+                return "No API key provided"
         except Exception as e:
             print("Error while deleting article:", e)
             session.rollback()
