@@ -24,6 +24,8 @@ from models.fixtures import Fixture
 from models.fixture_statistics import FixtureStatistics
 
 def main(args):
+    
+    #TODO implement auth with FANTABALUN_API_KEY_TEST
 
     db_url = args.get("POSTGRES_URL")
    
