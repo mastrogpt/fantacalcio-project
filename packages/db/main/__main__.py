@@ -22,6 +22,7 @@ from models.team_statistics import TeamStatistics
 from models.standings import Standings
 from models.fixtures import Fixture
 from models.fixture_statistics import FixtureStatistics
+from models.fixture_player_statistics import FixturePlayerStatistics
 
 def main(args):
 
@@ -58,7 +59,9 @@ def main(args):
     elif(args.get("model") == "fixture"):
         return Fixture.handler(db.session, args)             
     elif(args.get("model") == "fixture_statistics"):
-        return FixtureStatistics.handler(db.session, args)                                                                                                                                        
+        return FixtureStatistics.handler(db.session, args) 
+    elif(args.get("model") == "fixture_player_statistics"):
+        return FixturePlayerStatistics.handler(db.session, args)                                                                                                                                                   
     else: 
         return {
         "body": "model and/or query not present"

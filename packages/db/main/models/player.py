@@ -45,6 +45,7 @@ class Player(Base):
     player_seasons = relationship('PlayerSeason', back_populates='player', cascade="all, delete-orphan")
     player_statistics = relationship('PlayerStatistics', back_populates='player', cascade="all, delete-orphan")
     current_players_teams = relationship('CurrentPlayerTeam', back_populates='player', cascade="all, delete-orphan")
+    fixture_player_statistics = relationship('FixturePlayerStatistics', back_populates='player', cascade="all, delete-orphan")
 
     def __init__(self, name, firstname, lastname, birth_date, birth_place, birth_country, nationality, height, weight, injured, photo, apifootball_id):
         self.name = name
@@ -151,10 +152,12 @@ class Player(Base):
         elif "all_current_serie_a_players" in args:
             all_current_serie_a_players = args.get("all_current_serie_a_players")
             if all_current_serie_a_players.lower() =="true":
-                return {"body": Player.get_all_current_serie_a_players(session,args)}
+                return {"body": Player.get_all_current_serie_a_players(session)}
             return {"statusCode": 500, "body": f"Value '{all_current_serie_a_players}' of all_current_serie_a_players param is not valid"} 
         elif "current_serie_a_players_filtered_by_surname_and_team" in args:
                 return {"body": Player.current_serie_a_players_filtered_by_surname_and_team(session,args)}
+        elif 'league_id' in args and 'season' in args:
+            return {"body": Player.get_players_by_league_id_and_season(session,int(args['league_id']), int(args['season']))}               
         return {"body": Player.get_all(session,args)}
     
     @staticmethod
@@ -479,7 +482,7 @@ class Player(Base):
             session.close()
 
     @staticmethod
-    def get_all_current_serie_a_players(session, args):
+    def get_all_current_serie_a_players(session):
         ''' 
         This query returns all Serie A current players for the current season.
     
@@ -500,30 +503,47 @@ class Player(Base):
               irrespective of their current team affiliation.
         '''
         try:
-            r = Redis_utils(args)
-            redisKey = Player.get_all_current_serie_a_players.__name__
-            players = r.read(redisKey)
-            
-            if players != None:
-                return [player for player in players]
-
-            else:
-                players = session.query(Player).join(PlayerSeason).join(Season).join(League).filter(
-                    League.name == "Serie A",
-                    League.country_name == "Italy",
-                    Season.current == True
-                ).all()
-
-                playersToLoad = []
-                [playersToLoad.append(player._to_dict()) for player in players]
-
-                r.write(args, redisKey, playersToLoad)
-                return [player._to_dict() for player in players]
+            players = session.query(Player).join(PlayerSeason).join(Season).join(League).filter(
+                League.name == "Serie A",
+                League.country_name == "Italy",
+                Season.current == True
+            ).all()
+            return [player._to_dict() for player in players]
         except Exception as e:
             print(f"Error during fetching Serie A players for current season: {e}")
             return {"statusCode": 500, "body": f"Error during fetching Serie A players for current season: {e}"}
         finally:
-            session.close()        
+            session.close()               
+
+    @staticmethod
+    def get_players_by_league_id_and_season(session, league_id, season):
+        """
+        Fetches all players for a specific league in a given season.
+        
+        Args:
+            session (Session): The SQLAlchemy session used to connect to the database.
+            league_id (int): The ID of the league to filter players by.
+            season (int): The year of the season to filter players by.
+        
+        Returns:
+            list: A list of dictionaries, where each dictionary represents a player 
+                  of the specified league and season.
+            dict: In case of an error, returns a dictionary with a status code and an error message.
+        
+        Notes:
+        - **Crucial for ETL process**: This method should not be modified.
+        """
+        try:
+            players = session.query(Player).join(PlayerSeason).join(Season).join(League).filter(
+                League.id == league_id,
+                Season.year == season
+            ).all()
+            return [player._to_dict() for player in players]
+        except Exception as e:
+            print(f"Error during fetching players for league {league_id} and season {season}: {e}")
+            return {"statusCode": 500, "body": f"Error during fetching players for league {league_id} and season {season}: {e}"}
+        finally:
+            session.close()            
 
     @staticmethod
     def current_serie_a_players_filtered_by_surname_and_team(session, args):
