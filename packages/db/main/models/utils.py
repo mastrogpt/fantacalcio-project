@@ -23,7 +23,7 @@ def drop_tables(db_url):
 class Redis_utils():
     redis_ = None
     prefix_ = None
-    REDIS_DATA_EXPIRATION_S = 1
+    REDIS_DATA_EXPIRATION_S = 86400
 
     def __init__(self, args):
         self.prefix_ = args.get("REDIS_PREFIX")
