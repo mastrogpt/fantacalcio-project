@@ -8,7 +8,7 @@
 from dataclasses import dataclass
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from models.utils import create_tables, drop_tables
+from models.utils import create_tables, drop_tables, Redis_utils
 from models.article import Article
 from models.season import Season
 from models.league import League
@@ -63,7 +63,9 @@ def main(args):
     elif(args.get("model") == "fixture_statistics"):
         return FixtureStatistics.handler(db.session, args) 
     elif(args.get("model") == "fixture_player_statistics"):
-        return FixturePlayerStatistics.handler(db.session, args)                                                                                                                                                   
+        return FixturePlayerStatistics.handler(db.session, args)
+    elif(args.get("utils") == "clear_cache"):
+        return Redis_utils.clear_cache(redis_url=args.get("REDIS_URL"))                                                                                                                                                          
     else: 
         return {
         "body": "model and/or query not present"

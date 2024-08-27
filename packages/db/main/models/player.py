@@ -441,7 +441,10 @@ class Player(Base):
                     League.country_name == "Italy",
                     Season.current == True
                 ).subquery()
-    
+                
+                # Convert subquery into a select() construct
+                select_subquery = session.query(subquery.c.id)
+                
                 # Main query to fetch player details
                 players_teams = (session.query(
                         Player,
@@ -455,13 +458,13 @@ class Player(Base):
                     .join(TeamSeason, Team.id == TeamSeason.team_id)
                     .join(Season, TeamSeason.season_id == Season.id)
                     .filter(
-                        TeamSeason.season_id.in_(subquery),
+                        TeamSeason.season_id.in_(select_subquery),
                         CurrentPlayerTeam.number.isnot(None)
                     )
                     .all())
-    
+                
                 result = []
-    
+                
                 for player, team, season, number, position in players_teams:
                     player_dict = player._to_dict()
                     player_dict['team'] = team.name
@@ -472,7 +475,7 @@ class Player(Base):
                     player_dict['position'] = position
                     
                     result.append(player_dict)
-    
+                
                 r.write(args, redisKey, result)
                 return result
         except Exception as e:
@@ -552,30 +555,29 @@ class Player(Base):
             psurname = args.get('psurname')
             print("Invoked all player with filter", team, psurname)
            
-            players_teams = (session.query(Player, Team, Season, PlayerStatistics)
+            players_teams = (session.query(Player, Team, Season,  PlayerStatistics)
                 .join(PlayerStatistics, Player.id == PlayerStatistics.player_id)
-                .join(PlayerSeason, Player.id == PlayerSeason.player_id)
-                .join(Season, PlayerSeason.season_id == Season.id)
-                .join(League, Season.league_id == League.id)
                 .join(CurrentPlayerTeam, Player.id == CurrentPlayerTeam.player_id)
                 .join(Team, CurrentPlayerTeam.team_id == Team.id)
+                .join(Season, PlayerStatistics.season_id == Season.id)
+                .join(League, Season.league_id == League.id)
                 .filter(
                     League.name == "Serie A",
                     League.country_name == "Italy",
-                    Season.current == True,
                     Team.name.ilike(f'%{team}%'),
                     func.unaccent(Player.name).ilike(f'%{psurname}%'),
-                 )
+                )
                 .all())
 
             result = []
 
             for player in players_teams:
-                player_dict = player.Player._to_dict()
+                player_dict = player.Player._to_basic_info_dict()
                 player_dict['team'] = player.Team.name
                 player_dict['team_logo'] = player.Team.logo
                 player_dict['team_id'] = player.Team.id
-                player_dict['season_id'] = player.Season.id
+                player_dict['season_year'] = player.Season.year
+                player_dict['season_current'] = player.Season.current
                 player_dict['position'] = player.PlayerStatistics.position
     
                 player_dict['statistics'] = player.PlayerStatistics._to_dict()
@@ -860,6 +862,14 @@ class Player(Base):
             'injured': self.injured,
             'photo': self.photo,
             'apifootball_id': self.apifootball_id
+        }
+
+    def _to_basic_info_dict(self):
+        return {
+            'name': self.name,
+            'firstname': self.firstname,
+            'lastname': self.lastname,            
+            'photo': self.photo
         }
 
     @staticmethod
