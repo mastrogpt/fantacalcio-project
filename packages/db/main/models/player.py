@@ -716,7 +716,7 @@ class Player(Base):
                 fps.goals_assists,
                 fps.rating,
                 fps.games_minutes,
-                fps.games_substitutes,
+                fps.games_substitute,
                 fps.offsides,
                 fps.shots_total,
                 fps.shots_on,
