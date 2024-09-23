@@ -4,9 +4,7 @@ from sqlalchemy.orm import sessionmaker, relationship
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.orm import aliased
-from sqlalchemy import func
-from sqlalchemy import desc
-from sqlalchemy import case, func
+from sqlalchemy import case, func, desc, asc, and_, cast, Numeric
 from models.season import Season
 from models.team import Team
 from models.current_player_team import CurrentPlayerTeam
@@ -14,6 +12,7 @@ from models.league import League
 from models.player_season import PlayerSeason
 from models.team_season import TeamSeason
 from models.player_statistics import PlayerStatistics
+from models.fixture_player_statistics import FixturePlayerStatistics
 from models.base import Base
 from models.utils import Redis_utils
 import uuid
@@ -595,154 +594,280 @@ class Player(Base):
             
     @staticmethod
     def top_players_by_team_and_role(session, args):
+        """
+        Estrae i migliori giocatori per squadra e ruolo in una stagione di una lega di calcio.
+        
+        Questo metodo esegue una query complessa per ottenere le statistiche dei giocatori
+        basate su diversi parametri forniti, come il nome della squadra, il ruolo del giocatore,
+        la stagione, il round specifico o gli ultimi n round da considerare. Vengono aggregati
+        dati statistici come gol, assist, minuti giocati, rating medio, e altro.
+
+        Args:
+            session (Session): Oggetto della sessione SQLAlchemy.
+            args (dict): Dizionario con i parametri per la query. 
+                Possibili parametri:
+                - 'min_rating': Valutazione media minima del giocatore (predefinita 6.1)
+                - 'team': Nome della squadra (filtro opzionale)
+                - 'role': Ruolo del giocatore (filtro opzionale)
+                - 'season': Anno della stagione (se non fornito, si usa la stagione corrente)
+                - 'last_n_rounds': Numero di ultimi round da considerare
+                - 'league_round': Numero del round specifico da considerare (ha priorità su last_n_rounds)
+                - 'limit': Limite del numero di risultati (predefinito 5)
+        
+        Returns:
+            list: Lista di dizionari contenenti i dettagli dei giocatori, 
+            incluse statistiche come gol totali, assist, rating medio, minuti giocati, etc.
+        """        
         try:
             print("INVOKED TOP PLAYERS BY TEAM AND ROLE")
+
             min_rating = args.get('min_rating', 6.1)
-        
-            count_matches = Player.how_many_matches_until_now(session, args.get('season'))
-            matches_minimum_presence = Player.compute_matches_minum_presence(count_matches)
-            print("MINUM MATCHES IS", matches_minimum_presence)
             team = args.get("team")
             role = args.get("role")
-            season = args.get("season")
+            season = args.get("season")  # Anno della stagione
+            last_n_rounds = args.get("last_n_rounds")  # Numero di ultimi round da considerare
+            league_round = args.get("league_round")  # Numero del round specifico
+            limit = args.get("limit", 5)  # Limite dei risultati
+
+            print(f"PARAMS: min_rating={min_rating}, team={team}, role={role}, season={season}, "
+                  f"last_n_rounds={last_n_rounds}, league_round={league_round}, limit={limit}")
+
             ps = aliased(PlayerStatistics)
             p = aliased(Player)
             t = aliased(Team)
+            f = aliased(Fixture)
+            fps = aliased(FixturePlayerStatistics)
 
-            print("ROLE IS", role)
+            # Subquery per ottenere la stagione selezionata o corrente
+            if not season:
+                selected_season_subquery = session.query(Season.id).filter(Season.current == True, Season.league_id == 1).limit(1).subquery()
+            else:
+                selected_season_subquery = session.query(Season.id).filter(Season.year == season, Season.league_id == 1).limit(1).subquery()
 
-            if (role and role == "Goalkeeper"):
-                return Player.best_goalkeepers(session, matches_minimum_presence, args)
+            # DEBUG: view subquery result
+            selected_season_id = session.query(selected_season_subquery).scalar()
+            print(f"Selected Season ID: {selected_season_id}")
 
-            query = (session.query(
-                ps,
+            # Verifica se abbiamo ottenuto la stagione correttamente
+            if not selected_season_id:
+                raise ValueError("Season ID not found")
+
+            # Recupera il numero di round della stagione fino ad oggi
+            count_matches = Player.how_many_matches_until_now(session, selected_season_id)
+            print(f"Num. of matches until now: {count_matches}")
+
+            # Logica per gestire `last_n_rounds` e `league_round`
+            if not last_n_rounds and not league_round:
+                last_n_rounds = count_matches  # Considera tutta la stagione se entrambi i parametri sono null
+            elif last_n_rounds and league_round:
+                last_n_rounds = None  # Ignora `last_n_rounds` se `league_round` è fornito
+
+            # Subquery per filtrare i round in base al round specifico o agli ultimi N round
+            filtered_rounds_subquery = session.query(Fixture.league_round).filter(
+                Fixture.season_id == selected_season_id,
+                Fixture.event_datetime <= func.now()
+            )
+
+            if league_round:
+                filtered_rounds_subquery = filtered_rounds_subquery.filter(Fixture.league_round == league_round).distinct()
+            else:
+                filtered_rounds_subquery = filtered_rounds_subquery.order_by(
+                    Fixture.league_round.desc()).distinct().limit(last_n_rounds)
+
+            filtered_rounds_subquery = filtered_rounds_subquery.subquery()
+
+            # DEBUG: view subquery result
+            filtered_rounds = session.query(filtered_rounds_subquery).all()
+            print(f"Filtered rounds: {', '.join(str(tup[0]) for tup in filtered_rounds)}")
+
+            # Conta il numero di match / round
+            count_matches = len(filtered_rounds)
+            matches_minimum_presence = Player.compute_matches_minum_presence(count_matches)
+            print("Matches minimum presence:", matches_minimum_presence)
+
+            # Subquery per ottenere i giocatori che hanno giocato almeno un certo numero di partite
+            filtered_players_subquery = session.query(fps.player_id).\
+                join(f, f.id == fps.fixture_id).\
+                join(p, p.id == fps.player_id).\
+                join(t, t.id == fps.team_id).\
+                join(ps, and_(fps.player_id == ps.player_id, ps.season_id == f.season_id, ps.team_id == fps.team_id)).\
+                filter(
+                    f.season_id == selected_season_id,
+                    ps.season_id == selected_season_id,
+                    f.league_round.in_(filtered_rounds_subquery),
+                    func.coalesce(fps.games_minutes, 0) > 0
+                ).\
+                filter(
+                    (t.name.ilike(f'%{team}%') if team else True),
+                    (ps.position.ilike(f'%{role}%') if role else True)
+                ).\
+                group_by(fps.player_id).\
+                having(func.count(fps.fixture_id) >= matches_minimum_presence).\
+                subquery()
+
+            # Selezione dei dati
+            players_data_subquery = session.query(
+                fps.player_id,
                 p.name.label('player_name'),
                 p.photo.label('player_photo'),
-                t.name.label('team')
-                )
-                .join(p, p.id == ps.player_id)
-                .join(t, t.id == ps.team_id)
-                .join(PlayerSeason, p.id == PlayerSeason.player_id)
-                .join(Season, PlayerSeason.season_id == Season.id)
-                .filter(ps.games_appearences.isnot(None), ps.games_appearences >= matches_minimum_presence, ps.games_lineups.isnot(None), ps.rating.isnot(None), ps.rating >= min_rating)
-                .order_by(desc(ps.goals_total), desc(ps.goals_assists), desc(ps.rating), desc(ps.games_lineups), ps.team_id.asc(), ps.season_id.asc()))
+                t.name.label('team_name'),
+                ps.position,
+                fps.goals_total,
+                fps.goals_assists,
+                fps.rating,
+                fps.games_minutes,
+                fps.games_substitute,
+                fps.offsides,
+                fps.shots_total,
+                fps.shots_on,
+                fps.goals_conceded,
+                fps.goals_saves,
+                fps.passes_total,
+                fps.passes_key,
+                fps.passes_accuracy,
+                fps.tackles_total,
+                fps.tackles_blocks,
+                fps.tackles_interceptions,
+                fps.duels_total,
+                fps.duels_won,
+                fps.dribbles_attempts,
+                fps.dribbles_success,
+                fps.dribbles_past,
+                fps.fouls_drawn,
+                fps.fouls_committed,
+                fps.cards_yellow,
+                fps.cards_red,
+                fps.penalty_won,
+                fps.penalty_committed,
+                fps.penalty_scored,
+                fps.penalty_missed,
+                fps.penalty_saved
+            ).join(p, fps.player_id == p.id
+            ).join(f, fps.fixture_id == f.id  
+            ).join(ps, and_(fps.player_id == ps.player_id, ps.season_id == f.season_id, ps.team_id == fps.team_id)
+            ).join(t, fps.team_id == t.id
+            ).filter(f.season_id == selected_season_id  # Filtro per la stagione selezionata
+            ).filter(f.league_round.in_(filtered_rounds_subquery)  # Filtro per round selezionati
+            ).filter(p.id.in_(filtered_players_subquery)  # Filtro per giocatori selezionati
+            ).subquery()       
 
-            # Apply season filter
-            if season:
-                query = query.filter(Season.id == season)
+            # Criterio di ordinamento, a seconda del ruolo, nella successiva query di aggregazione
+            order_criteria = []
+            if role == 'Goalkeeper':
+                order_criteria = [
+                    asc('goals_conceded'),
+                    desc('average_rating'),
+                    desc('penalty_saved'),
+                    desc('goals_saves'),
+                    desc('total_matches_played')
+                ]
             else:
-                query = query.filter(Season.current == True)
+                order_criteria = [
+                    desc('total_goals'),
+                    desc('total_assists'),
+                    desc('average_rating'),
+                    desc('total_matches_played')
+                ]
 
-            if team:
-                query = query.filter(t.name.ilike(f'%{team}%'))
-
-            if role:
-                query = query.filter(ps.position.ilike(f'%{role}%'))
-
-            query = query.limit(5)
+            # Aggregazioni sui dati selezionati
+            query = session.query(
+                players_data_subquery.c.player_name,
+                players_data_subquery.c.player_photo,
+                players_data_subquery.c.team_name,
+                players_data_subquery.c.position,
+                func.coalesce(func.sum(players_data_subquery.c.goals_total), 0).label('total_goals'),
+                func.coalesce(func.sum(players_data_subquery.c.goals_assists), 0).label('total_assists'),
+                func.coalesce(func.round(cast(func.avg(players_data_subquery.c.rating), Numeric), 2), 0).label('average_rating'),
+                func.coalesce(func.sum(players_data_subquery.c.games_minutes), 0).label('total_minutes'),
+                func.coalesce(func.sum(players_data_subquery.c.offsides), 0).label('total_offsides'),
+                func.coalesce(func.sum(players_data_subquery.c.shots_total), 0).label('total_shots'),
+                func.coalesce(func.sum(players_data_subquery.c.shots_on), 0).label('shots_on_target'),
+                func.coalesce(func.sum(players_data_subquery.c.goals_conceded), 0).label('goals_conceded'),
+                func.coalesce(func.sum(players_data_subquery.c.goals_saves), 0).label('goals_saves'),
+                func.coalesce(func.sum(players_data_subquery.c.passes_total), 0).label('passes_total'),
+                func.coalesce(func.sum(players_data_subquery.c.passes_key), 0).label('passes_key'),
+                func.coalesce(func.sum(players_data_subquery.c.passes_accuracy), 0).label('passes_accuracy'),
+                func.coalesce(func.sum(players_data_subquery.c.tackles_total), 0).label('tackles_total'),
+                func.coalesce(func.sum(players_data_subquery.c.tackles_blocks), 0).label('tackles_blocks'),
+                func.coalesce(func.sum(players_data_subquery.c.tackles_interceptions), 0).label('tackles_interceptions'),
+                func.coalesce(func.sum(players_data_subquery.c.duels_total), 0).label('duels_total'),
+                func.coalesce(func.sum(players_data_subquery.c.duels_won), 0).label('duels_won'),
+                func.coalesce(func.sum(players_data_subquery.c.dribbles_attempts), 0).label('dribbles_attempts'),
+                func.coalesce(func.sum(players_data_subquery.c.dribbles_success), 0).label('dribbles_success'),
+                func.coalesce(func.sum(players_data_subquery.c.dribbles_past), 0).label('dribbles_past'),
+                func.coalesce(func.sum(players_data_subquery.c.fouls_drawn), 0).label('fouls_drawn'),
+                func.coalesce(func.sum(players_data_subquery.c.fouls_committed), 0).label('fouls_committed'),
+                func.coalesce(func.sum(players_data_subquery.c.cards_yellow), 0).label('yellow_cards'),
+                func.coalesce(func.sum(players_data_subquery.c.cards_red), 0).label('red_cards'),
+                func.coalesce(func.sum(players_data_subquery.c.penalty_won), 0).label('penalty_won'),
+                func.coalesce(func.sum(players_data_subquery.c.penalty_committed), 0).label('penalty_committed'),
+                func.coalesce(func.sum(players_data_subquery.c.penalty_scored), 0).label('penalty_scored'),
+                func.coalesce(func.sum(players_data_subquery.c.penalty_missed), 0).label('penalty_missed'),
+                func.coalesce(func.sum(players_data_subquery.c.penalty_saved), 0).label('penalty_saved'),
+                func.count(case((players_data_subquery.c.games_minutes > 0, players_data_subquery.c.games_minutes))).label('total_matches_played')
+            ).having(
+                func.avg(players_data_subquery.c.rating) >= min_rating  # Filtro su avg_rating
+            ).group_by(
+                players_data_subquery.c.player_name,
+                players_data_subquery.c.player_photo,
+                players_data_subquery.c.team_name,
+                players_data_subquery.c.position
+            ).order_by(
+                *order_criteria
+            ).limit(limit)
 
             top_players = query.all()
 
-            print("TOP PLAYERS", top_players)
-
-            if len(top_players) == 0:
-                args['min_rating'] = min_rating - 0.5
-                return Player.top_players_by_team_and_role(session, args)
-            
-            print("TOP PLAYERS ARRIVED", top_players)
-            
-            result = []
-
-            for ps, player_name, player_photo, team_name in top_players:
-                player_dict = ps._to_dict()
-                player_dict['player_name'] = player_name
-                player_dict['player_photo'] = player_photo
-                player_dict['team'] = team_name
-                
-                result.append(player_dict)
-
-            return result
-
-                            
-        except Exception as e:
-            print(f"Error during fetching Serie A top players: {e}")
-            return {"statusCode": 500, "body": f"Error during fetching Serie A top players: {e}"}
-        finally:
-            session.close()
-    
-
-    @staticmethod
-    def best_goalkeepers(session, matches_minimum_presence, args):
-        try:
-            print("INVOKED BEST GOALKEEPERS")
-            min_rating = args.get('min_rating', 6.1)
-            team = args.get("team")
-            role = args.get("role")
-            season = args.get("season")
-            ps = aliased(PlayerStatistics)
-            p = aliased(Player)
-            t = aliased(Team)
-
-            query = (session.query(
-                        ps,
-                        p.name.label('player_name'),
-                        p.photo.label('player_photo'),
-                        t.name.label('team')
-                    )
-                    .join(p, p.id == ps.player_id)
-                    .join(t, t.id == ps.team_id)
-                    .join(PlayerSeason, p.id == PlayerSeason.player_id)
-                    .join(Season, PlayerSeason.season_id == Season.id)
-                    .filter(
-                        ps.games_lineups.isnot(None),
-                        ps.games_lineups >= matches_minimum_presence,
-                        ps.rating.isnot(None),
-                        ps.rating >= min_rating,
-                        ps.goals_saves.isnot(None),
-                        ps.goals_conceded.isnot(None)
-                    )
-                    .order_by(
-                        ps.goals_conceded.asc(),
-                        desc(ps.rating),
-                        desc(ps.goals_saves),
-                        desc(ps.games_lineups)
-                    )
-                    )
-
-            # Apply season filter
-            if season:
-                query = query.filter(Season.id == season)
-            else:
-                query = query.filter(Season.current == True)
-
-            if team:
-                query = query.filter(t.name.ilike(f'%{team}%'))
-
-            if role:
-                query = query.filter(ps.position.ilike(f'%{role}%'))
-
-            goleadors = query.limit(7).all()
-            print("Goalkeepers arrived", goleadors)
-
-            if len(goleadors) == 0:
-                args['min_rating'] = min_rating - 0.5
-                return Player.top_players_by_team_and_role(session, args)
+            print(f"TOP PLAYERS: {top_players}")
 
             result = []
-            for ps_row in goleadors:
-                ps, player_name, player_photo, team_name = ps_row
-                player_dict = ps._to_dict() 
-                player_dict['player_name'] = player_name
-                player_dict['player_photo'] = player_photo
-                player_dict['team'] = team_name
-                
+
+            for row in top_players:
+                player_dict = {
+                    'player_name': row.player_name,
+                    'player_photo': row.player_photo,
+                    'team': row.team_name,
+                    'position': row.position,
+                    'total_goals': row.total_goals,
+                    'total_assists': row.total_assists,
+                    'average_rating': float(row.average_rating),
+                    'total_minutes': row.total_minutes,
+                    'total_offsides': row.total_offsides,
+                    'total_shots': row.total_shots,
+                    'shots_on_target': row.shots_on_target,
+                    'goals_conceded': row.goals_conceded,
+                    'goals_saves': row.goals_saves,
+                    'passes_total': row.passes_total,
+                    'passes_key': row.passes_key,
+                    'passes_accuracy': row.passes_accuracy,
+                    'tackles_total': row.tackles_total,
+                    'tackles_blocks': row.tackles_blocks,
+                    'tackles_interceptions': row.tackles_interceptions,
+                    'duels_total': row.duels_total,
+                    'duels_won': row.duels_won,
+                    'dribbles_attempts': row.dribbles_attempts,
+                    'dribbles_success': row.dribbles_success,
+                    'dribbles_past': row.dribbles_past,
+                    'fouls_drawn': row.fouls_drawn,
+                    'fouls_committed': row.fouls_committed,
+                    'yellow_cards': row.yellow_cards,
+                    'red_cards': row.red_cards,
+                    'penalty_won': row.penalty_won,
+                    'penalty_committed': row.penalty_committed,
+                    'penalty_scored': row.penalty_scored,
+                    'penalty_missed': row.penalty_missed,
+                    'penalty_saved': row.penalty_saved,
+                    'total_matches_played': row.total_matches_played
+                }
+            
                 result.append(player_dict)
 
             return result
 
         except Exception as e:
-            print(f"Error during fetching Serie A top goalkeepers: {e}")
-            return {"statusCode": 500, "body": f"Error during fetching Serie A top players: {e}"}
+            print("Error during fetching top players:", e)
+            session.rollback()
+            return []
         finally:
             session.close()
 
@@ -875,20 +1000,39 @@ class Player(Base):
     @staticmethod
     def how_many_matches_until_now(session, season):
         try:
-            if(season is None):
-                print("Cannot calculate matches number without season, setting default season to 1")
-                season = 1 #TODO handle this
-            matches = session.query(Fixture).filter(Fixture.season_id == season).count()
-            
-            print("MATCHES len", matches / 10)
-            return matches / 10
-          
+            # Se la stagione non è specificata, ottieni la stagione corrente per league_id = 1
+            if season is None:
+                print("Season not provided, fetching current season for league_id = 1")
+                current_season = session.query(Season.id).filter(
+                    Season.current == True,
+                    Season.league_id == 1  # Specifica che stai cercando la stagione corrente per la lega 1
+                ).first()
+
+                if current_season is None:
+                    raise ValueError("No current season found for league_id = 1")
+
+                season = current_season.id
+
+            # Estrai l'ultimo round (league_round) fino ad oggi basato su event_datetime
+            last_round = session.query(Fixture.league_round).filter(
+                Fixture.season_id == season,
+                Fixture.event_datetime <= func.now()  # Filtro per partite già giocate fino a oggi
+            ).order_by(Fixture.league_round.desc()).first()
+
+            if last_round is None:
+                raise ValueError("No matches found for the current season.")
+
+            print("Last league round is", last_round.league_round)
+            return last_round.league_round
+
         except Exception as e:
-            print("Error while getting number of matches", e)
+            print("Error while getting last league round", e)
             session.rollback()
             return False
+
         finally:
             session.close()
+
     
     @staticmethod
     def compute_matches_minum_presence(all_matches_count):

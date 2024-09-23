@@ -16,7 +16,7 @@ class FixturePlayerStatistics(Base):
     rating = Column(Float)
     captain = Column(Boolean)
     games_minutes = Column(Integer)
-    games_substitutes = Column(Boolean)
+    games_substitute = Column(Boolean)
     offsides = Column(Integer)
     shots_total = Column(Integer)
     shots_on = Column(Integer)
@@ -214,7 +214,7 @@ class FixturePlayerStatistics(Base):
                     rating=f.get('rating'),
                     captain=f.get('captain'),
                     games_minutes=f.get('games_minutes'),
-                    games_substitutes=f.get('games_substitutes'),
+                    games_substitute=f.get('games_substitute'),
                     offsides=f.get('offsides'),
                     shots_total=f.get('shots_total'),
                     shots_on=f.get('shots_on'),
@@ -274,7 +274,7 @@ class FixturePlayerStatistics(Base):
                     rating=f.get('rating'),
                     captain=f.get('captain'),
                     games_minutes=f.get('games_minutes'),
-                    games_substitutes=f.get('games_substitutes'),
+                    games_substitute=f.get('games_substitute'),
                     offsides=f.get('offsides'),
                     shots_total=f.get('shots_total'),
                     shots_on=f.get('shots_on'),
@@ -310,7 +310,7 @@ class FixturePlayerStatistics(Base):
                         'rating': f.get('rating'),
                         'captain': f.get('captain'),
                         'games_minutes': f.get('games_minutes'),
-                        'games_substitutes': f.get('games_substitutes'),
+                        'games_substitute': f.get('games_substitute'),
                         'offsides': f.get('offsides'),
                         'shots_total': f.get('shots_total'),
                         'shots_on': f.get('shots_on'),
@@ -379,7 +379,7 @@ class FixturePlayerStatistics(Base):
             'rating': self.rating,
             'captain': self.captain,
             'games_minutes': self.games_minutes,
-            'games_substitutes': self.games_substitutes,
+            'games_substitute': self.games_substitute,
             'offsides': self.offsides,
             'shots_total': self.shots_total,
             'shots_on': self.shots_on,
