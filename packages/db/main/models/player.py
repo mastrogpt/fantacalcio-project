@@ -1,5 +1,5 @@
 from models.fixtures import Fixture
-from sqlalchemy import Column, Integer, String, Boolean, Date, insert, UniqueConstraint, delete
+from sqlalchemy import Column, Integer, String, Boolean, Date, insert, UniqueConstraint, delete, or_, and_, case, cast, String, func
 from sqlalchemy.orm import sessionmaker, relationship
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.dialects.postgresql import insert as pg_insert
@@ -164,9 +164,21 @@ class Player(Base):
         if 'assist_man' in args:
             player = Player.best_assist_man(session, args)
             return {"body": player if player else "Player not found"}
+
         elif 'top_players_by_team_and_role' in args:
             player = Player.top_players_by_team_and_role(session, args)
             return {"body": player if player else "Player not found"}
+
+        elif 'get_player_fixtures_stats' in args:
+
+          season = args['season'] if 'season' in args and args['season'] else None
+          player_name = args['player_name']
+          last_n_rounds =  args['last_n_rounds'] if 'last_n_rounds' in args and args['last_n_rounds'] else None
+          home_away_filter = args['home_away_filter'] if 'home_away_filter' in args and args['home_away_filter'] else None
+
+          player_statistic_by_params = Player.get_player_fixtures_stats(session, player_name, last_n_rounds, home_away_filter, season)
+
+          return {"body": player_statistic_by_params if player_statistic_by_params else "Players FIxtures Statistics not found"}
         return {"body": Player.get_all(session,args)}
     
 
@@ -591,7 +603,174 @@ class Player(Base):
         finally:
             session.close()                
 
-            
+    @staticmethod
+    def get_player_fixtures_stats(session, player_name, last_n_rounds=None, home_away_filter='', season=None):
+      try:
+
+        player = aliased(Player)
+        team = aliased(Team)
+        opponent_team = aliased(Team)
+        fixture = aliased(Fixture)
+        SelectedSeason = aliased(Season)
+
+        FPS = aliased(FixturePlayerStatistics)
+        CPT = aliased(CurrentPlayerTeam)
+        PS = aliased(PlayerStatistics)
+
+        # Subquery per selezionare la stagione
+        selected_season_subquery = (
+          session.query(SelectedSeason)
+          .filter(or_(
+            SelectedSeason.year == season,
+            and_(season == None, Season.current == True)
+          ))
+          .limit(1)
+          .subquery()
+        )
+
+        num_all_matches = session.query(func.count(fixture.id)).filter(fixture.season_id == selected_season_subquery.c.id).all()[0][0]
+
+        # Subquery per selezionare le statistiche delle partite del giocatore
+        player_fixtures_subquery = (
+          session.query(
+            player.name.label('player_name'),
+            fixture.event_datetime,
+            selected_season_subquery.c.year.label('season'),
+            team.name.label('team_name'),
+            PS.position.label('ps_position'),
+            case(
+              (fixture.home_team_id == CPT.team_id, 'home'),
+              else_='away'
+            ).label('home_or_away'),
+            opponent_team.name.label('opponent_team'),
+            fixture.goals_home,
+            fixture.goals_away,
+            fixture.league_round,
+            FPS
+          )
+          .join(FPS, FPS.player_id == player.id)
+          .join(CPT, player.id == CPT.player_id)
+          .join(fixture, FPS.fixture_id == fixture.id)
+          .join(team, CPT.team_id == team.id)
+          .join(PS, and_(
+            PS.team_id == team.id,
+            PS.player_id == FPS.player_id,
+            PS.season_id == fixture.season_id
+          ))
+          .join(opponent_team, or_(
+            and_(fixture.home_team_id == opponent_team.id, CPT.team_id != opponent_team.id),
+            and_(fixture.away_team_id == opponent_team.id, CPT.team_id != opponent_team.id)
+          ))
+
+          .filter(fixture.season_id == selected_season_subquery.c.id)
+          .filter(func.unaccent(player.name).ilike(func.unaccent(f"%{player_name}%")))
+          .filter(or_(
+            and_(home_away_filter == 'home', fixture.home_team_id == CPT.team_id),
+            and_(home_away_filter == 'away', fixture.away_team_id == CPT.team_id),
+            or_(home_away_filter == '', home_away_filter == None)
+          ))
+          .filter(FPS.games_minutes > 0)
+
+          .filter(or_(fixture.home_team_id == CPT.team_id, fixture.away_team_id == CPT.team_id)) # -- NOTA (1)
+
+          # -- NOTA (1) --> FrankMaverick said:
+          # -- al momento non abbiamo una tabella che contiene lo storico dei trasferimenti, 
+          # -- ma solo la squadra attuale del giocatore, per cui diventa fondamentale filtrare la query solo sul team attuale, 
+          # -- altrimenti si avrebbero record duplicati inerenti le due squadre (perché nessuna delle due è la squadra - attuale - del player)
+
+          .order_by(fixture.event_datetime.desc())
+          .limit(func.coalesce(last_n_rounds, num_all_matches))
+          .subquery()
+        )
+
+        result_query = session.query(
+          player_fixtures_subquery.c.player_name,
+          # player_fixtures_subquery.c.fixture_id, # only for test
+          # player_fixtures_subquery.c.player_id, # only for test
+          player_fixtures_subquery.c.season,
+          player_fixtures_subquery.c.event_datetime,
+          player_fixtures_subquery.c.team_name,
+          player_fixtures_subquery.c.ps_position.label('position'),
+          player_fixtures_subquery.c.home_or_away,
+          player_fixtures_subquery.c.opponent_team,
+          player_fixtures_subquery.c.league_round,
+          func.concat(player_fixtures_subquery.c.goals_home, ' - ', player_fixtures_subquery.c.goals_away).label('result'),
+
+          case(
+            (and_(
+                player_fixtures_subquery.c.home_or_away == 'home',
+                player_fixtures_subquery.c.goals_home > player_fixtures_subquery.c.goals_away
+              ), 'W'),
+            (and_(
+              player_fixtures_subquery.c.home_or_away == 'away',
+              player_fixtures_subquery.c.goals_away > player_fixtures_subquery.c.goals_home
+            ), 'W'),
+            (and_(
+              player_fixtures_subquery.c.home_or_away == 'away',
+              player_fixtures_subquery.c.goals_home > player_fixtures_subquery.c.goals_away
+            ), 'L'),
+            (and_(
+              player_fixtures_subquery.c.home_or_away == 'home',
+              player_fixtures_subquery.c.goals_away > player_fixtures_subquery.c.goals_home
+            ), 'L'),
+            else_='D'
+          ),
+
+          cast(player_fixtures_subquery.c.event_datetime, String).label('event_datetime'),
+          func.coalesce(player_fixtures_subquery.c.games_substitute, False).label('games_substitute'),
+          func.coalesce(player_fixtures_subquery.c.rating, 0).label('rating'),
+          func.coalesce(player_fixtures_subquery.c.games_minutes, 0).label('games_minutes'),
+          func.coalesce(player_fixtures_subquery.c.offsides, 0).label('offsides'),
+          func.coalesce(player_fixtures_subquery.c.shots_total, 0).label('shots_total'),
+          func.coalesce(player_fixtures_subquery.c.shots_on, 0).label('shots_on'),
+          func.coalesce(player_fixtures_subquery.c.goals_total, 0).label('goals_total'),
+          func.coalesce(player_fixtures_subquery.c.goals_conceded, 0).label('goals_conceded'),
+          func.coalesce(player_fixtures_subquery.c.goals_assists, 0).label('goals_assists'),
+          func.coalesce(player_fixtures_subquery.c.goals_saves, 0).label('goals_saves'),
+          func.coalesce(player_fixtures_subquery.c.passes_total, 0).label('passes_total'),
+          func.coalesce(player_fixtures_subquery.c.passes_key, 0).label('passes_key'),
+          func.coalesce(player_fixtures_subquery.c.passes_accuracy, 0).label('passes_accuracy'),
+          func.coalesce(player_fixtures_subquery.c.tackles_total, 0).label('tackles_total'),
+          func.coalesce(player_fixtures_subquery.c.tackles_blocks, 0).label('tackles_blocks'),
+          func.coalesce(player_fixtures_subquery.c.tackles_interceptions, 0).label('tackles_interceptions'),
+          func.coalesce(player_fixtures_subquery.c.duels_total, 0).label('duels_total'),
+          func.coalesce(player_fixtures_subquery.c.duels_won, 0).label('duels_won'),
+          func.coalesce(player_fixtures_subquery.c.dribbles_attempts, 0).label('dribbles_attempts'),
+          func.coalesce(player_fixtures_subquery.c.dribbles_success, 0).label('dribbles_success'),
+          func.coalesce(player_fixtures_subquery.c.dribbles_past, 0).label('dribbles_past'),
+          func.coalesce(player_fixtures_subquery.c.fouls_drawn, 0).label('fouls_drawn'),
+          func.coalesce(player_fixtures_subquery.c.fouls_committed, 0).label('fouls_committed'),
+          func.coalesce(player_fixtures_subquery.c.cards_yellow, 0).label('cards_yellow'),
+          func.coalesce(player_fixtures_subquery.c.cards_red, 0).label('cards_red'),
+          func.coalesce(player_fixtures_subquery.c.penalty_won, 0).label('penalty_won'),
+          func.coalesce(player_fixtures_subquery.c.penalty_committed, 0).label('penalty_committed'),
+          func.coalesce(player_fixtures_subquery.c.penalty_scored, 0).label('penalty_scored'),
+          func.coalesce(player_fixtures_subquery.c.penalty_missed, 0).label('penalty_missed'),
+          func.coalesce(player_fixtures_subquery.c.penalty_saved, 0).label('penalty_saved')
+        )
+
+        columns = [column['name'] for column in result_query.column_descriptions]
+
+        player_statistic = result_query.all()
+
+        result = []
+
+        for row in player_statistic:
+          player_dict = {}
+          for attr in columns:
+            if attr:
+              player_dict[attr] = getattr(row, attr)
+
+          result.append(player_dict)
+
+        return result
+
+      except Exception as e:
+          print(f"Error during fetching Players by params for season={season}, player_name={player_name}, last_n_rounds={last_n_rounds}, home_or_away={home_away_filter}: {e}")
+          return None
+      finally:
+          session.close()
+
     @staticmethod
     def top_players_by_team_and_role(session, args):
         """
