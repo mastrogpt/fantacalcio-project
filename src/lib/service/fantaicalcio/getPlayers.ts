@@ -1,5 +1,6 @@
 import axios from 'axios';
 import {PUBLIC_FANTAICALCIO_BASE_URL, PUBLIC_ENDPOINT_FANTA_PLAYERS_ALL_SERIE_A } from '$env/static/public';
+import { getApiHost } from '$lib/store/store';
 
 /*
 ALL PLAYERS
@@ -21,14 +22,8 @@ export interface Player {
 export interface PlayersList extends Array<Player> {}
 
 export async function getPlayersList(): Promise<PlayersList> {
-
-    let apiHost = window.location.hostname.split('.')[0];
-    console.log("API HOST IS " + apiHost)
-    if(!apiHost || !apiHost.includes('fantabalun')) {
-        apiHost = 'fantatest'
-    }
     
-    let finalUrl = PUBLIC_FANTAICALCIO_BASE_URL + apiHost + PUBLIC_ENDPOINT_FANTA_PLAYERS_ALL_SERIE_A
+    let finalUrl = PUBLIC_FANTAICALCIO_BASE_URL + getApiHost() + PUBLIC_ENDPOINT_FANTA_PLAYERS_ALL_SERIE_A
     
     try {
         const response = await axios.get(finalUrl, {

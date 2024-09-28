@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { PUBLIC_FANTAICALCIO_BASE_URL, PUBLIC_ENDPOINT_AI_ARTICLES } from '$env/static/public';
+import { getApiHost } from '$lib/store/store';
 
 export interface IArticlesProps {
 	author: string;
@@ -15,12 +16,7 @@ export interface IArticlesProps {
 export async function getArticlesList(): Promise<IArticlesProps[]> {
 	try {
 
-		let apiHost = window.location.hostname.split('.')[0];
-		console.log("API HOST IS art" + apiHost)
-		if(!apiHost || !apiHost.includes('fantabalun')) {
-			apiHost = 'fantatest'
-		}
-		const response = await axios.get(PUBLIC_FANTAICALCIO_BASE_URL + apiHost + PUBLIC_ENDPOINT_AI_ARTICLES, {
+		const response = await axios.get(PUBLIC_FANTAICALCIO_BASE_URL + getApiHost() + PUBLIC_ENDPOINT_AI_ARTICLES, {
 			params: { model: 'article', limit : 150 }
 		});
 		return response.data?.map((articles: IArticlesProps[]) => articles);

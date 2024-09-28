@@ -1,3 +1,4 @@
+import { getApiHost } from '$lib/store/store';
 import axios from 'axios';
 
 export interface ChatInput {
@@ -7,7 +8,8 @@ export interface ChatInput {
 }
 
 export async function chat(input: ChatInput): Promise<any> {
-	const apiUrl = 'https://nuvolaris.dev/api/v1/web/fantatest/chatwidget/chat';
+	
+	const apiUrl = 'https://nuvolaris.dev/api/v1/web/' + getApiHost() + '/chatwidget/chat';
 	const headers = {
 		'Content-Type': 'application/json'
 	};
