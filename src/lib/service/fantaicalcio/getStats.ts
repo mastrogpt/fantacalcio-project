@@ -1,7 +1,8 @@
 import axios from 'axios';
 import {
 	PUBLIC_FANTAICALCIO_BASE_URL,
-	PUBLIC_FANTAICALCIO_FANTA_PLAYERS_STATS
+	PUBLIC_ENDPOINT_FANTA_PLAYERS_STATS
+
 } from '$env/static/public';
 import { roleMapping } from './getPlayers';
 import type { Player } from './getPlayers';
@@ -84,8 +85,13 @@ export interface StatsData {
 }
 
 export function getStatsData(player_id, season_id, team_id): Promise<PlayerCompleteStats> {
+
+	let apiHost = window.location.hostname.split('.')[0];
+		if(!apiHost || !apiHost.includes('fantabalun')) {
+			apiHost = 'fantatest'
+		}
 	return axios
-		.get(PUBLIC_FANTAICALCIO_BASE_URL + PUBLIC_FANTAICALCIO_FANTA_PLAYERS_STATS, {
+		.get(PUBLIC_FANTAICALCIO_BASE_URL + apiHost +  PUBLIC_ENDPOINT_FANTA_PLAYERS_STATS, {
 			params: { player_id: player_id, season_id: season_id, team_id: team_id }
 		})
 		.then((response) => {
