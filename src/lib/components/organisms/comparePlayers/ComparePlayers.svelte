@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { getStatsData } from '$lib/service/fantamaster/getStats';
 	import { onMount } from 'svelte';
 	import { nuvbotChat, selectedRows } from '$lib/store/store';
 	import { handleNuvBotChatOpening, handlePlayerCardOpening } from '$lib/store/store';
@@ -13,7 +12,7 @@
 
 	onMount(async () => {
 		loading = true;
-		const data = await getStatsData();
+		const data = null;
 
 		$selectedRows.forEach((row, idx, array) => {
 			playersToCompare.push(row);
