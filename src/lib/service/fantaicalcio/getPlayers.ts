@@ -1,5 +1,5 @@
 import axios from 'axios';
-import {PUBLIC_URL_API_BASEURL, PUBLIC_FANTAICALCIO_BASE_URL, PUBLIC_FANTAICALCIO_FANTA_PLAYERS_ALL_SERIE_A } from '$env/static/public';
+import {PUBLIC_FANTAICALCIO_BASE_URL, PUBLIC_FANTAICALCIO_FANTA_PLAYERS_ALL_SERIE_A } from '$env/static/public';
 
 /*
 ALL PLAYERS
@@ -46,46 +46,6 @@ export async function getPlayersList(): Promise<PlayersList> {
         console.error(error);
         throw error;
     }
-}
-
-/*
-UNAVAILABLE PLAYERS
-*/
-export interface UnavailablePlayers {
-    team: string;
-    role: string;
-    desc: string;
-    name: string;
-    type: string;
-    source_desc: string;
-    next_day: string;
-    doubt: boolean;
-}
-
-export interface UnavailabilityInfo {
-    day: string;
-    unavailable: UnavailablePlayers[];
-}
-
-export function getUnavailablePlayers(): Promise<UnavailablePlayers[]> {
-    return axios
-        .get(PUBLIC_URL_API_BASEURL, { params: { module: 'fantamaster', action: 'unavailable' } })
-        .then((response) => {
-            return response.data.data.unavailable.map((player: any) => ({
-                team: player.team,
-                role: roleMapping[player.role] || player.role, 
-                desc: player.desc,
-                name: player.name,
-                type: player.type,
-                source_desc: player.source_desc,
-                next_day: player.next_day,
-                doubt: player.doubt
-            }));
-        })
-        .catch((error) => {
-            console.error(error);
-            throw error;
-        });
 }
 
 export const roleMapping: { [key: string]: string } = {

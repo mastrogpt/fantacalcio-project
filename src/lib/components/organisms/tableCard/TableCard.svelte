@@ -4,7 +4,7 @@
 	import Modal from '$lib/components/atoms/modal/Modal.svelte';
 	import Tab from '$lib/components/atoms/tab/Tab.svelte';
 	import Table from '$lib/components/molecules/table/table.svelte';
-	import { getPlayersList, getUnavailablePlayers } from '$lib/service/fantaicalcio/getPlayers';
+	import { getPlayersList } from '$lib/service/fantaicalcio/getPlayers';
 	import { selectedRows, isPlayerCardOpen, handlePlayerCardOpening } from '$lib/store/store';
 	import ComparePlayers from '../comparePlayers/ComparePlayers.svelte';
 	import PlayerDetails from '../playerDetails/PlayerDetails.svelte';
@@ -102,7 +102,7 @@
 			{:catch error}
 				<p style="color: red">{error.message}</p>
 			{/await}
-		{:else}
+			<!-- {:else}
 			{#await getUnavailablePlayers()}
 				<Loader />
 			{:then data}
@@ -120,7 +120,7 @@
 				/>
 			{:catch error}
 				<p style="color: red">{error.message}</p>
-			{/await}
+			{/await} -->
 		{/if}
 	</div>
 	{#if Array.from($selectedRows).length > 0}

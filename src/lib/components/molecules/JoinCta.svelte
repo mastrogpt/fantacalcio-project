@@ -17,7 +17,7 @@
 
 	async function postMessage() {
 		try {
-			await sendMessage('Someone is interested to Nuvolaris Fantamaster: ' + userMessage);
+			await sendMessage('Someone is interested to Nuvolaris Fantabalun: ' + userMessage);
 
 			userMessage = '';
 			showModalFun();
