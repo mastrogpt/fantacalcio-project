@@ -3,8 +3,8 @@ import {
 	PUBLIC_FANTAICALCIO_BASE_URL,
 	PUBLIC_FANTAICALCIO_FANTA_PLAYERS_STATS
 } from '$env/static/public';
-import type { Player } from '../fantamaster/getPlayers';
 import { roleMapping } from './getPlayers';
+import type { Player } from './getPlayers';
 export interface PlayerStats {
 	captain: boolean;
 	cards_red: number;
@@ -133,7 +133,6 @@ export async function getStatsDataById(
 		throw error;
 	}
 }
-
 
 
 const getStatsDataByIdLabelMapper = {

@@ -4,7 +4,7 @@ import {PUBLIC_FANTAICALCIO_BASE_URL, PUBLIC_FANTAICALCIO_FANTA_PLAYERS_ALL_SERI
 /*
 ALL PLAYERS
 */
-interface Player {
+export interface Player {
     id: number;
     name: string;
     playmaker: boolean;
