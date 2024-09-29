@@ -74,6 +74,8 @@ class Article(Base):
     def delete_handler(session, args):
         if 'id' in args:
             return {"body": Article.delete_by_id(session, args)}
+        elif 'author' in args:
+            return {"body": Article.delete_by_author(session, args)}
         else:
             return {"body": Article.delete_all(session, args)}
 
@@ -151,6 +153,27 @@ class Article(Base):
                     session.delete(article)
                     session.commit()
                     return f"Article {args.get('id')} deleted"
+                else:
+                    return "Article not found"
+            else:
+                return "No API key provided"
+        except Exception as e:
+            print("Error while deleting article:", e)
+            session.rollback()
+            return "Error while deleting article"
+        finally:
+            session.close()
+    
+    def delete_by_author(session, args):
+        try:
+            if args.get('FANTABALUN_API_KEY_TEST'):
+                articles = session.query(Article).filter_by(author=args.get('author')).all()
+
+                if articles:
+                    for article in articles:
+                        session.delete(article)
+                        session.commit()
+                    return f"Articles deleted: {len(articles)}"
                 else:
                     return "Article not found"
             else:
