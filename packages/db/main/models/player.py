@@ -552,44 +552,48 @@ class Player(Base):
         try:
             team = args.get('team')
             psurname = args.get('psurname')
-            print("Invoked all player with filter", team, psurname)
-           
-            players_teams = (session.query(Player, Team, Season,  PlayerStatistics)
+            print("Invoked all player by surname and team with filter", team, psurname)
+        
+            players_teams_query = (session.query(Player, Team, Season, PlayerStatistics)
                 .join(PlayerStatistics, Player.id == PlayerStatistics.player_id)
                 .join(CurrentPlayerTeam, Player.id == CurrentPlayerTeam.player_id)
-                .join(Team, CurrentPlayerTeam.team_id == Team.id)
                 .join(Season, PlayerStatistics.season_id == Season.id)
                 .join(League, Season.league_id == League.id)
                 .filter(
                     League.name == "Serie A",
                     League.country_name == "Italy",
-                    Team.name.ilike(f'%{team}%'),
                     func.unaccent(Player.name).ilike(f'%{psurname}%'),
-                )
-                .all())
+                ))
 
+            if team:
+                players_teams_query = players_teams_query.join(Team, CurrentPlayerTeam.team_id == Team.id).filter(Team.name.ilike(f'%{team}%'))
+            else:
+                players_teams_query = players_teams_query.join(Team, CurrentPlayerTeam.team_id == Team.id)
+            
+            players = players_teams_query.all()
+            
             result = []
 
-            for player in players_teams:
-                player_dict = player.Player._to_basic_info_dict()
-                player_dict['team'] = player.Team.name
-                player_dict['team_logo'] = player.Team.logo
-                player_dict['team_id'] = player.Team.id
-                player_dict['season_year'] = player.Season.year
-                player_dict['season_current'] = player.Season.current
-                player_dict['position'] = player.PlayerStatistics.position
-    
-                player_dict['statistics'] = player.PlayerStatistics._to_dict()
+            for player, team, season, statistics in players:
+                player_dict = player._to_basic_info_dict()
+                player_dict['team'] = team.name
+                player_dict['team_logo'] = team.logo
+                player_dict['team_id'] = team.id
+                player_dict['season_year'] = season.year
+                player_dict['season_current'] = season.current
+                player_dict['position'] = statistics.position
+                player_dict['statistics'] = statistics._to_dict()
                 
                 result.append(player_dict)
 
             return result
-                       
+                    
         except Exception as e:
             print(f"Error during fetching Serie A players for current season: {e}")
             return {"statusCode": 500, "body": f"Error during fetching Serie A players for current season: {e}"}
         finally:
-            session.close()                
+            session.close()
+
 
             
     @staticmethod
