@@ -7,6 +7,7 @@
 	height="110"
 	preserveAspectRatio="xMidYMid meet"
 	version="1.0"
+	id="waving-logo"
 	><defs
 		><filter x="0%" y="0%" width="100%" height="100%" id="ae5fe515c4"
 			><feColorMatrix
@@ -82,3 +83,28 @@
 		></g
 	></svg
 >
+
+<style>
+	#waving-logo {
+		animation: wave 5s infinite ease-in-out;
+		transform-origin: center;
+	}
+
+	@keyframes wave {
+		0% {
+			transform: rotate(0deg);
+		}
+		25% {
+			transform: rotate(5deg);
+		}
+		50% {
+			transform: rotate(0deg);
+		}
+		75% {
+			transform: rotate(-5deg);
+		}
+		100% {
+			transform: rotate(0deg);
+		}
+	}
+</style>
