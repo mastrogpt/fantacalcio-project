@@ -333,5 +333,5 @@ class Standings(Base):
             'lose_away': self.lose_away,
             'goals_for_away': self.goals_for_away,
             'goals_against_away': self.goals_against_away,
-            'last_update': self.last_update
+            'last_update': self.last_update.isoformat()
         }
