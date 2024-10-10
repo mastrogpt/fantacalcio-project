@@ -6,6 +6,21 @@
 	import { getArticlesList, type IArticlesProps } from '$lib/service/fantaicalcio/getArticles';
 
 	export let data: IArticlesProps;
+
+	// Function to format date
+	function formatDate(isoDate: string, locale: string = 'it-IT'): string {
+		const date = new Date(isoDate);
+		const formattedDate = new Intl.DateTimeFormat(locale, {
+			day: '2-digit',
+			month: 'short',
+			year: 'numeric',
+		}).format(date);
+		const formattedTime = new Intl.DateTimeFormat(locale, {
+			hour: '2-digit',
+			minute: '2-digit',
+		}).format(date);
+		return `${formattedDate} - ${formattedTime}`;
+	}
 </script>
 
 <article class="flex flex-col justify-center items-center">
@@ -16,6 +31,10 @@
 			<small class="author">Scritto da {' '}{data?.author}</small>
 
 			<h2 class="text-center mx-10">{data?.title}</h2>
+
+			<small class="published-date">
+				{formatDate(data?.creation_date, 'it-IT')}
+			</small>
 		</div>
 
 		<div class="article-body container mx-10">

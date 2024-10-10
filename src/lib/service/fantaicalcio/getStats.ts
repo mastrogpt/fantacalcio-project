@@ -155,7 +155,7 @@ const getStatsDataByIdLabelMapper = {
 	// games_number: "Partite vinte",
 	goals_assists: 'Assist',
 	goals_conceded: 'Goal concessi',
-	goals_saves: 'Goal savati',
+	goals_saves: 'Goal salvati',
 	goals_total: 'Goal totali',
 	passes_accuracy: 'Passaggi riusciti',
 	passes_key: 'Passaggi chiave',
