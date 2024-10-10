@@ -650,7 +650,7 @@ class Player(Base):
           session.query(SelectedSeason)
           .filter(or_(
             SelectedSeason.year == season,
-            and_(season == None, Season.current == True)
+            and_(season == None, SelectedSeason.current == True)
           ))
           .limit(1)
           .subquery()
