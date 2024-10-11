@@ -577,7 +577,7 @@ class Player(Base):
                 .filter(
                     League.name == "Serie A",
                     League.country_name == "Italy",
-                    func.unaccent(Player.name).ilike(f'%{psurname}%'),
+                    func.unaccent(Player.name).ilike(func.unaccent(f'%{psurname}%')),
                 ))
 
             if team:
@@ -590,16 +590,37 @@ class Player(Base):
             result = []
 
             for player, team, season, statistics in players:
-                player_dict = player._to_basic_info_dict()
-                player_dict['team'] = team.name
-                player_dict['team_logo'] = team.logo
-                player_dict['team_id'] = team.id
-                player_dict['season_year'] = season.year
-                player_dict['season_current'] = season.current
-                player_dict['position'] = statistics.position
-                player_dict['statistics'] = statistics._to_dict()
+                # Cerca se il giocatore è già presente nel risultato
+                existing_player = next((p for p in result if p['firstname'] == player.firstname and p['lastname'] == player.lastname), None)
                 
-                result.append(player_dict)
+                if not existing_player:
+                    # Se non esiste, crea una nuova entry per il giocatore
+                    player_entry = {
+                        "name": player.name,
+                        "firstname": player.firstname,
+                        "lastname": player.lastname,
+                        "photo": player.photo,
+                        "team": team.name,
+                        "team_logo": team.logo,
+                        "seasons": []  # Qui inseriamo le statistiche per stagione
+                    }
+                    result.append(player_entry)
+                else:
+                    player_entry = existing_player
+            
+                # Aggiungi le statistiche per la stagione corrente
+                season_stats = {
+                    "season_year": season.year,
+                    "season_current": season.current,
+                    "position": statistics.position,
+                    "statistics": statistics._to_dict()
+                }
+                
+                player_entry['seasons'].append(season_stats)
+            
+            # Ordina le stagioni dalla più recente
+            for player_entry in result:
+                player_entry['seasons'].sort(key=lambda x: (not x['season_current'], -x['season_year']))
 
             return result
                     
