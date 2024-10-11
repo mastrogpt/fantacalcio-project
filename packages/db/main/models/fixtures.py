@@ -444,6 +444,47 @@ class Fixture(Base):
         finally:
             session.close()
 
+
+    @staticmethod
+    def how_many_matches_until_now(session, season, league_id=None):
+        try:
+            if league_id is None:
+                league_id = 1 # Serie A
+            # Esegui una query per ottenere il season_id basato su season (se fornito) o sulla stagione corrente
+            season_query = session.query(Season.id).filter(
+                (Season.year == season if season is not None else Season.current == True),
+                Season.league_id == league_id
+            ).first()
+            
+            if season_query is None:
+                if season is None:
+                    raise ValueError("No current season found for league_id = 1")
+                else:
+                    raise ValueError(f"No season found for year {season} and league_id = 1")
+            
+            # Estrai l'ID della stagione
+            season_id = season_query.id
+
+            # Estrai l'ultimo round (league_round) fino ad oggi basato su event_datetime
+            last_round = session.query(Fixture.league_round).filter(
+                Fixture.season_id == season_id,
+                Fixture.event_datetime <= func.now()  # Filtro per partite già giocate fino a oggi
+            ).order_by(Fixture.league_round.desc()).first()
+
+            if last_round is None:
+                raise ValueError("No matches found for the current season.")
+
+            print("Last league round is", last_round.league_round)
+            return last_round.league_round
+
+        except Exception as e:
+            print("Error while getting last league round", e)
+            session.rollback()
+            return False
+
+        finally:
+            session.close()            
+
     def _to_dict(self):
         return {
             'id': self.id,
