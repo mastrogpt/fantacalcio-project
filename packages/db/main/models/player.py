@@ -577,7 +577,7 @@ class Player(Base):
                 .filter(
                     League.name == "Serie A",
                     League.country_name == "Italy",
-                    func.unaccent(Player.name).ilike(f'%{psurname}%'),
+                    func.unaccent(Player.name).ilike(func.unaccent(f'%{psurname}%')),
                 ))
 
             if team:
@@ -590,16 +590,37 @@ class Player(Base):
             result = []
 
             for player, team, season, statistics in players:
-                player_dict = player._to_basic_info_dict()
-                player_dict['team'] = team.name
-                player_dict['team_logo'] = team.logo
-                player_dict['team_id'] = team.id
-                player_dict['season_year'] = season.year
-                player_dict['season_current'] = season.current
-                player_dict['position'] = statistics.position
-                player_dict['statistics'] = statistics._to_dict()
+                # Cerca se il giocatore è già presente nel risultato
+                existing_player = next((p for p in result if p['firstname'] == player.firstname and p['lastname'] == player.lastname), None)
                 
-                result.append(player_dict)
+                if not existing_player:
+                    # Se non esiste, crea una nuova entry per il giocatore
+                    player_entry = {
+                        "name": player.name,
+                        "firstname": player.firstname,
+                        "lastname": player.lastname,
+                        "photo": player.photo,
+                        "team": team.name,
+                        "team_logo": team.logo,
+                        "seasons": []  # Qui inseriamo le statistiche per stagione
+                    }
+                    result.append(player_entry)
+                else:
+                    player_entry = existing_player
+            
+                # Aggiungi le statistiche per la stagione corrente
+                season_stats = {
+                    "season_year": season.year,
+                    "season_current": season.current,
+                    "position": statistics.position,
+                    "statistics": statistics._to_dict()
+                }
+                
+                player_entry['seasons'].append(season_stats)
+            
+            # Ordina le stagioni dalla più recente
+            for player_entry in result:
+                player_entry['seasons'].sort(key=lambda x: (not x['season_current'], -x['season_year']))
 
             return result
                     
@@ -826,20 +847,19 @@ class Player(Base):
 
             # Subquery per ottenere la stagione selezionata o corrente
             if not season:
-                selected_season_subquery = session.query(Season.id).filter(Season.current == True, Season.league_id == 1).limit(1).subquery()
+                selected_season = session.query(Season.id, Season.year).filter(Season.current == True, Season.league_id == 1).limit(1).first()
             else:
-                selected_season_subquery = session.query(Season.id).filter(Season.year == season, Season.league_id == 1).limit(1).subquery()
+                selected_season = session.query(Season.id, Season.year).filter(Season.year == season, Season.league_id == 1).limit(1).first()
+
+            if selected_season is None:
+                raise ValueError("No season found")
 
             # DEBUG: view subquery result
-            selected_season_id = session.query(selected_season_subquery).scalar()
-            print(f"Selected Season ID: {selected_season_id}")
-
-            # Verifica se abbiamo ottenuto la stagione correttamente
-            if not selected_season_id:
-                raise ValueError("Season ID not found")
+            selected_season_id, selected_season_year = selected_season
+            print(f"Selected Season: {selected_season_id} {selected_season_year}")
 
             # Recupera il numero di round della stagione fino ad oggi
-            count_matches = Player.how_many_matches_until_now(session, selected_season_id)
+            count_matches = Fixture.how_many_matches_until_now(session, selected_season_year)
             print(f"Num. of matches until now: {count_matches}")
 
             # Logica per gestire `last_n_rounds` e `league_round`
@@ -1043,7 +1063,9 @@ class Player(Base):
                     'penalty_scored': row.penalty_scored,
                     'penalty_missed': row.penalty_missed,
                     'penalty_saved': row.penalty_saved,
-                    'total_matches_played': row.total_matches_played
+                    'total_matches_played': row.total_matches_played,
+                    'total_season_matches': count_matches,
+                    'season': selected_season_year
                 }
             
                 result.append(player_dict)
@@ -1323,43 +1345,6 @@ class Player(Base):
             'lastname': self.lastname,            
             'photo': self.photo
         }
-
-    @staticmethod
-    def how_many_matches_until_now(session, season):
-        try:
-            # Se la stagione non è specificata, ottieni la stagione corrente per league_id = 1
-            if season is None:
-                print("Season not provided, fetching current season for league_id = 1")
-                current_season = session.query(Season.id).filter(
-                    Season.current == True,
-                    Season.league_id == 1  # Specifica che stai cercando la stagione corrente per la lega 1
-                ).first()
-
-                if current_season is None:
-                    raise ValueError("No current season found for league_id = 1")
-
-                season = current_season.id
-
-            # Estrai l'ultimo round (league_round) fino ad oggi basato su event_datetime
-            last_round = session.query(Fixture.league_round).filter(
-                Fixture.season_id == season,
-                Fixture.event_datetime <= func.now()  # Filtro per partite già giocate fino a oggi
-            ).order_by(Fixture.league_round.desc()).first()
-
-            if last_round is None:
-                raise ValueError("No matches found for the current season.")
-
-            print("Last league round is", last_round.league_round)
-            return last_round.league_round
-
-        except Exception as e:
-            print("Error while getting last league round", e)
-            session.rollback()
-            return False
-
-        finally:
-            session.close()
-
     
     @staticmethod
     def compute_matches_minum_presence(all_matches_count):

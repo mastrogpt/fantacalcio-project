@@ -20,10 +20,10 @@
 <nav class="bg-primary text-white shadow-lg">
 	<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 		<div class="flex justify-between h-16 items-center">
-			<a href="/" class="flex-shrink-0 flex flex-col items-center">
+			<a href="/" class="flex-shrink-0 flex flex-row items-center">
 			<h2 class="text-2xl font-bold">FantaBalùn</h2>
 			<p class="text-xs flex items-center">
-				by <img id="nuv-img" alt="nuv logo" class="ml-1 h-8" src="{nuvBgWhite}"/>
+				<img id="nuv-img" alt="nuv logo" class="ml-1 h-8" src="{nuvBgWhite}"/>
 			  </p>
 		  </a>
 			<div class="hidden md:flex md:space-x-8">
