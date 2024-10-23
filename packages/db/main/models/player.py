@@ -662,6 +662,8 @@ class Player(Base):
         player_fixtures_subquery = (
           session.query(
             player.name.label('player_name'),
+            player.id,
+            player.firstname,
             fixture.event_datetime,
             selected_season_subquery.c.year.label('season'),
             team.name.label('team_name'),
@@ -674,7 +676,11 @@ class Player(Base):
             fixture.goals_home,
             fixture.goals_away,
             fixture.league_round,
-            FPS
+            FPS,
+            func.row_number().over(
+              partition_by = player.id,
+              order_by = fixture.event_datetime.desc()
+            ).label("row_number")
           )
           .join(FPS, FPS.player_id == player.id)
           .join(CPT, player.id == CPT.player_id)
@@ -706,13 +712,14 @@ class Player(Base):
           # -- ma solo la squadra attuale del giocatore, per cui diventa fondamentale filtrare la query solo sul team attuale, 
           # -- altrimenti si avrebbero record duplicati inerenti le due squadre (perché nessuna delle due è la squadra - attuale - del player)
 
-          .order_by(fixture.event_datetime.desc())
-          .limit(func.coalesce(last_n_rounds, num_all_matches))
+          .order_by(player.id, fixture.event_datetime.desc())
           .subquery()
         )
 
         result_query = session.query(
           player_fixtures_subquery.c.player_name,
+          player_fixtures_subquery.c.id.label('player_id'),
+          player_fixtures_subquery.c.firstname.label('player_firstname'),
           # player_fixtures_subquery.c.fixture_id, # only for test
           # player_fixtures_subquery.c.player_id, # only for test
           player_fixtures_subquery.c.season,
@@ -775,7 +782,8 @@ class Player(Base):
           func.coalesce(player_fixtures_subquery.c.penalty_scored, 0).label('penalty_scored'),
           func.coalesce(player_fixtures_subquery.c.penalty_missed, 0).label('penalty_missed'),
           func.coalesce(player_fixtures_subquery.c.penalty_saved, 0).label('penalty_saved')
-        )
+
+        ).filter(player_fixtures_subquery.c.row_number <= func.coalesce(last_n_rounds, num_all_matches))
 
         columns = [column['name'] for column in result_query.column_descriptions]
 
