@@ -16,7 +16,7 @@ from models.standings import Standings
 from models.base import Base
 from models.utils import Redis_utils
 import uuid
-from datetime import datetime
+from datetime import datetime, date
 import json
 
 class Player(Base):
@@ -664,6 +664,8 @@ class Player(Base):
             player.name.label('player_name'),
             player.id,
             player.firstname,
+            player.lastname,
+            func.concat(player.firstname, ' ', player.lastname).label('player_full_name'),
             fixture.event_datetime,
             selected_season_subquery.c.year.label('season'),
             team.name.label('team_name'),
@@ -720,8 +722,9 @@ class Player(Base):
           player_fixtures_subquery.c.player_name,
           player_fixtures_subquery.c.id.label('player_id'),
           player_fixtures_subquery.c.firstname.label('player_firstname'),
+          player_fixtures_subquery.c.lastname.label('player_lastname'),
+          player_fixtures_subquery.c.player_full_name,
           # player_fixtures_subquery.c.fixture_id, # only for test
-          # player_fixtures_subquery.c.player_id, # only for test
           player_fixtures_subquery.c.season,
           player_fixtures_subquery.c.event_datetime,
           player_fixtures_subquery.c.team_name,
@@ -789,17 +792,59 @@ class Player(Base):
 
         player_statistic = result_query.all()
 
-        result = []
+        results = []
+        season_selected = ''
 
         for row in player_statistic:
           player_dict = {}
           for attr in columns:
             if attr:
               player_dict[attr] = getattr(row, attr)
+              if attr == 'season':
+                season_selected = player_dict[attr]
 
-          result.append(player_dict)
+          results.append(player_dict)
 
-        return result
+        dict_player = {
+          'player_full_name' : '',
+          'player_name' : '',
+          'player_firstname' : '',
+          'player_lastname' : '',
+          'player_id' : '',
+          'team_name' : '',
+        }
+
+        dict_to_return = {
+          'last_n_rounds' : last_n_rounds if last_n_rounds else num_all_matches,
+          'today_date' : str(date.today()),
+          'season_selected' : season_selected,
+          'players' : []
+        }
+
+        player_map = {}
+
+        for row in results:
+          player_id = row['player_id']
+
+          if not player_id in player_map:
+            player_map[player_id] = {
+              'stats' : []
+            }
+
+          only_stats_row = dict(row)
+          player_id_from_map = player_map[player_id]
+
+          for key, val in row.items():
+
+            if key in dict_player:
+              player_id_from_map[key] = val
+              del only_stats_row[key]
+
+          player_id_from_map['stats'].append(only_stats_row)
+
+        dict_to_return['players'] = list(player_map.values())
+
+        return [dict_to_return]
 
       except Exception as e:
           print(f"Error during fetching Players by params for season={season}, player_name={player_name}, last_n_rounds={last_n_rounds}, home_or_away={home_away_filter}: {e}")
