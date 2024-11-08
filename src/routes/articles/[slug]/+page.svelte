@@ -38,9 +38,9 @@
 		</div>
 
 		<div class="article-body container mx-10">
-			<p class="article-body-text mx-20">
-				{data?.content}
-			</p>
+			<div class="article-body-text mx-20">
+				{@html data?.content}
+			</div>
 		</div>
 	</div>
 </article>
