@@ -26,7 +26,7 @@ class Article(Base):
     author = Column(String(100))
     publication_date = Column(DateTime)
 
-    def __init__(self, uuid, title, subtitle, content, author, tag=None, category=None):
+    def __init__(self, uuid, title, subtitle, content, author, publication_date, tag=None, category=None):
         self.uuid = uuid
         self.title = title
         self.subtitle = subtitle
@@ -35,6 +35,7 @@ class Article(Base):
 
         self.tag = tag
         self.category = category
+        self.publication_date = publication_date
 
     def __repr__(self):
         return f"<Article(uuid={self.uuid}, title='{self.title}', subtitle='{self.subtitle}', content='{self.content}', tag='{self.tag}', category='{self.category}', author='{self.author}')>"
@@ -216,8 +217,14 @@ class Article(Base):
             session.close()
 
     def save_articles(session, articles):
+        print("save article")
         try:
             for article in articles:
+
+                publication_date_str = article['publication_date']
+                publication_date = datetime.fromisoformat(publication_date_str)
+
+                print(article)
                 new_article = Article(
                     uuid=str(uuid.uuid4()),
                     title=article['title'],
@@ -226,7 +233,8 @@ class Article(Base):
                     author = article['author'],
 
                     tag=article.get('tag', []),
-                    category=article.get('category', [])
+                    category=article.get('category', []),
+                    publication_date = publication_date
                 )
                 session.add(new_article)
             session.commit()
