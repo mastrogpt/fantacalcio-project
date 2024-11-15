@@ -96,6 +96,9 @@ class Season(Base):
         elif 'league_id' in args and 'year' in args:
             season = Season.get_season_by_league_and_year(session, args['league_id'], args['year'])
             return {"body": season if season else "Season not found"}
+        elif 'current_season' in args:
+            season = Season.get_current_season(session, args['league_id'])
+            return {"body": season if season else "Season not found"}
         else:
             return {"body": Season.get_all(session)}
 
@@ -223,6 +226,17 @@ class Season(Base):
             return None
         finally:
             session.close()
+
+    @staticmethod
+    def get_current_season(session, league_id):
+        try:
+            season = session.query(Season).filter_by(league_id=league_id, current=True).one()
+            return season._to_dict() if season else None
+        except Exception as e:
+            print("Error during season loading:", e)
+            return None
+        finally:
+            session.close()    
 
     @staticmethod
     def update_season_by_id(session, season_id, update_fields):

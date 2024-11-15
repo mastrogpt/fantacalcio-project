@@ -368,6 +368,85 @@ class FixturePlayerStatistics(Base):
         finally:
             session.close()
 
+    def aggregate_player_stats(player_stats):
+        aggregated_stats = {
+            "cards_red": 0,
+            "cards_yellow": 0,
+            "dribbles_attempts": 0,
+            "dribbles_past": 0,
+            "dribbles_success": 0,
+            "duels_total": 0,
+            "duels_won": 0,
+            "fouls_committed": 0,
+            "fouls_drawn": 0,
+            "games_minutes": 0,
+            "goals_assists": 0,
+            "goals_conceded": 0,
+            "goals_saves": 0,
+            "goals_total": 0,
+            "offsides": 0,
+            "passes_accuracy": 0,
+            "passes_key": 0,
+            "passes_total": 0,
+            "penalty_committed": 0,
+            "penalty_missed": 0,
+            "penalty_saved": 0,
+            "penalty_scored": 0,
+            "penalty_won": 0,
+            "shots_on": 0,
+            "shots_total": 0,
+            "tackles_blocks": 0,
+            "tackles_interceptions": 0,
+            "tackles_total": 0,
+            "rating_sum": 0,  # Somma per calcolare la media
+            "rating_count": 0  # Numero di partite per il calcolo della media
+        }
+    
+        for stat in player_stats:
+            aggregated_stats["cards_red"] += stat["cards_red"]
+            aggregated_stats["cards_yellow"] += stat["cards_yellow"]
+            aggregated_stats["dribbles_attempts"] += stat["dribbles_attempts"]
+            aggregated_stats["dribbles_past"] += stat["dribbles_past"]
+            aggregated_stats["dribbles_success"] += stat["dribbles_success"]
+            aggregated_stats["duels_total"] += stat["duels_total"]
+            aggregated_stats["duels_won"] += stat["duels_won"]
+            aggregated_stats["fouls_committed"] += stat["fouls_committed"]
+            aggregated_stats["fouls_drawn"] += stat["fouls_drawn"]
+            aggregated_stats["games_minutes"] += stat["games_minutes"]
+            aggregated_stats["goals_assists"] += stat["goals_assists"]
+            aggregated_stats["goals_conceded"] += stat["goals_conceded"]
+            aggregated_stats["goals_saves"] += stat["goals_saves"]
+            aggregated_stats["goals_total"] += stat["goals_total"]
+            aggregated_stats["offsides"] += stat["offsides"]
+            aggregated_stats["passes_accuracy"] += stat["passes_accuracy"]
+            aggregated_stats["passes_key"] += stat["passes_key"]
+            aggregated_stats["passes_total"] += stat["passes_total"]
+            aggregated_stats["penalty_committed"] += stat["penalty_committed"]
+            aggregated_stats["penalty_missed"] += stat["penalty_missed"]
+            aggregated_stats["penalty_saved"] += stat["penalty_saved"]
+            aggregated_stats["penalty_scored"] += stat["penalty_scored"]
+            aggregated_stats["penalty_won"] += stat["penalty_won"]
+            aggregated_stats["shots_on"] += stat["shots_on"]
+            aggregated_stats["shots_total"] += stat["shots_total"]
+            aggregated_stats["tackles_blocks"] += stat["tackles_blocks"]
+            aggregated_stats["tackles_interceptions"] += stat["tackles_interceptions"]
+            aggregated_stats["tackles_total"] += stat["tackles_total"]
+            
+            aggregated_stats["rating_sum"] += stat["rating"]
+            aggregated_stats["rating_count"] += 1
+    
+        # Calcola la media per il rating
+        if aggregated_stats["rating_count"] > 0:
+            aggregated_stats["rating_avg"] = round(aggregated_stats["rating_sum"] / aggregated_stats["rating_count"], 2)
+        else:
+            aggregated_stats["rating_avg"] = None
+    
+        # Rimuovi la somma del rating e il conteggio
+        aggregated_stats.pop("rating_sum")
+        aggregated_stats.pop("rating_count")
+    
+        return aggregated_stats    
+
 
     def _to_dict(self):
         return {

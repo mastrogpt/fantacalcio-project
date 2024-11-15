@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
-
+	import nuvBgWhite from '$lib/assets/nuvBgWhite.png'
 	let isOpen = false;
 	let currentPath = '';
 
@@ -20,9 +20,12 @@
 <nav class="bg-primary text-white shadow-lg">
 	<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 		<div class="flex justify-between h-16 items-center">
-			<a href="/" class="flex-shrink-0 flex items-center">
-				<h2 class="text-2xl font-bold">FantaBalùn &#x26BD</h2>
-			</a>
+			<a href="/" class="flex-shrink-0 flex flex-row items-center">
+			<h2 class="text-2xl font-bold">FantaBalùn</h2>
+			<p class="text-xs flex items-center">
+				<img id="nuv-img" alt="nuv logo" class="ml-1 h-8" src="{nuvBgWhite}"/>
+			  </p>
+		  </a>
 			<div class="hidden md:flex md:space-x-8">
 				<a
 					href="/"
@@ -106,4 +109,6 @@
 		color: rgb(var(--accent));
 		font-weight: bold;
 	}
+
+	
 </style>

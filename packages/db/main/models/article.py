@@ -1,14 +1,11 @@
 import uuid
 from sqlalchemy.sql import delete
 from models.base import Base
-from sqlalchemy import desc
-from sqlalchemy import Column, Integer, String,Text, ARRAY, DateTime, Boolean, Date, insert, UniqueConstraint, delete
+from sqlalchemy import Column, Integer, String,Text, ARRAY, DateTime, Boolean, Date, insert, UniqueConstraint, delete, desc, select
 from sqlalchemy.orm import sessionmaker, relationship
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.orm import aliased
-from sqlalchemy import func
-from sqlalchemy import desc
 import uuid
 from datetime import datetime
 import json
@@ -27,6 +24,7 @@ class Article(Base):
     tag = Column(ARRAY(String(100)))
     category = Column(ARRAY(String(100)))
     author = Column(String(100))
+    publication_date = Column(DateTime)
 
     def __init__(self, uuid, title, subtitle, content, author, tag=None, category=None):
         self.uuid = uuid
@@ -68,12 +66,16 @@ class Article(Base):
             return {"body": article if article else "Article not found"}
         elif 'last' in args:
             return {"body": Article.get_last_articles(session, args)}
+        elif 'latest_article_by_author' in args:
+            return {"body": Article.get_latest_article_by_author(session, args)}
         else:
             return {"body": Article.get_all_articles(session, args)}
 
     def delete_handler(session, args):
         if 'id' in args:
             return {"body": Article.delete_by_id(session, args)}
+        elif 'author' in args:
+            return {"body": Article.delete_by_author(session, args)}
         else:
             return {"body": Article.delete_all(session, args)}
 
@@ -127,6 +129,36 @@ class Article(Base):
         finally:
             session.close()
 
+    def get_latest_article_by_author(session, args):
+        print("get_latest_article_by_author")
+        try:
+            author_name = args.get('author', None)
+            print("Author:", author_name)
+
+            if author_name is None:
+                raise ValueError("Author's name not provided")
+
+            query = (
+                select(Article)
+                .where(Article.author.ilike(f"%{author_name}%"))
+                .order_by(desc(Article.publication_date), desc(Article.creation_date))
+                .limit(1)
+            )
+        
+            article = session.execute(query).scalars().first()
+        
+            # Se non ci sono articoli per l'autore specificato, scatena un'eccezione
+            if article is None:
+                raise Exception(f"No articles found for the author '{author_name}'.")
+        
+            return article.to_dict()
+            
+        except Exception as e:
+            print("Error extracting latest article:", e)
+            return []
+        finally:
+            session.close()            
+
 
     def delete_all(session, args):
         try:
@@ -151,6 +183,27 @@ class Article(Base):
                     session.delete(article)
                     session.commit()
                     return f"Article {args.get('id')} deleted"
+                else:
+                    return "Article not found"
+            else:
+                return "No API key provided"
+        except Exception as e:
+            print("Error while deleting article:", e)
+            session.rollback()
+            return "Error while deleting article"
+        finally:
+            session.close()
+    
+    def delete_by_author(session, args):
+        try:
+            if args.get('FANTABALUN_API_KEY_TEST'):
+                articles = session.query(Article).filter_by(author=args.get('author')).all()
+
+                if articles:
+                    for article in articles:
+                        session.delete(article)
+                        session.commit()
+                    return f"Articles deleted: {len(articles)}"
                 else:
                     return "Article not found"
             else:
@@ -205,5 +258,6 @@ class Article(Base):
             'content': self.content,
             'tag': self.tag,
             'category': self.category,
-            'author': self.author
+            'author': self.author,
+            'publication_date': self.publication_date.isoformat() if self.publication_date else None,
         }

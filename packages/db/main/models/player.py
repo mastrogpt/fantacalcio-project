@@ -1,10 +1,9 @@
 from models.fixtures import Fixture
-from sqlalchemy import Column, Integer, String, Boolean, Date, insert, UniqueConstraint, delete
+from sqlalchemy import Column, Integer, String, Boolean, Date, Numeric, insert, UniqueConstraint, delete, or_, and_, case, cast, String, func, desc, asc
 from sqlalchemy.orm import sessionmaker, relationship
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.orm import aliased
-from sqlalchemy import case, func, desc, asc, and_, cast, Numeric
 from models.season import Season
 from models.team import Team
 from models.current_player_team import CurrentPlayerTeam
@@ -13,6 +12,7 @@ from models.player_season import PlayerSeason
 from models.team_season import TeamSeason
 from models.player_statistics import PlayerStatistics
 from models.fixture_player_statistics import FixturePlayerStatistics
+from models.standings import Standings
 from models.base import Base
 from models.utils import Redis_utils
 import uuid
@@ -164,9 +164,24 @@ class Player(Base):
         if 'assist_man' in args:
             player = Player.best_assist_man(session, args)
             return {"body": player if player else "Player not found"}
+
         elif 'top_players_by_team_and_role' in args:
             player = Player.top_players_by_team_and_role(session, args)
             return {"body": player if player else "Player not found"}
+
+        elif 'get_player_fixtures_stats' in args:
+
+          season = args['season'] if 'season' in args and args['season'] else None
+          player_name = args['player_name']
+          last_n_rounds =  args['last_n_rounds'] if 'last_n_rounds' in args and args['last_n_rounds'] else None
+          home_away_filter = args['home_away_filter'] if 'home_away_filter' in args and args['home_away_filter'] else None
+
+          player_statistic_by_params = Player.get_player_fixtures_stats(session, player_name, last_n_rounds, home_away_filter, season)
+
+          return {"body": player_statistic_by_params if player_statistic_by_params else "Players FIxtures Statistics not found"}
+        elif 'get_upcoming_match_and_stats_for_players' in args:
+            players_stats = Player.get_upcoming_match_and_stats_for_players(session, args)
+            return {"body": players_stats if players_stats else "Players not found"}
         return {"body": Player.get_all(session,args)}
     
 
@@ -552,46 +567,238 @@ class Player(Base):
         try:
             team = args.get('team')
             psurname = args.get('psurname')
-            print("Invoked all player with filter", team, psurname)
-           
-            players_teams = (session.query(Player, Team, Season,  PlayerStatistics)
+            print("Invoked all player by surname and team with filter", team, psurname)
+        
+            players_teams_query = (session.query(Player, Team, Season, PlayerStatistics)
                 .join(PlayerStatistics, Player.id == PlayerStatistics.player_id)
                 .join(CurrentPlayerTeam, Player.id == CurrentPlayerTeam.player_id)
-                .join(Team, CurrentPlayerTeam.team_id == Team.id)
                 .join(Season, PlayerStatistics.season_id == Season.id)
                 .join(League, Season.league_id == League.id)
                 .filter(
                     League.name == "Serie A",
                     League.country_name == "Italy",
-                    Team.name.ilike(f'%{team}%'),
-                    func.unaccent(Player.name).ilike(f'%{psurname}%'),
-                )
-                .all())
+                    func.unaccent(Player.name).ilike(func.unaccent(f'%{psurname}%')),
+                ))
 
+            if team:
+                players_teams_query = players_teams_query.join(Team, CurrentPlayerTeam.team_id == Team.id).filter(Team.name.ilike(f'%{team}%'))
+            else:
+                players_teams_query = players_teams_query.join(Team, CurrentPlayerTeam.team_id == Team.id)
+            
+            players = players_teams_query.all()
+            
             result = []
 
-            for player in players_teams:
-                player_dict = player.Player._to_basic_info_dict()
-                player_dict['team'] = player.Team.name
-                player_dict['team_logo'] = player.Team.logo
-                player_dict['team_id'] = player.Team.id
-                player_dict['season_year'] = player.Season.year
-                player_dict['season_current'] = player.Season.current
-                player_dict['position'] = player.PlayerStatistics.position
-    
-                player_dict['statistics'] = player.PlayerStatistics._to_dict()
+            for player, team, season, statistics in players:
+                # Cerca se il giocatore è già presente nel risultato
+                existing_player = next((p for p in result if p['firstname'] == player.firstname and p['lastname'] == player.lastname), None)
                 
-                result.append(player_dict)
+                if not existing_player:
+                    # Se non esiste, crea una nuova entry per il giocatore
+                    player_entry = {
+                        "name": player.name,
+                        "firstname": player.firstname,
+                        "lastname": player.lastname,
+                        "photo": player.photo,
+                        "team": team.name,
+                        "team_logo": team.logo,
+                        "seasons": []  # Qui inseriamo le statistiche per stagione
+                    }
+                    result.append(player_entry)
+                else:
+                    player_entry = existing_player
+            
+                # Aggiungi le statistiche per la stagione corrente
+                season_stats = {
+                    "season_year": season.year,
+                    "season_current": season.current,
+                    "position": statistics.position,
+                    "statistics": statistics._to_dict()
+                }
+                
+                player_entry['seasons'].append(season_stats)
+            
+            # Ordina le stagioni dalla più recente
+            for player_entry in result:
+                player_entry['seasons'].sort(key=lambda x: (not x['season_current'], -x['season_year']))
 
             return result
-                       
+                    
         except Exception as e:
             print(f"Error during fetching Serie A players for current season: {e}")
             return {"statusCode": 500, "body": f"Error during fetching Serie A players for current season: {e}"}
         finally:
-            session.close()                
+            session.close()
 
-            
+
+    @staticmethod
+    def get_player_fixtures_stats(session, player_name, last_n_rounds=None, home_away_filter='', season=None):
+      try:
+
+        player = aliased(Player)
+        team = aliased(Team)
+        opponent_team = aliased(Team)
+        fixture = aliased(Fixture)
+        SelectedSeason = aliased(Season)
+
+        FPS = aliased(FixturePlayerStatistics)
+        CPT = aliased(CurrentPlayerTeam)
+        PS = aliased(PlayerStatistics)
+
+        # Subquery per selezionare la stagione
+        selected_season_subquery = (
+          session.query(SelectedSeason)
+          .filter(or_(
+            SelectedSeason.year == season,
+            and_(season == None, Season.current == True)
+          ))
+          .limit(1)
+          .subquery()
+        )
+
+        num_all_matches = session.query(func.count(fixture.id)).filter(fixture.season_id == selected_season_subquery.c.id).all()[0][0]
+
+        # Subquery per selezionare le statistiche delle partite del giocatore
+        player_fixtures_subquery = (
+          session.query(
+            player.name.label('player_name'),
+            fixture.event_datetime,
+            selected_season_subquery.c.year.label('season'),
+            team.name.label('team_name'),
+            PS.position.label('ps_position'),
+            case(
+              (fixture.home_team_id == CPT.team_id, 'home'),
+              else_='away'
+            ).label('home_or_away'),
+            opponent_team.name.label('opponent_team'),
+            fixture.goals_home,
+            fixture.goals_away,
+            fixture.league_round,
+            FPS
+          )
+          .join(FPS, FPS.player_id == player.id)
+          .join(CPT, player.id == CPT.player_id)
+          .join(fixture, FPS.fixture_id == fixture.id)
+          .join(team, CPT.team_id == team.id)
+          .join(PS, and_(
+            PS.team_id == team.id,
+            PS.player_id == FPS.player_id,
+            PS.season_id == fixture.season_id
+          ))
+          .join(opponent_team, or_(
+            and_(fixture.home_team_id == opponent_team.id, CPT.team_id != opponent_team.id),
+            and_(fixture.away_team_id == opponent_team.id, CPT.team_id != opponent_team.id)
+          ))
+
+          .filter(fixture.season_id == selected_season_subquery.c.id)
+          .filter(func.unaccent(player.name).ilike(func.unaccent(f"%{player_name}%")))
+          .filter(or_(
+            and_(home_away_filter == 'home', fixture.home_team_id == CPT.team_id),
+            and_(home_away_filter == 'away', fixture.away_team_id == CPT.team_id),
+            or_(home_away_filter == '', home_away_filter == None)
+          ))
+          .filter(FPS.games_minutes > 0)
+
+          .filter(or_(fixture.home_team_id == CPT.team_id, fixture.away_team_id == CPT.team_id)) # -- NOTA (1)
+
+          # -- NOTA (1) --> FrankMaverick said:
+          # -- al momento non abbiamo una tabella che contiene lo storico dei trasferimenti, 
+          # -- ma solo la squadra attuale del giocatore, per cui diventa fondamentale filtrare la query solo sul team attuale, 
+          # -- altrimenti si avrebbero record duplicati inerenti le due squadre (perché nessuna delle due è la squadra - attuale - del player)
+
+          .order_by(fixture.event_datetime.desc())
+          .limit(func.coalesce(last_n_rounds, num_all_matches))
+          .subquery()
+        )
+
+        result_query = session.query(
+          player_fixtures_subquery.c.player_name,
+          # player_fixtures_subquery.c.fixture_id, # only for test
+          # player_fixtures_subquery.c.player_id, # only for test
+          player_fixtures_subquery.c.season,
+          player_fixtures_subquery.c.event_datetime,
+          player_fixtures_subquery.c.team_name,
+          player_fixtures_subquery.c.ps_position.label('position'),
+          player_fixtures_subquery.c.home_or_away,
+          player_fixtures_subquery.c.opponent_team,
+          player_fixtures_subquery.c.league_round,
+          func.concat(player_fixtures_subquery.c.goals_home, ' - ', player_fixtures_subquery.c.goals_away).label('result'),
+
+          case(
+            (and_(
+                player_fixtures_subquery.c.home_or_away == 'home',
+                player_fixtures_subquery.c.goals_home > player_fixtures_subquery.c.goals_away
+              ), 'W'),
+            (and_(
+              player_fixtures_subquery.c.home_or_away == 'away',
+              player_fixtures_subquery.c.goals_away > player_fixtures_subquery.c.goals_home
+            ), 'W'),
+            (and_(
+              player_fixtures_subquery.c.home_or_away == 'away',
+              player_fixtures_subquery.c.goals_home > player_fixtures_subquery.c.goals_away
+            ), 'L'),
+            (and_(
+              player_fixtures_subquery.c.home_or_away == 'home',
+              player_fixtures_subquery.c.goals_away > player_fixtures_subquery.c.goals_home
+            ), 'L'),
+            else_='D'
+          ),
+
+          cast(player_fixtures_subquery.c.event_datetime, String).label('event_datetime'),
+          func.coalesce(player_fixtures_subquery.c.games_substitute, False).label('games_substitute'),
+          func.coalesce(player_fixtures_subquery.c.rating, 0).label('rating'),
+          func.coalesce(player_fixtures_subquery.c.games_minutes, 0).label('games_minutes'),
+          func.coalesce(player_fixtures_subquery.c.offsides, 0).label('offsides'),
+          func.coalesce(player_fixtures_subquery.c.shots_total, 0).label('shots_total'),
+          func.coalesce(player_fixtures_subquery.c.shots_on, 0).label('shots_on'),
+          func.coalesce(player_fixtures_subquery.c.goals_total, 0).label('goals_total'),
+          func.coalesce(player_fixtures_subquery.c.goals_conceded, 0).label('goals_conceded'),
+          func.coalesce(player_fixtures_subquery.c.goals_assists, 0).label('goals_assists'),
+          func.coalesce(player_fixtures_subquery.c.goals_saves, 0).label('goals_saves'),
+          func.coalesce(player_fixtures_subquery.c.passes_total, 0).label('passes_total'),
+          func.coalesce(player_fixtures_subquery.c.passes_key, 0).label('passes_key'),
+          func.coalesce(player_fixtures_subquery.c.passes_accuracy, 0).label('passes_accuracy'),
+          func.coalesce(player_fixtures_subquery.c.tackles_total, 0).label('tackles_total'),
+          func.coalesce(player_fixtures_subquery.c.tackles_blocks, 0).label('tackles_blocks'),
+          func.coalesce(player_fixtures_subquery.c.tackles_interceptions, 0).label('tackles_interceptions'),
+          func.coalesce(player_fixtures_subquery.c.duels_total, 0).label('duels_total'),
+          func.coalesce(player_fixtures_subquery.c.duels_won, 0).label('duels_won'),
+          func.coalesce(player_fixtures_subquery.c.dribbles_attempts, 0).label('dribbles_attempts'),
+          func.coalesce(player_fixtures_subquery.c.dribbles_success, 0).label('dribbles_success'),
+          func.coalesce(player_fixtures_subquery.c.dribbles_past, 0).label('dribbles_past'),
+          func.coalesce(player_fixtures_subquery.c.fouls_drawn, 0).label('fouls_drawn'),
+          func.coalesce(player_fixtures_subquery.c.fouls_committed, 0).label('fouls_committed'),
+          func.coalesce(player_fixtures_subquery.c.cards_yellow, 0).label('cards_yellow'),
+          func.coalesce(player_fixtures_subquery.c.cards_red, 0).label('cards_red'),
+          func.coalesce(player_fixtures_subquery.c.penalty_won, 0).label('penalty_won'),
+          func.coalesce(player_fixtures_subquery.c.penalty_committed, 0).label('penalty_committed'),
+          func.coalesce(player_fixtures_subquery.c.penalty_scored, 0).label('penalty_scored'),
+          func.coalesce(player_fixtures_subquery.c.penalty_missed, 0).label('penalty_missed'),
+          func.coalesce(player_fixtures_subquery.c.penalty_saved, 0).label('penalty_saved')
+        )
+
+        columns = [column['name'] for column in result_query.column_descriptions]
+
+        player_statistic = result_query.all()
+
+        result = []
+
+        for row in player_statistic:
+          player_dict = {}
+          for attr in columns:
+            if attr:
+              player_dict[attr] = getattr(row, attr)
+
+          result.append(player_dict)
+
+        return result
+
+      except Exception as e:
+          print(f"Error during fetching Players by params for season={season}, player_name={player_name}, last_n_rounds={last_n_rounds}, home_or_away={home_away_filter}: {e}")
+          return None
+      finally:
+          session.close()
+
     @staticmethod
     def top_players_by_team_and_role(session, args):
         """
@@ -640,20 +847,19 @@ class Player(Base):
 
             # Subquery per ottenere la stagione selezionata o corrente
             if not season:
-                selected_season_subquery = session.query(Season.id).filter(Season.current == True, Season.league_id == 1).limit(1).subquery()
+                selected_season = session.query(Season.id, Season.year).filter(Season.current == True, Season.league_id == 1).limit(1).first()
             else:
-                selected_season_subquery = session.query(Season.id).filter(Season.year == season, Season.league_id == 1).limit(1).subquery()
+                selected_season = session.query(Season.id, Season.year).filter(Season.year == season, Season.league_id == 1).limit(1).first()
+
+            if selected_season is None:
+                raise ValueError("No season found")
 
             # DEBUG: view subquery result
-            selected_season_id = session.query(selected_season_subquery).scalar()
-            print(f"Selected Season ID: {selected_season_id}")
-
-            # Verifica se abbiamo ottenuto la stagione correttamente
-            if not selected_season_id:
-                raise ValueError("Season ID not found")
+            selected_season_id, selected_season_year = selected_season
+            print(f"Selected Season: {selected_season_id} {selected_season_year}")
 
             # Recupera il numero di round della stagione fino ad oggi
-            count_matches = Player.how_many_matches_until_now(session, selected_season_id)
+            count_matches = Fixture.how_many_matches_until_now(session, selected_season_year)
             print(f"Num. of matches until now: {count_matches}")
 
             # Logica per gestire `last_n_rounds` e `league_round`
@@ -857,7 +1063,9 @@ class Player(Base):
                     'penalty_scored': row.penalty_scored,
                     'penalty_missed': row.penalty_missed,
                     'penalty_saved': row.penalty_saved,
-                    'total_matches_played': row.total_matches_played
+                    'total_matches_played': row.total_matches_played,
+                    'total_season_matches': count_matches,
+                    'season': selected_season_year
                 }
             
                 result.append(player_dict)
@@ -938,6 +1146,147 @@ class Player(Base):
             session.close()
 
     @staticmethod
+    def get_upcoming_match_and_stats_for_players(session, args):
+        """
+        Retrieves upcoming match information and recent performance statistics for a list of players.
+
+        - Gets the current season for Serie A (hardcoded league_id = 1).
+        - Retrieves the next fixture involving each player's team.
+        - Fetches and aggregates the last 5 match statistics for each player.
+        - Fetches standings information for both the player's team and the opponent's team.
+
+        Args:
+            session: The database session for executing queries.
+            args: A dictionary containing the list of players (comma-separated) under the key 'players'.
+
+        Returns:
+            A dictionary containing the player's name, team name, next fixture details, recent player stats, 
+            and standings for both teams.
+            If an error occurs, returns a dictionary with an error message.
+        """        
+        try:
+            print("INVOKED UPCOMING MATCH AND STATS FOR PLAYERS")
+
+            # get current season
+            league_id = 1  # Serie A
+            season = Season.get_current_season(session, league_id)
+            print("Current season:", season['year'])
+
+            players = args.get("players")
+
+            if not players:
+                return {}
+
+            # ricavo tutte le fixture del prossimo round
+            next_fixtures = Fixture.get_fixtures_by_round(session, league_id=league_id, season=season['year'], round='next')
+
+            # Risultato complessivo per tutti i giocatori
+            result = {}
+
+            # Itera per ciascun giocatore
+            for player in players.split(','):
+                player = player.strip()  # Rimuove eventuali spazi prima e dopo il nome
+                print("Processing player:", player)
+
+                # Ricavo la squadra a cui appartiene
+                player_team_info = (session.query(Player.id.label('player_id'), Player.name.label('player_name'), CurrentPlayerTeam.team_id)
+                    .join(CurrentPlayerTeam, Player.id == CurrentPlayerTeam.player_id)
+                    .filter(func.unaccent(Player.name).ilike(func.unaccent(f'%{player}%')))
+                    .limit(1)  # Assicuriamoci di ottenere solo un risultato
+                    .first())
+
+                if not player_team_info:
+                    print(f"No team info found for player: {player}")
+                    result[player] = {"error": "Player team information not found"}
+                    continue
+
+                #print('player_team_info', player_team_info)
+                player_id = player_team_info.player_id
+                player_name = player_team_info.player_name
+                team_id = player_team_info.team_id
+
+                # Recupera la prossima partita per la squadra del giocatore
+                next_fixture = None
+                for fixture in next_fixtures:
+                    # Verifica se away_team_id o home_team_id corrisponde a team_id
+                    if fixture['away_team_id'] == team_id or fixture['home_team_id'] == team_id:
+                        next_fixture = fixture
+                        break
+
+                if not next_fixture:
+                    print(f"No upcoming fixture found for player: {player}")
+                    result[player] = {"error": "No upcoming fixture found"}
+                    continue
+
+                opponent_team_id = next_fixture['away_team_id'] if next_fixture['home_team_id'] == team_id else next_fixture['home_team_id']
+
+                player_team_detail = Team.get_team_by_id(session, team_id)
+                opponent_team_detail = Team.get_team_by_id(session, opponent_team_id)
+
+                #print("next_fixture", next_fixture)
+                #print("player_team_detail", player_team_detail)
+                #print("opponent_team_detail", opponent_team_detail)
+
+                # Ricavo le stats delle ultime 5 giornate del player
+                last_player_stats = Player.get_player_fixtures_stats(session, player_name, last_n_rounds=5, home_away_filter=None, season=season['year'])
+                
+                # Aggrega le statistiche
+                aggregated_player_stats = FixturePlayerStatistics.aggregate_player_stats(last_player_stats)
+
+                # Ricavo informazioni sulla classifica delle due squadre
+                player_team_standings = Standings.get_by_ids(session, season['id'], player_team_detail['id'])
+                opponent_team_standings = Standings.get_by_ids(session, season['id'], opponent_team_detail['id'])
+
+                print(player_team_standings[0])
+
+                # Aggiungi le informazioni al risultato
+                result[player] = {
+                    'player_name': player_name,
+                    'player_team_name': player_team_detail['name'],
+                    'next_fixture': {
+                        'event_datetime': next_fixture['event_datetime'],
+                        'player_team_position': 'home' if next_fixture['home_team_id'] == team_id else 'away',
+                        'player_team': player_team_detail['name'],
+                        'opponent_team': opponent_team_detail['name'],
+                        'league_round': next_fixture['league_round'],
+                        'venue_name': next_fixture['venue_name']
+                    },
+                    'last_5_matches_player_stats': aggregated_player_stats,
+                    'player_team_standings': {
+                        'team': player_team_detail['name'],
+                        'rank': player_team_standings[0]['rank'],
+                        'points': player_team_standings[0]['points'],
+                        'form': player_team_standings[0]['form'],
+                        'goals_for': player_team_standings[0]['goals_for_all'],
+                        'goals_against': player_team_standings[0]['goals_against_all'],
+                        'played': player_team_standings[0]['played_all'],
+                        'win': player_team_standings[0]['win_all'],
+                        'lose': player_team_standings[0]['lose_all'],
+                        'draw': player_team_standings[0]['draw_all']
+                    },
+                    'opponent_team_standings': {
+                        'team': opponent_team_detail['name'],
+                        'rank': opponent_team_standings[0]['rank'],
+                        'points': opponent_team_standings[0]['points'],
+                        'form': opponent_team_standings[0]['form'],
+                        'goals_for': opponent_team_standings[0]['goals_for_all'],
+                        'goals_against': opponent_team_standings[0]['goals_against_all'],
+                        'played': opponent_team_standings[0]['played_all'],
+                        'win': opponent_team_standings[0]['win_all'],
+                        'lose': opponent_team_standings[0]['lose_all'],
+                        'draw': opponent_team_standings[0]['draw_all']
+                    },
+                }
+
+            return result
+
+        except Exception as e:
+            print(f"Error during fetching upcoming match and stats for players: {e}")
+            return {"statusCode": 500, "body": f"Error during fetching upcoming match and stats for players: {e}"}
+        finally:
+            session.close()
+
+    @staticmethod
     def update_player_by_id(session, player_id, update_fields):
         try:
             player = session.query(Player).get(player_id)
@@ -996,43 +1345,6 @@ class Player(Base):
             'lastname': self.lastname,            
             'photo': self.photo
         }
-
-    @staticmethod
-    def how_many_matches_until_now(session, season):
-        try:
-            # Se la stagione non è specificata, ottieni la stagione corrente per league_id = 1
-            if season is None:
-                print("Season not provided, fetching current season for league_id = 1")
-                current_season = session.query(Season.id).filter(
-                    Season.current == True,
-                    Season.league_id == 1  # Specifica che stai cercando la stagione corrente per la lega 1
-                ).first()
-
-                if current_season is None:
-                    raise ValueError("No current season found for league_id = 1")
-
-                season = current_season.id
-
-            # Estrai l'ultimo round (league_round) fino ad oggi basato su event_datetime
-            last_round = session.query(Fixture.league_round).filter(
-                Fixture.season_id == season,
-                Fixture.event_datetime <= func.now()  # Filtro per partite già giocate fino a oggi
-            ).order_by(Fixture.league_round.desc()).first()
-
-            if last_round is None:
-                raise ValueError("No matches found for the current season.")
-
-            print("Last league round is", last_round.league_round)
-            return last_round.league_round
-
-        except Exception as e:
-            print("Error while getting last league round", e)
-            session.rollback()
-            return False
-
-        finally:
-            session.close()
-
     
     @staticmethod
     def compute_matches_minum_presence(all_matches_count):
