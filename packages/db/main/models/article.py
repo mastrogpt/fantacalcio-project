@@ -221,8 +221,11 @@ class Article(Base):
         try:
             for article in articles:
 
-                publication_date_str = article['publication_date']
-                publication_date = datetime.fromisoformat(publication_date_str)
+                publication_date_str = article.get('publication_date')
+                publication_date = None
+            
+                if publication_date_str:
+                    publication_date = datetime.fromisoformat(publication_date_str)
 
                 print(article)
                 new_article = Article(
