@@ -1,3 +1,4 @@
+import traceback
 from models.fixtures import Fixture
 from sqlalchemy import Column, Integer, String, Boolean, Date, Numeric, insert, UniqueConstraint, delete, or_, and_, case, cast, String, func, desc, asc
 from sqlalchemy.orm import sessionmaker, relationship
@@ -395,6 +396,68 @@ class Player(Base):
             session.close()
 
     @staticmethod
+    def get_players_by_name(session, player_name, isSubquery = False):
+
+      player_names = player_name.split()
+      firstName = player_names[0]
+
+      secondName = ' '.join([str(name) for name in player_names if name != firstName])
+      inverted_player_name = secondName + ' ' + firstName
+
+      try:
+        player_sub_query = (
+          session.query(Player)
+          .filter(or_(
+            and_(func.unaccent(Player.name).ilike(func.unaccent(f"%{player_name}%"))),
+
+            and_(func.unaccent(Player.name).ilike(func.unaccent(f"%{inverted_player_name}%"))),
+
+            and_(func.unaccent(func.concat(Player.firstname, ' ', Player.lastname)).ilike(func.unaccent(f"%{player_name}%"))),
+
+            and_(func.unaccent(func.concat(Player.lastname, ' ', Player.firstname)).ilike(func.unaccent(f"%{player_name}%"))),
+
+            and_(
+              func.unaccent(func.concat(Player.firstname)).ilike(func.unaccent(f"%{firstName}%")),
+
+              func.unaccent(func.concat(Player.lastname)).ilike(func.unaccent(f"%{secondName}%"))
+            ),
+
+            and_(
+              func.unaccent(func.concat(Player.lastname)).ilike(func.unaccent(f"%{firstName}%")),
+
+              func.unaccent(func.concat(Player.firstname)).ilike(func.unaccent(f"%{secondName}%"))
+            )
+          ))
+          .order_by(Player.lastname)
+          .subquery()
+        )
+
+        if not isSubquery:
+          result_query = session.query(player_sub_query)
+          player_query = result_query.all()
+
+          results = []
+          columns = [column['name'] for column in result_query.column_descriptions]
+
+          for row in player_query:
+            player_dict = {}
+            for attr in columns:
+              if attr:
+                player_dict[attr] = getattr(row, attr)
+
+            results.append(player_dict)
+            return results
+
+      except Exception as e:
+        print("Error while fetching player by id:", e)
+        return None
+      finally:
+        if not isSubquery:
+          session.close()
+
+      return player_sub_query
+
+    @staticmethod
     def get_player_by_apifootball_id(session, apifootball_id):
         try:
             player = session.query(Player).filter_by(apifootball_id=apifootball_id).one()
@@ -635,7 +698,7 @@ class Player(Base):
     def get_player_fixtures_stats(session, player_name, last_n_rounds=None, home_away_filter='', season=None):
       try:
 
-        player = aliased(Player)
+        # player = aliased(Player)
         team = aliased(Team)
         opponent_team = aliased(Team)
         fixture = aliased(Fixture)
@@ -658,14 +721,20 @@ class Player(Base):
 
         num_all_matches = session.query(func.count(fixture.id)).filter(fixture.season_id == selected_season_subquery.c.id).all()[0][0]
 
+        player = Player.get_players_by_name(session, player_name, True)
+
+        # player_to_print_Test = Player.get_players_by_name(session, player_name)
+        # print('player_to_print_Test')
+        # print(player_to_print_Test)
+
         # Subquery per selezionare le statistiche delle partite del giocatore
         player_fixtures_subquery = (
           session.query(
-            player.name.label('player_name'),
-            player.id,
-            player.firstname,
-            player.lastname,
-            func.concat(player.firstname, ' ', player.lastname).label('player_full_name'),
+            player.c.name.label('player_name'),
+            player.c.id,
+            player.c.firstname,
+            player.c.lastname,
+            func.concat(player.c.firstname, ' ', player.c.lastname).label('player_full_name'),
             fixture.event_datetime,
             selected_season_subquery.c.year.label('season'),
             team.name.label('team_name'),
@@ -680,12 +749,12 @@ class Player(Base):
             fixture.league_round,
             FPS,
             func.row_number().over(
-              partition_by = player.id,
+              partition_by = player.c.id,
               order_by = fixture.event_datetime.desc()
             ).label("row_number")
           )
-          .join(FPS, FPS.player_id == player.id)
-          .join(CPT, player.id == CPT.player_id)
+          .join(FPS, FPS.player_id == player.c.id)
+          .join(CPT, player.c.id == CPT.player_id)
           .join(fixture, FPS.fixture_id == fixture.id)
           .join(team, CPT.team_id == team.id)
           .join(PS, and_(
@@ -699,7 +768,7 @@ class Player(Base):
           ))
 
           .filter(fixture.season_id == selected_season_subquery.c.id)
-          .filter(func.unaccent(player.name).ilike(func.unaccent(f"%{player_name}%")))
+          # .filter(func.unaccent(player.name).ilike(func.unaccent(f"%{player_name}%")))
           .filter(or_(
             and_(home_away_filter == 'home', fixture.home_team_id == CPT.team_id),
             and_(home_away_filter == 'away', fixture.away_team_id == CPT.team_id),
@@ -714,7 +783,7 @@ class Player(Base):
           # -- ma solo la squadra attuale del giocatore, per cui diventa fondamentale filtrare la query solo sul team attuale, 
           # -- altrimenti si avrebbero record duplicati inerenti le due squadre (perché nessuna delle due è la squadra - attuale - del player)
 
-          .order_by(player.id, fixture.event_datetime.desc())
+          .order_by(player.c.id, fixture.event_datetime.desc())
           .subquery()
         )
 
@@ -832,21 +901,22 @@ class Player(Base):
             }
 
           only_stats_row = dict(row)
-          player_id_from_map = player_map[player_id]
+          player_from_map_id = player_map[player_id]
 
           for key, val in row.items():
 
             if key in dict_player:
-              player_id_from_map[key] = val
+              player_from_map_id[key] = val
               del only_stats_row[key]
 
-          player_id_from_map['stats'].append(only_stats_row)
+          player_from_map_id['stats'].append(only_stats_row)
 
         dict_to_return['players'] = list(player_map.values())
 
         return [dict_to_return]
 
       except Exception as e:
+          print(traceback.format_exc())
           print(f"Error during fetching Players by params for season={season}, player_name={player_name}, last_n_rounds={last_n_rounds}, home_or_away={home_away_filter}: {e}")
           return None
       finally:
