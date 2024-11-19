@@ -4,6 +4,9 @@ import uuid
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.sql import func, delete
 from models.base import Base
+from models.league import League
+from models.season import Season
+from models.fixtures import Fixture
 
 class FixturePlayerStatistics(Base):
     __tablename__ = 'fixtures_players_statistics'
@@ -123,11 +126,17 @@ class FixturePlayerStatistics(Base):
 
     @staticmethod
     def get_handler(session, args):
-        if 'fixture_id' in args and 'player_id' in args:
+        if 'fixture_id' in args:
             fixture_id = args['fixture_id']
-            player_id = args['player_id']
-            fixture_player_statistic = FixturePlayerStatistics.get_entry(session, fixture_id, player_id)
-            return {"body": fixture_player_statistic if fixture_player_statistic else "FixturePlayerStatistics not found"}
+            # Se 'player_id' non esiste in args, assegnamo None a player_id
+            player_id = args.get('player_id', None)
+
+            # Chiamiamo il metodo con fixture_id e, se presente, player_id
+            fpstats = FixturePlayerStatistics.get_fixture_player_statistics(session, fixture_id, player_id)
+    
+            return {"body": fpstats if fpstats else "FixturePlayerStatistics not found"}
+        elif 'get_stats_by_round_for_fixtures_and_players' in args:
+            return {"body": FixturePlayerStatistics.get_stats_by_round_for_fixtures_and_players(session, args)}
         else:
             return {"body": FixturePlayerStatistics.get_all(session)}
 
@@ -152,15 +161,37 @@ class FixturePlayerStatistics(Base):
             session.close()
 
     @staticmethod
-    def get_entry(session, fixture_id, player_id):
+    def get_fixture_player_statistics(session, fixture_id, player_id=None):
+        """
+        Retrieves statistics from FixturePlayerStatistics based on fixture_id and optionally player_id.
+
+        Args:
+            session (Session): The database session to use for the query.
+            fixture_id (int): The ID of the fixture to filter by.
+            player_id (int, optional): The ID of the player to filter by. If None, only fixture_id is used.
+
+        Returns:
+            dict | list[dict] | None: 
+                - A single statistic as a dictionary if player_id is provided and found.
+                - A list of statistics as dictionaries if only fixture_id is provided.
+                - None if no data is found.
+        """
         try:
-            fixture_player_statistic = session.query(FixturePlayerStatistics).filter_by(fixture_id=fixture_id, player_id=player_id).one_or_none()
-            return fixture_player_statistic._to_dict() if fixture_player_statistic else None
+            query = session.query(FixturePlayerStatistics).filter_by(fixture_id=fixture_id)
+            if player_id is not None:
+                query = query.filter_by(player_id=player_id)
+
+            fixture_player_statistics = query.all() if player_id is None else query.one_or_none()
+
+            if player_id is None:
+                return [fps._to_dict() for fps in fixture_player_statistics] if fixture_player_statistics else None
+            else:
+                return fixture_player_statistics._to_dict() if fixture_player_statistics else None
         except Exception as e:
             print(f"Error during fetching FixturePlayerStatistics for fixture_id={fixture_id}, player_id={player_id}: {e}")
             return None
         finally:
-            session.close()            
+            session.close()    
 
     @staticmethod
     def delete_all(session):
@@ -367,6 +398,108 @@ class FixturePlayerStatistics(Base):
             return False
         finally:
             session.close()
+
+    def get_stats_by_round_for_fixtures_and_players(session, args):
+        """
+        This function retrieves the statistics for fixtures and players for a specific round of a given season.
+        If no season or round is provided, it defaults to the current season and the most recent round.
+
+        Parameters:
+        - session: The database session used for querying.
+        - args: A dictionary that may contain the following optional keys:
+            - 'season' (int): The year of the season. If not provided, the current season is used.
+            - 'round' (int): The round number. If not provided, the last round of the season is used.
+
+        Returns:
+        - A list of dictionaries containing fixture details, player statistics, and the result status ('W', 'L' or 'D') for each player.
+        """
+        print("get_stats_by_round_for_fixtures_and_players")
+        try:
+            # Get the Serie A league details
+            league = League.get_it_serie_a_league(session)
+            print("league:", league['name'])
+
+            # Determine the season: if not provided, get the current season
+            season = args.get('season')
+            if season:
+                season_dict = Season.get_season_by_league_and_year(session, league['id'], int(season))   
+            else:
+                season_dict = Season.get_current_season(session, league['id'])
+            print("season:", season_dict['year'])
+
+            # Determine the round: if not provided, get the last round
+            round = args.get('round')
+            if round:
+                fixtures = Fixture.get_fixtures_by_round(session, league_id=league['id'], season=int(season_dict['year']), round=int(round))
+            else:
+                fixtures = Fixture.get_fixtures_by_round(session, league_id=league['id'], season=int(season_dict['year']), round='last')
+
+            # List to hold the final result data
+            fixture_data = []
+
+            # Iterate over each fixture to gather data
+            for fixture in fixtures:
+                # Extract basic fixture details
+                fixture_id = fixture['id']
+                fixture_details = {
+                    'home_team_id': fixture['home_team_id'],
+                    'goals_home': fixture['goals_home'],
+                    'away_team_id': fixture['away_team_id'],
+                    'goals_away': fixture['goals_away'],
+                    'league_round': fixture['league_round']
+                }
+
+                # Get player statistics for the fixture
+                fp_stats = FixturePlayerStatistics.get_fixture_player_statistics(session, fixture_id=fixture_id)
+
+                # If player statistics exist, combine them with fixture data
+                if fp_stats:
+                    
+                    for stat in fp_stats:
+                        # Calculate the result status for the player
+                        result_status = None
+                        if fixture_details['goals_home'] == fixture_details['goals_away']:
+                            result_status = 'D' #draw
+                        elif stat['team_id'] == fixture_details['home_team_id']:
+                            # If the player's team is the home team
+                            if fixture_details['goals_home'] > fixture_details['goals_away']:
+                                result_status = 'W'
+                            elif fixture_details['goals_home'] < fixture_details['goals_away']:
+                                result_status = 'L'
+                        elif stat['team_id'] == fixture_details['away_team_id']:
+                            # If the player's team is the away team
+                            if fixture_details['goals_away'] > fixture_details['goals_home']:
+                                result_status = 'W'
+                            elif fixture_details['goals_away'] < fixture_details['goals_home']:
+                                result_status = 'L'
+
+                        # Rimuovi il campo 'uuid' da stat, se esiste
+                        stat.pop('uuid', None)
+
+                        # Combine fixture details, player statistics, and result status
+                        player_data = {
+                            **fixture_details,  # Fixture details
+                            **stat,  # Player statistics
+                            'result_status': result_status  # Result status
+                        }
+                        fixture_data.append(player_data)
+                else:
+                    fixture_data.append(fixture_details)
+
+            #TODO: add position from player_statistics
+            
+            # Return the final list of fixture and player data
+            return fixture_data
+
+        except Exception as e:
+            print(f"Error in get_fixtures_and_players_statistics: {e}")
+            session.rollback()
+            return False
+        finally:
+            session.close()
+
+       
+
 
     def aggregate_player_stats(player_stats):
         aggregated_stats = {
