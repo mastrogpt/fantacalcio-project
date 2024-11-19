@@ -91,6 +91,9 @@ class League(Base):
         elif 'apifootball_id' in args:
             league = League.get_league_by_apifootball_id(session, args['apifootball_id'])
             return {"body": league if league else "League not found"}
+        elif 'get_it_serie_a_league' in args:
+            league = League.get_it_serie_a_league(session)
+            return {"body": league if league else "League not found"} 
         else:
             return {"body": League.get_all(session)}
 
@@ -113,6 +116,17 @@ class League(Base):
         finally:
             session.close()
 
+    @staticmethod
+    def get_it_serie_a_league(session):
+        try:
+            league = session.query(League).filter(League.name == "Serie A",League.country_name == "Italy",).first()
+            return league._to_dict()
+        except Exception as e:
+            print("Error during leagues loading:", e)
+            return []
+        finally:
+            session.close()
+    
     @staticmethod
     def delete_all(session):
         try:
