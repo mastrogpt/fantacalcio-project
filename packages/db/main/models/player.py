@@ -723,10 +723,6 @@ class Player(Base):
 
         player = Player.get_players_by_name(session, player_name, True)
 
-        # player_to_print_Test = Player.get_players_by_name(session, player_name)
-        # print('player_to_print_Test')
-        # print(player_to_print_Test)
-
         # Subquery per selezionare le statistiche delle partite del giocatore
         player_fixtures_subquery = (
           session.query(
@@ -744,6 +740,7 @@ class Player(Base):
               else_='away'
             ).label('home_or_away'),
             opponent_team.name.label('opponent_team'),
+            fixture.id.label('fixture_id'),
             fixture.goals_home,
             fixture.goals_away,
             fixture.league_round,
@@ -790,10 +787,10 @@ class Player(Base):
         result_query = session.query(
           player_fixtures_subquery.c.player_name,
           player_fixtures_subquery.c.id.label('player_id'),
+          player_fixtures_subquery.c.fixture_id,
           player_fixtures_subquery.c.firstname.label('player_firstname'),
           player_fixtures_subquery.c.lastname.label('player_lastname'),
           player_fixtures_subquery.c.player_full_name,
-          # player_fixtures_subquery.c.fixture_id, # only for test
           player_fixtures_subquery.c.season,
           player_fixtures_subquery.c.event_datetime,
           player_fixtures_subquery.c.team_name,
@@ -881,16 +878,18 @@ class Player(Base):
           'player_lastname' : '',
           'player_id' : '',
           'team_name' : '',
+          'last_fixture_id': ''
         }
 
         dict_to_return = {
-          'last_n_rounds' : last_n_rounds if last_n_rounds else num_all_matches,
+          # 'last_n_rounds' : int(last_n_rounds) if last_n_rounds else num_all_matches,
           'today_date' : str(date.today()),
           'season_selected' : season_selected,
           'players' : []
         }
 
         player_map = {}
+        map_played_rounds_by_player_id = {}
 
         for row in results:
           player_id = row['player_id']
@@ -899,6 +898,8 @@ class Player(Base):
             player_map[player_id] = {
               'stats' : []
             }
+
+            map_played_rounds_by_player_id[player_id] = []
 
           only_stats_row = dict(row)
           player_from_map_id = player_map[player_id]
@@ -909,6 +910,15 @@ class Player(Base):
               player_from_map_id[key] = val
               del only_stats_row[key]
 
+          if only_stats_row['games_minutes'] > 0:
+
+            if len(map_played_rounds_by_player_id[player_id]) == 0:
+              # player_from_map_id['last_played_fixture_id'] = row['fixture_id']
+              player_from_map_id['last_round'] = row['league_round']
+
+            map_played_rounds_by_player_id[player_id].append(row['fixture_id'])
+
+          player_from_map_id['played_matches_number'] = len(map_played_rounds_by_player_id[player_id])
           player_from_map_id['stats'].append(only_stats_row)
 
         dict_to_return['players'] = list(player_map.values())
