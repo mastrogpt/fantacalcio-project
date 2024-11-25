@@ -14,7 +14,7 @@ class FixturePlayerStatistics(Base):
     uuid = Column(String(36), unique=True, nullable=False, default=lambda: str(uuid.uuid4()))
     fixture_id = Column(Integer, ForeignKey('fixtures.id', ondelete='CASCADE'), nullable=False)
     player_id = Column(Integer, ForeignKey('players.id', ondelete='CASCADE'), nullable=False)
-    team_id = Column(Integer, ForeignKey('teams.id', ondelete='CASCADE'), nullable=False)
+    team_id = Column(Integer, ForeignKey('teams.id', ondelete='CASCADE'), nullable=True)
     position = Column(String(50))
     rating = Column(Float)
     captain = Column(Boolean)
@@ -47,6 +47,7 @@ class FixturePlayerStatistics(Base):
     penalty_scored = Column(Integer)
     penalty_missed = Column(Integer)
     penalty_saved = Column(Integer)
+    fbrating = Column(Float)
 
     __table_args__ = (
         PrimaryKeyConstraint('fixture_id', 'player_id', name='pk_fixture_player'),
@@ -272,7 +273,8 @@ class FixturePlayerStatistics(Base):
                     penalty_committed=f.get('penalty_committed'),
                     penalty_scored=f.get('penalty_scored'),
                     penalty_missed=f.get('penalty_missed'),
-                    penalty_saved=f.get('penalty_saved')
+                    penalty_saved=f.get('penalty_saved'),
+                    fbrating=f.get('fbrating')
                 ).on_conflict_do_nothing(index_elements=['fixture_id', 'player_id'])
 
                 session.execute(stmt)
@@ -295,7 +297,45 @@ class FixturePlayerStatistics(Base):
         try:
             upserted_records = []
             for f in fixtures_players_statistics:
+                # Prepara i valori per il set_ evitando i campi con valore None
+                update_values = {key: value for key, value in {
+                    'team_id': f.get('team_id'),
+                    'position': f.get('position'),
+                    'rating': f.get('rating'),
+                    'captain': f.get('captain'),
+                    'games_minutes': f.get('games_minutes'),
+                    'games_substitute': f.get('games_substitute'),
+                    'offsides': f.get('offsides'),
+                    'shots_total': f.get('shots_total'),
+                    'shots_on': f.get('shots_on'),
+                    'goals_total': f.get('goals_total'),
+                    'goals_conceded': f.get('goals_conceded'),
+                    'goals_assists': f.get('goals_assists'),
+                    'goals_saves': f.get('goals_saves'),
+                    'passes_total': f.get('passes_total'),
+                    'passes_key': f.get('passes_key'),
+                    'passes_accuracy': f.get('passes_accuracy'),
+                    'tackles_total': f.get('tackles_total'),
+                    'tackles_blocks': f.get('tackles_blocks'),
+                    'tackles_interceptions': f.get('tackles_interceptions'),
+                    'duels_total': f.get('duels_total'),
+                    'duels_won': f.get('duels_won'),
+                    'dribbles_attempts': f.get('dribbles_attempts'),
+                    'dribbles_success': f.get('dribbles_success'),
+                    'dribbles_past': f.get('dribbles_past'),
+                    'fouls_drawn': f.get('fouls_drawn'),
+                    'fouls_committed': f.get('fouls_committed'),
+                    'cards_yellow': f.get('cards_yellow'),
+                    'cards_red': f.get('cards_red'),
+                    'penalty_won': f.get('penalty_won'),
+                    'penalty_committed': f.get('penalty_committed'),
+                    'penalty_scored': f.get('penalty_scored'),
+                    'penalty_missed': f.get('penalty_missed'),
+                    'penalty_saved': f.get('penalty_saved'),
+                    'fbrating': f.get('fbrating')
+                }.items() if value is not None}  # Esclude i valori None
 
+                # Inserisce o aggiorna
                 stmt = insert(FixturePlayerStatistics).values(
                     uuid=str(uuid.uuid4()),
                     fixture_id=f.get('fixture_id'),
@@ -332,52 +372,21 @@ class FixturePlayerStatistics(Base):
                     penalty_committed=f.get('penalty_committed'),
                     penalty_scored=f.get('penalty_scored'),
                     penalty_missed=f.get('penalty_missed'),
-                    penalty_saved=f.get('penalty_saved')
+                    penalty_saved=f.get('penalty_saved'),
+                    fbrating=f.get('fbrating')
                 ).on_conflict_do_update(
                     index_elements=['fixture_id', 'player_id'],
-                    set_={
-                        'team_id': f.get('team_id'),
-                        'position': f.get('position'),
-                        'rating': f.get('rating'),
-                        'captain': f.get('captain'),
-                        'games_minutes': f.get('games_minutes'),
-                        'games_substitute': f.get('games_substitute'),
-                        'offsides': f.get('offsides'),
-                        'shots_total': f.get('shots_total'),
-                        'shots_on': f.get('shots_on'),
-                        'goals_total': f.get('goals_total'),
-                        'goals_conceded': f.get('goals_conceded'),
-                        'goals_assists': f.get('goals_assists'),
-                        'goals_saves': f.get('goals_saves'),
-                        'passes_total': f.get('passes_total'),
-                        'passes_key': f.get('passes_key'),
-                        'passes_accuracy': f.get('passes_accuracy'),
-                        'tackles_total': f.get('tackles_total'),
-                        'tackles_blocks': f.get('tackles_blocks'),
-                        'tackles_interceptions': f.get('tackles_interceptions'),
-                        'duels_total': f.get('duels_total'),
-                        'duels_won': f.get('duels_won'),
-                        'dribbles_attempts': f.get('dribbles_attempts'),
-                        'dribbles_success': f.get('dribbles_success'),
-                        'dribbles_past': f.get('dribbles_past'),
-                        'fouls_drawn': f.get('fouls_drawn'),
-                        'fouls_committed': f.get('fouls_committed'),
-                        'cards_yellow': f.get('cards_yellow'),
-                        'cards_red': f.get('cards_red'),
-                        'penalty_won': f.get('penalty_won'),
-                        'penalty_committed': f.get('penalty_committed'),
-                        'penalty_scored': f.get('penalty_scored'),
-                        'penalty_missed': f.get('penalty_missed'),
-                        'penalty_saved': f.get('penalty_saved')
-                    }
+                    set_=update_values
                 )
 
+                # Esegui la query
                 session.execute(stmt)
-    
                 upserted_records.append(f)
-    
+
+            # Commit finale
             session.commit()
             return upserted_records
+
         except Exception as e:
             print("Error during fixtures_players_statistics upsert:", e)
             session.rollback()
@@ -498,9 +507,7 @@ class FixturePlayerStatistics(Base):
         finally:
             session.close()
 
-       
-
-
+    #FIXME: Add fbrating
     def aggregate_player_stats(player_stats):
         aggregated_stats = {
             "cards_red": 0,
@@ -618,5 +625,43 @@ class FixturePlayerStatistics(Base):
             'penalty_committed': self.penalty_committed,
             'penalty_scored': self.penalty_scored,
             'penalty_missed': self.penalty_missed,
-            'penalty_saved': self.penalty_saved
+            'penalty_saved': self.penalty_saved,
+            'fbrating': self.fbrating
+        }
+
+    # Campi da restituire al frontend
+    def _to_dict_frontend(self):
+        return {
+            'position': self.position,
+            'captain': self.captain,
+            'games_minutes': self.games_minutes,
+            'games_substitute': self.games_substitute,
+            'offsides': self.offsides,
+            'shots_total': self.shots_total,
+            'shots_on': self.shots_on,
+            'goals_total': self.goals_total,
+            'goals_conceded': self.goals_conceded,
+            'goals_assists': self.goals_assists,
+            'goals_saves': self.goals_saves,
+            'passes_total': self.passes_total,
+            'passes_key': self.passes_key,
+            'passes_accuracy': self.passes_accuracy,
+            'tackles_total': self.tackles_total,
+            'tackles_blocks': self.tackles_blocks,
+            'tackles_interceptions': self.tackles_interceptions,
+            'duels_total': self.duels_total,
+            'duels_won': self.duels_won,
+            'dribbles_attempts': self.dribbles_attempts,
+            'dribbles_success': self.dribbles_success,
+            'dribbles_past': self.dribbles_past,
+            'fouls_drawn': self.fouls_drawn,
+            'fouls_committed': self.fouls_committed,
+            'cards_yellow': self.cards_yellow,
+            'cards_red': self.cards_red,
+            'penalty_won': self.penalty_won,
+            'penalty_committed': self.penalty_committed,
+            'penalty_scored': self.penalty_scored,
+            'penalty_missed': self.penalty_missed,
+            'penalty_saved': self.penalty_saved,
+            'fbrating': self.penalty_saved
         }

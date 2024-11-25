@@ -48,6 +48,7 @@ class PlayerStatistics(Base):
     penalty_scored = Column(Integer)
     penalty_missed = Column(Integer)
     penalty_saved = Column(Integer)
+    fbrating = Column(Float)
     
     player = relationship('Player', back_populates='player_statistics')
     team = relationship('Team', back_populates='player_statistics')
