@@ -1,7 +1,7 @@
 import uuid
 from sqlalchemy.sql import delete
 from models.base import Base
-from sqlalchemy import Column, Integer, String,Text, ARRAY, DateTime, Boolean, Date, insert, UniqueConstraint, delete, desc, select
+from sqlalchemy import Column, Integer, String,Text, ARRAY, DateTime, Boolean, Date, insert, UniqueConstraint, delete, desc, select, case
 from sqlalchemy.orm import sessionmaker, relationship
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.dialects.postgresql import insert as pg_insert
@@ -142,7 +142,14 @@ class Article(Base):
             query = (
                 select(Article)
                 .where(Article.author.ilike(f"%{author_name}%"))
-                .order_by(desc(Article.publication_date), desc(Article.creation_date))
+                .order_by(
+                    case(
+                        (Article.publication_date == None, 1),  # Se publication_date è NULL, ordinalo dopo
+                        else_=0
+                    ),
+                    desc(Article.publication_date),  # Ordina per publication_date DESC
+                    desc(Article.creation_date)      # Se necessario, ordina per creation_date DESC
+                )
                 .limit(1)
             )
         
