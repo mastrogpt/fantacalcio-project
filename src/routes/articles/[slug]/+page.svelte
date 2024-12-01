@@ -7,19 +7,27 @@
 
 	export let data: IArticlesProps;
 
-	// Function to format date
+	// Function to format date considering UTC timezone
 	function formatDate(isoDate: string, locale: string = 'it-IT'): string {
-		const date = new Date(isoDate);
-		const formattedDate = new Intl.DateTimeFormat(locale, {
-			day: '2-digit',
-			month: 'short',
-			year: 'numeric',
-		}).format(date);
-		const formattedTime = new Intl.DateTimeFormat(locale, {
-			hour: '2-digit',
-			minute: '2-digit',
-		}).format(date);
-		return `${formattedDate} - ${formattedTime}`;
+	    const date = new Date(isoDate);
+	
+	    // Convert UTC date to local timezone
+	    const localDate = new Date(
+	        date.getTime() - date.getTimezoneOffset() * 60000
+	    );
+	
+	    const formattedDate = new Intl.DateTimeFormat(locale, {
+	        day: '2-digit',
+	        month: 'short',
+	        year: 'numeric',
+	    }).format(localDate);
+	
+	    const formattedTime = new Intl.DateTimeFormat(locale, {
+	        hour: '2-digit',
+	        minute: '2-digit',
+	    }).format(localDate);
+	
+	    return `${formattedDate} - ${formattedTime}`;
 	}
 </script>
 
