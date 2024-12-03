@@ -62,10 +62,16 @@ export type Message = {
 
 export const getApiHost = () : string => {
     let apiHost = window.location.hostname.split('.')[0];
-		console.log("Api host is" + apiHost)
-		if(!apiHost || !apiHost.includes('fantabalun')) {
-			apiHost = 'fantatest'
-		}
+
+    // Gestisce il caso in cui il primo elemento è "www"
+    if (apiHost === 'www') {
+        apiHost = window.location.hostname.split('.')[1]; // Prende il secondo elemento
+    }
+
+	console.log("Api host is" + apiHost)
+	if(!apiHost || !apiHost.includes('fantabalun')) {
+		apiHost = 'fantatest'
+	}
 
     return apiHost;
 }
