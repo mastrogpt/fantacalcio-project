@@ -48,6 +48,8 @@ class PlayerStatistics(Base):
     penalty_scored = Column(Integer)
     penalty_missed = Column(Integer)
     penalty_saved = Column(Integer)
+    fbrating = Column(Float)
+    fantarating = Column(Float)
     
     player = relationship('Player', back_populates='player_statistics')
     team = relationship('Team', back_populates='player_statistics')
@@ -228,7 +230,9 @@ class PlayerStatistics(Base):
                     penalty_committed=ps.get('penalty_committed'),
                     penalty_scored=ps.get('penalty_scored'),
                     penalty_missed=ps.get('penalty_missed'),
-                    penalty_saved=ps.get('penalty_saved')
+                    penalty_saved=ps.get('penalty_saved'),
+                    fbrating=ps.get('fbrating'),
+                    fantarating=ps.get('fantarating')
                 ).on_conflict_do_nothing(
                     index_elements=['player_id', 'team_id', 'season_id']
                 )
@@ -289,7 +293,9 @@ class PlayerStatistics(Base):
                     penalty_committed=ps.get('penalty_committed'),
                     penalty_scored=ps.get('penalty_scored'),
                     penalty_missed=ps.get('penalty_missed'),
-                    penalty_saved=ps.get('penalty_saved')
+                    penalty_saved=ps.get('penalty_saved'),
+                    fbrating=ps.get('fbrating'),
+                    fantarating=ps.get('fantarating')
                 ).on_conflict_do_nothing()
     
                 # Execute the insert statement
@@ -341,6 +347,8 @@ class PlayerStatistics(Base):
                     upserted_player_statistic.penalty_scored = ps.get('penalty_scored')
                     upserted_player_statistic.penalty_missed = ps.get('penalty_missed')
                     upserted_player_statistic.penalty_saved = ps.get('penalty_saved')
+                    upserted_player_statistic.fbrating = ps.get('fbrating')
+                    upserted_player_statistic.fantarating = ps.get('fantarating')
     
                     # Add the updated player statistic to the list
                     upserted_player_statistics.append(upserted_player_statistic._to_dict())
@@ -464,5 +472,7 @@ class PlayerStatistics(Base):
             'penalty_committed': self.penalty_committed,
             'penalty_scored': self.penalty_scored,
             'penalty_missed': self.penalty_missed,
-            'penalty_saved': self.penalty_saved
+            'penalty_saved': self.penalty_saved,
+            'fbrating': self.fbrating,
+            'fantarating': self.fantarating
         }

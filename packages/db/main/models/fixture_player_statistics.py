@@ -48,6 +48,7 @@ class FixturePlayerStatistics(Base):
     penalty_missed = Column(Integer)
     penalty_saved = Column(Integer)
     fbrating = Column(Float)
+    fantarating = Column(Float)
 
     __table_args__ = (
         PrimaryKeyConstraint('fixture_id', 'player_id', name='pk_fixture_player'),
@@ -274,7 +275,8 @@ class FixturePlayerStatistics(Base):
                     penalty_scored=f.get('penalty_scored'),
                     penalty_missed=f.get('penalty_missed'),
                     penalty_saved=f.get('penalty_saved'),
-                    fbrating=f.get('fbrating')
+                    fbrating=f.get('fbrating'),
+                    fantarating=f.get('fantarating')
                 ).on_conflict_do_nothing(index_elements=['fixture_id', 'player_id'])
 
                 session.execute(stmt)
@@ -332,7 +334,8 @@ class FixturePlayerStatistics(Base):
                     'penalty_scored': f.get('penalty_scored'),
                     'penalty_missed': f.get('penalty_missed'),
                     'penalty_saved': f.get('penalty_saved'),
-                    'fbrating': f.get('fbrating')
+                    'fbrating': f.get('fbrating'),
+                    'fantarating': f.get('fantarating')
                 }.items() if value is not None}  # Esclude i valori None
 
                 # Inserisce o aggiorna
@@ -373,7 +376,8 @@ class FixturePlayerStatistics(Base):
                     penalty_scored=f.get('penalty_scored'),
                     penalty_missed=f.get('penalty_missed'),
                     penalty_saved=f.get('penalty_saved'),
-                    fbrating=f.get('fbrating')
+                    fbrating=f.get('fbrating'),
+                    fantarating=f.get('fantarating')
                 ).on_conflict_do_update(
                     index_elements=['fixture_id', 'player_id'],
                     set_=update_values
@@ -626,7 +630,8 @@ class FixturePlayerStatistics(Base):
             'penalty_scored': self.penalty_scored,
             'penalty_missed': self.penalty_missed,
             'penalty_saved': self.penalty_saved,
-            'fbrating': self.fbrating
+            'fbrating': self.fbrating,
+            'fantarating': self.fantarating
         }
 
     # Campi da restituire al frontend
@@ -663,5 +668,6 @@ class FixturePlayerStatistics(Base):
             'penalty_scored': self.penalty_scored,
             'penalty_missed': self.penalty_missed,
             'penalty_saved': self.penalty_saved,
-            'fbrating': self.penalty_saved
+            'fbrating': self.fbrating,
+            'fantarating': self.fantarating
         }
