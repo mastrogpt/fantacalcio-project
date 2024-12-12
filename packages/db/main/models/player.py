@@ -1053,7 +1053,8 @@ class Player(Base):
                 ps.position,
                 fps.goals_total,
                 fps.goals_assists,
-                fps.rating,
+                fps.fbrating.label('rating'),
+                fps.fantarating.label('fantarating'),
                 fps.games_minutes,
                 fps.games_substitute,
                 fps.offsides,
@@ -1094,17 +1095,17 @@ class Player(Base):
             order_criteria = []
             if role == 'Goalkeeper':
                 order_criteria = [
+                    desc('average_fantarating'),
                     asc('goals_conceded'),
-                    desc('average_rating'),
                     desc('penalty_saved'),
                     desc('goals_saves'),
                     desc('total_matches_played')
                 ]
             else:
                 order_criteria = [
+                    desc('average_fantarating'),
                     desc('total_goals'),
                     desc('total_assists'),
-                    desc('average_rating'),
                     desc('total_matches_played')
                 ]
 
@@ -1117,6 +1118,7 @@ class Player(Base):
                 func.coalesce(func.sum(players_data_subquery.c.goals_total), 0).label('total_goals'),
                 func.coalesce(func.sum(players_data_subquery.c.goals_assists), 0).label('total_assists'),
                 func.coalesce(func.round(cast(func.avg(players_data_subquery.c.rating), Numeric), 2), 0).label('average_rating'),
+                func.coalesce(func.round(cast(func.avg(players_data_subquery.c.fantarating), Numeric), 2), 0).label('average_fantarating'),
                 func.coalesce(func.sum(players_data_subquery.c.games_minutes), 0).label('total_minutes'),
                 func.coalesce(func.sum(players_data_subquery.c.offsides), 0).label('total_offsides'),
                 func.coalesce(func.sum(players_data_subquery.c.shots_total), 0).label('total_shots'),
@@ -1167,9 +1169,10 @@ class Player(Base):
                     'player_photo': row.player_photo,
                     'team': row.team_name,
                     'position': row.position,
+                    'average_rating': float(row.average_rating),
+                    'average_fantarating': float(row.average_fantarating),                    
                     'total_goals': row.total_goals,
                     'total_assists': row.total_assists,
-                    'average_rating': float(row.average_rating),
                     'total_minutes': row.total_minutes,
                     'total_offsides': row.total_offsides,
                     'total_shots': row.total_shots,
