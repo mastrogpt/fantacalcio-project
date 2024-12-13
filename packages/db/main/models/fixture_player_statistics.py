@@ -543,6 +543,7 @@ class FixturePlayerStatistics(Base):
             "tackles_interceptions": 0,
             "tackles_total": 0,
             "rating_sum": 0,  # Somma per calcolare la media
+            "fantarating_sum": 0 # Somma per calcolare la fantamedia
             "rating_count": 0  # Numero di partite per il calcolo della media
         }
     
@@ -576,17 +577,21 @@ class FixturePlayerStatistics(Base):
             aggregated_stats["tackles_interceptions"] += stat["tackles_interceptions"]
             aggregated_stats["tackles_total"] += stat["tackles_total"]
             
-            aggregated_stats["rating_sum"] += stat["rating"]
+            aggregated_stats["rating_sum"] += stat["fbrating"]
+            aggregated_stats["fantarating_sum"] += stat["fantarating"]
             aggregated_stats["rating_count"] += 1
     
         # Calcola la media per il rating
         if aggregated_stats["rating_count"] > 0:
             aggregated_stats["rating_avg"] = round(aggregated_stats["rating_sum"] / aggregated_stats["rating_count"], 2)
+            aggregated_stats["fantarating_avg"] = round(aggregated_stats["fantarating_sum"] / aggregated_stats["rating_count"], 2)
         else:
             aggregated_stats["rating_avg"] = None
+            aggregated_stats["fantarating_avg"] = None
     
         # Rimuovi la somma del rating e il conteggio
         aggregated_stats.pop("rating_sum")
+        aggregated_stats.pop("fantarating_sum")
         aggregated_stats.pop("rating_count")
     
         return aggregated_stats    
