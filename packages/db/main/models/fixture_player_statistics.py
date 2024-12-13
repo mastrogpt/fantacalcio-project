@@ -543,7 +543,7 @@ class FixturePlayerStatistics(Base):
             "tackles_interceptions": 0,
             "tackles_total": 0,
             "rating_sum": 0,  # Somma per calcolare la media
-            "fantarating_sum": 0 # Somma per calcolare la fantamedia
+            "fantarating_sum": 0, # Somma per calcolare la fantamedia
             "rating_count": 0  # Numero di partite per il calcolo della media
         }
     
