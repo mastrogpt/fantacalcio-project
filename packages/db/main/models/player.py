@@ -822,7 +822,8 @@ class Player(Base):
 
           cast(player_fixtures_subquery.c.event_datetime, String).label('event_datetime'),
           func.coalesce(player_fixtures_subquery.c.games_substitute, False).label('games_substitute'),
-          func.coalesce(player_fixtures_subquery.c.rating, 0).label('rating'),
+          func.coalesce(player_fixtures_subquery.c.fbrating, 0).label('rating'),
+          func.coalesce(player_fixtures_subquery.c.fantarating, 0).label('fantarating'),
           func.coalesce(player_fixtures_subquery.c.games_minutes, 0).label('games_minutes'),
           func.coalesce(player_fixtures_subquery.c.offsides, 0).label('offsides'),
           func.coalesce(player_fixtures_subquery.c.shots_total, 0).label('shots_total'),
@@ -1239,12 +1240,12 @@ class Player(Base):
                     .join(Season, PlayerSeason.season_id == Season.id)
                     .filter(
                         ps.games_lineups.isnot(None),
-                        ps.rating.isnot(None),
+                        ps.fbrating.isnot(None),
                         ps.goals_assists.isnot(None)
                     )
                     .order_by(
                         desc(ps.goals_assists),
-                        desc(ps.rating)
+                        desc(ps.fbrating)
                     )
                     )
             # Apply season filter
