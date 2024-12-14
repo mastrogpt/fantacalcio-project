@@ -37,7 +37,8 @@ export interface PlayerStats {
 	penalty_won: number | null;
 	player_id: number;
 	position: string;
-	rating: number;
+	fbrating: number;
+	fantavoto: number;
 	season_id: number;
 	shots_on: number;
 	shots_total: number;
@@ -139,7 +140,7 @@ export async function getStatsDataById(
 
 
 const getStatsDataByIdLabelMapper = {
-	captain: 'Capitano',
+	//captain: 'Capitano',
 	cards_red: 'Cartellini rossi',
 	cards_yellow: 'Cartellini gialli',
 	dribbles_attempts: 'Dribbling tentati',
@@ -166,7 +167,8 @@ const getStatsDataByIdLabelMapper = {
 	penalty_scored: 'Rigori segnati',
 	penalty_won: 'Rigori procurati',
 	position: 'Ruolo',
-	rating: 'Valutazione',
+	fbrating: 'Voto',
+	fantarating: 'Fantamedia',
 	shots_on: 'Tiri in porta',
 	shots_total: 'Tiri totali',
 	// substitutes_bench: "Sostituzioni",

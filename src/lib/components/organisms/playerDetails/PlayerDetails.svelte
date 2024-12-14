@@ -36,8 +36,12 @@
 					value: playerStats?.goals_total ? playerStats?.goals_total : '0'
 				},
 				{
-					label: 'Media',
-					value: playerStats?.rating ? playerStats?.rating.toFixed(2) : '0'
+					label: 'Media Voto',
+					value: playerStats?.fbrating ? playerStats?.fbrating.toFixed(2) : '0'
+				},
+				{
+					label: 'Media Fantavoto',
+					value: playerStats?.fantarating ? playerStats?.fbrating.toFixed(2) : '0'
 				},
 				{
 					label: 'Cartellini',
