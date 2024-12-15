@@ -446,7 +446,7 @@ class Fixture(Base):
 
 
     @staticmethod
-    def how_many_matches_until_now(session, season, league_id=None):
+    def get_last_or_current_round(session, season, league_id=None):
         try:
             if league_id is None:
                 league_id = 1 # Serie A
