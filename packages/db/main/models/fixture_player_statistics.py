@@ -511,7 +511,6 @@ class FixturePlayerStatistics(Base):
         finally:
             session.close()
 
-    #FIXME: Add fbrating
     def aggregate_player_stats(player_stats):
         aggregated_stats = {
             "cards_red": 0,
@@ -543,58 +542,87 @@ class FixturePlayerStatistics(Base):
             "tackles_interceptions": 0,
             "tackles_total": 0,
             "rating_sum": 0,  # Somma per calcolare la media
+            "fbrating_sum": 0,  # Somma per calcolare la media
             "fantarating_sum": 0, # Somma per calcolare la fantamedia
-            "rating_count": 0  # Numero di partite per il calcolo della media
+            "rating_count": 0,  # Numero di rating per il calcolo della media
+            "fbrating_count": 0,  # Numero di fbrating per il calcolo della media
+            "fantarating_count": 0  # Numero di fantarating per il calcolo della media
         }
-    
+
         for stat in player_stats:
-            aggregated_stats["cards_red"] += stat["cards_red"]
-            aggregated_stats["cards_yellow"] += stat["cards_yellow"]
-            aggregated_stats["dribbles_attempts"] += stat["dribbles_attempts"]
-            aggregated_stats["dribbles_past"] += stat["dribbles_past"]
-            aggregated_stats["dribbles_success"] += stat["dribbles_success"]
-            aggregated_stats["duels_total"] += stat["duels_total"]
-            aggregated_stats["duels_won"] += stat["duels_won"]
-            aggregated_stats["fouls_committed"] += stat["fouls_committed"]
-            aggregated_stats["fouls_drawn"] += stat["fouls_drawn"]
-            aggregated_stats["games_minutes"] += stat["games_minutes"]
-            aggregated_stats["goals_assists"] += stat["goals_assists"]
-            aggregated_stats["goals_conceded"] += stat["goals_conceded"]
-            aggregated_stats["goals_saves"] += stat["goals_saves"]
-            aggregated_stats["goals_total"] += stat["goals_total"]
-            aggregated_stats["offsides"] += stat["offsides"]
-            aggregated_stats["passes_accuracy"] += stat["passes_accuracy"]
-            aggregated_stats["passes_key"] += stat["passes_key"]
-            aggregated_stats["passes_total"] += stat["passes_total"]
-            aggregated_stats["penalty_committed"] += stat["penalty_committed"]
-            aggregated_stats["penalty_missed"] += stat["penalty_missed"]
-            aggregated_stats["penalty_saved"] += stat["penalty_saved"]
-            aggregated_stats["penalty_scored"] += stat["penalty_scored"]
-            aggregated_stats["penalty_won"] += stat["penalty_won"]
-            aggregated_stats["shots_on"] += stat["shots_on"]
-            aggregated_stats["shots_total"] += stat["shots_total"]
-            aggregated_stats["tackles_blocks"] += stat["tackles_blocks"]
-            aggregated_stats["tackles_interceptions"] += stat["tackles_interceptions"]
-            aggregated_stats["tackles_total"] += stat["tackles_total"]
-            
-            aggregated_stats["rating_sum"] += stat["fbrating"]
-            aggregated_stats["fantarating_sum"] += stat["fantarating"]
-            aggregated_stats["rating_count"] += 1
-    
+            # Sostituisci None con 0 prima di sommare
+            aggregated_stats["cards_red"] += stat.get("cards_red", 0) or 0
+            aggregated_stats["cards_yellow"] += stat.get("cards_yellow", 0) or 0
+            aggregated_stats["dribbles_attempts"] += stat.get("dribbles_attempts", 0) or 0
+            aggregated_stats["dribbles_past"] += stat.get("dribbles_past", 0) or 0
+            aggregated_stats["dribbles_success"] += stat.get("dribbles_success", 0) or 0
+            aggregated_stats["duels_total"] += stat.get("duels_total", 0) or 0
+            aggregated_stats["duels_won"] += stat.get("duels_won", 0) or 0
+            aggregated_stats["fouls_committed"] += stat.get("fouls_committed", 0) or 0
+            aggregated_stats["fouls_drawn"] += stat.get("fouls_drawn", 0) or 0
+            aggregated_stats["games_minutes"] += stat.get("games_minutes", 0) or 0
+            aggregated_stats["goals_assists"] += stat.get("goals_assists", 0) or 0
+            aggregated_stats["goals_conceded"] += stat.get("goals_conceded", 0) or 0
+            aggregated_stats["goals_saves"] += stat.get("goals_saves", 0) or 0
+            aggregated_stats["goals_total"] += stat.get("goals_total", 0) or 0
+            aggregated_stats["offsides"] += stat.get("offsides", 0) or 0
+            aggregated_stats["passes_accuracy"] += stat.get("passes_accuracy", 0) or 0
+            aggregated_stats["passes_key"] += stat.get("passes_key", 0) or 0
+            aggregated_stats["passes_total"] += stat.get("passes_total", 0) or 0
+            aggregated_stats["penalty_committed"] += stat.get("penalty_committed", 0) or 0
+            aggregated_stats["penalty_missed"] += stat.get("penalty_missed", 0) or 0
+            aggregated_stats["penalty_saved"] += stat.get("penalty_saved", 0) or 0
+            aggregated_stats["penalty_scored"] += stat.get("penalty_scored", 0) or 0
+            aggregated_stats["penalty_won"] += stat.get("penalty_won", 0) or 0
+            aggregated_stats["shots_on"] += stat.get("shots_on", 0) or 0
+            aggregated_stats["shots_total"] += stat.get("shots_total", 0) or 0
+            aggregated_stats["tackles_blocks"] += stat.get("tackles_blocks", 0) or 0
+            aggregated_stats["tackles_interceptions"] += stat.get("tackles_interceptions", 0) or 0
+            aggregated_stats["tackles_total"] += stat.get("tackles_total", 0) or 0
+
+            # Somma i rating, considerando i valori None come 0
+            aggregated_stats["rating_sum"] += stat.get("rating", 0) or 0
+            aggregated_stats["fbrating_sum"] += stat.get("fbrating", 0) or 0
+            aggregated_stats["fantarating_sum"] += stat.get("fantarating", 0) or 0
+            if stat.get("rating") is not None and stat.get("rating") != 0:  # Aggiungi solo se non è None o 0
+                aggregated_stats["rating_count"] += 1
+            if stat.get("fbrating") is not None and stat.get("fbrating") != 0:  # Aggiungi solo se non è None o 0
+                aggregated_stats["fbrating_count"] += 1
+            if stat.get("fantarating") is not None and stat.get("fantarating") != 0:  # Aggiungi solo se non è None o 0
+                aggregated_stats["fantarating_count"] += 1
+
         # Calcola la media per il rating
         if aggregated_stats["rating_count"] > 0:
-            aggregated_stats["rating_avg"] = round(aggregated_stats["rating_sum"] / aggregated_stats["rating_count"], 2)
-            aggregated_stats["fantarating_avg"] = round(aggregated_stats["fantarating_sum"] / aggregated_stats["rating_count"], 2)
+            aggregated_stats["rating"] = round(aggregated_stats["rating_sum"] / aggregated_stats["rating_count"], 2)
         else:
-            aggregated_stats["rating_avg"] = None
-            aggregated_stats["fantarating_avg"] = None
-    
+            aggregated_stats["rating"] = None
+        
+        # Calcola la media per il fbrating
+        if aggregated_stats["fbrating_count"] > 0:
+            aggregated_stats["fbrating"] = round(aggregated_stats["fbrating_sum"] / aggregated_stats["fbrating_count"], 2)
+        else:
+            aggregated_stats["fbrating"] = None
+
+        # Calcola la media per il fantarating
+        if aggregated_stats["fantarating_count"] > 0:
+            aggregated_stats["fantarating"] = round(aggregated_stats["fantarating_sum"] / aggregated_stats["fantarating_count"], 2)
+        else:
+            aggregated_stats["fantarating"] = None
+
         # Rimuovi la somma del rating e il conteggio
         aggregated_stats.pop("rating_sum")
+        aggregated_stats.pop("fbrating_sum")
         aggregated_stats.pop("fantarating_sum")
         aggregated_stats.pop("rating_count")
-    
-        return aggregated_stats    
+        aggregated_stats.pop("fbrating_count")
+        aggregated_stats.pop("fantarating_count")
+
+        # Converte tutti gli 0 in None
+        for key, value in aggregated_stats.items():
+            if value == 0:
+                aggregated_stats[key] = None
+
+        return aggregated_stats   
 
 
     def _to_dict(self):
