@@ -1,7 +1,12 @@
 from sqlalchemy import Column, Integer, String, Float, Boolean, ForeignKey, delete
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, aliased
 from sqlalchemy.dialects.postgresql import insert
+from sqlalchemy.orm.exc import NoResultFound
 from models.base import Base
+from models.season import Season
+from models.fixtures import Fixture
+from models.season import Season
+from models.fixture_player_statistics import FixturePlayerStatistics
 import uuid
 
 class PlayerStatistics(Base):
@@ -77,6 +82,8 @@ class PlayerStatistics(Base):
             return PlayerStatistics.update_handler(session, args)
         elif query_type == "upsert":
             return PlayerStatistics.upsert_handler(session, args)
+        elif query_type == "stats":
+            return PlayerStatistics.stats_handler(session, args)
         else:
             return PlayerStatistics.get_handler(session, args)
 
@@ -118,7 +125,7 @@ class PlayerStatistics(Base):
                 player_id = args['player_id']
                 team_id = args['team_id']
                 season_id = args['season_id']
-                ret = PlayerStatistics.update_by_ids(session, player_id, team_id, season_id, update_fields)
+                ret = PlayerStatistics.update_entry(session, player_id, team_id, season_id, update_fields)
                 if ret:
                     return {"statusCode": 200, "body": f"Updated fields successfully for player_id: {player_id}, team_id: {team_id}, season_id: {season_id}"}
                 else:
@@ -127,6 +134,21 @@ class PlayerStatistics(Base):
                 return {"statusCode": 400, "body": "player_id, team_id and season_id are required for update"}
         except Exception as e:
             return {"statusCode": 500, "body": f"Error during update operation: {e}"}
+
+    @staticmethod
+    def stats_handler(session, args):
+        if 'aggregate_and_save_stats' in args:
+            season = args.get('season')
+            league_id = args.get('league_id')
+            ret = PlayerStatistics.aggregate_and_save_stats(session, season, league_id)
+            season = season if season else "last"
+            league_id = league_id if league_id else "Serie A"
+            if ret:
+                return {"statusCode": 200, "body": f"Updated stats successfully for season: {season}, league_id: {league_id}"}
+            else:
+                return {"statusCode": 500, "body": f"Failed to update stats for season: {season}, league_id: {league_id}"} 
+        else:
+            return {"statusCode": 500, "body": f"No stats args"} 
 
     @staticmethod
     def get_handler(session, args):
@@ -403,7 +425,7 @@ class PlayerStatistics(Base):
             session.close()
 
     @staticmethod
-    def update_by_ids(session, player_id, team_id, season_id, update_fields):
+    def update_entry(session, player_id, team_id, season_id, update_fields):
         try:
             player_statistic = session.query(PlayerStatistics).filter_by(player_id=player_id, team_id=team_id, season_id=season_id).one_or_none()
             if player_statistic:
@@ -427,8 +449,118 @@ class PlayerStatistics(Base):
             print(f"Error during update for PlayerStatistics with player_id={player_id}, team_id={team_id}, season_id={season_id}: {e}")
             session.rollback()
             return False
+        #finally:
+        #    session.close()
+
+    @staticmethod
+    def aggregate_and_save_stats(session, season, league_id=None):
+        try:
+            if league_id is None:
+                league_id = 1  # Serie A
+
+            # Recupera la stagione per il campionato e l'anno
+            season_rec = Season.get_season_by_league_and_year(session, league_id, season)
+            if season_rec is None:
+                season_rec = Season.get_current_season(session, league_id)
+
+            season_id = season_rec.get('id')
+            print("Season ID:", season_id)
+
+            # Recupera l'ultimo round della stagione fino ad oggi
+            last_round = Fixture.get_last_or_current_round(session, season, league_id)
+            print("Last Round:", last_round)
+
+            # Query per recuperare le statistiche dei giocatori
+            player_stats_query = (
+                session.query(
+                    Fixture.season_id,
+                    FixturePlayerStatistics
+                )
+                .join(Fixture, Fixture.id == FixturePlayerStatistics.fixture_id)
+                .filter(
+                    Fixture.league_round <= last_round,
+                    Fixture.season_id == season_id,
+                    FixturePlayerStatistics.games_minutes > 0
+                )
+            )
+
+            player_stats_results = player_stats_query.all()
+
+            # Raggruppa le statistiche per giocatore, stagione e squadra
+            player_stats_by_player_season_team = {}
+            for row in player_stats_results:
+                fixture_season_id = row[0]  # Fixture.season_id
+                fixture_player_stats = row[1]  # Oggetto FixturePlayerStatistics
+
+                player_id = fixture_player_stats.player_id
+                team_id = fixture_player_stats.team_id
+
+                # Crea una chiave composta da player_id, season_id e team_id
+                key = (player_id, fixture_season_id, team_id)
+
+                if key not in player_stats_by_player_season_team:
+                    player_stats_by_player_season_team[key] = []
+
+                player_stats_by_player_season_team[key].append(fixture_player_stats)
+
+            # Aggrega e salva le statistiche per ogni giocatore, stagione e squadra
+            for (player_id, season_id, team_id), stats in player_stats_by_player_season_team.items():
+                print(f"Processing aggregated stats for player_id={player_id}, season_id={season_id}, team_id={team_id}")
+
+                if not stats:
+                    print(f"No stats available for player_id={player_id}, season_id={season_id}, team_id={team_id}")
+                    continue
+
+                # Prepara i dati delle statistiche
+                stats_data = [
+                    {
+                        key: getattr(stat, key)
+                        for key in stat.__dict__.keys()
+                        if not key.startswith('_') and key not in ['fixture_id', 'player_id', 'team_id', 'uuid', 'captain', 'games_substitute', 'position', 'offsides']
+                    }
+                    for stat in stats
+                ]
+
+
+                # Aggrega le statistiche del giocatore
+                aggregated_stats = FixturePlayerStatistics.aggregate_player_stats(stats_data)
+
+                # Rimuove i campi indesiderati dalle statistiche aggregate
+                fields_to_remove = ['offsides']
+
+                # Filtra le statistiche aggregate
+                filtered_aggregated_stats = {key: value for key, value in aggregated_stats.items() if key not in fields_to_remove}
+
+                # Aggiungi un controllo per i valori None
+                filtered_aggregated_stats = {key: value for key, value in filtered_aggregated_stats.items() if value is not None}
+
+                #print("Filtered Aggregated Stats:", filtered_aggregated_stats)
+
+                # Aggiorna le stats a db
+                rows_updated = session.query(PlayerStatistics).filter(
+                    PlayerStatistics.player_id == player_id,
+                    PlayerStatistics.team_id == team_id,
+                    PlayerStatistics.season_id == season_id
+                ).update(filtered_aggregated_stats, synchronize_session=False)
+
+
+                if rows_updated == 0:
+                    print(f"Failed to save stats for player_id={player_id}, season_id={season_id}, team_id={team_id}")
+                    raise Exception(f"Failed to update statistics for player_id={player_id}, team_id={team_id}, season_id={season_id}")
+
+                print(f"Stats for player_id={player_id}, season_id={season_id}, team_id={team_id} saved successfully")
+
+            session.commit()
+            return True
+
+        except Exception as e:
+            print("Error while aggregating and saving player statistics:", e)
+            session.rollback()
+            return False
+
         finally:
             session.close()
+        
 
     def _to_dict(self):
         return {
