@@ -273,124 +273,45 @@ class PlayerStatistics(Base):
     def upsert(session, player_statistics):
         try:
             upserted_player_statistics = []
+
             for ps in player_statistics:
-                # Try to insert the record
+                # Tentativo di inserimento del record
                 stmt = insert(PlayerStatistics).values(
                     player_id=ps['player_id'],
                     team_id=ps['team_id'],
-                    season_id=ps['season_id'],
-                    position=ps.get('position'),
-                    rating=ps.get('rating'),
-                    captain=ps.get('captain'),
-                    games_appearences=ps.get('games_appearences'),
-                    games_lineups=ps.get('games_lineups'),
-                    games_minutes=ps.get('games_minutes'),
-                    games_number=ps.get('games_number'),
-                    substitutes_in=ps.get('substitutes_in'),
-                    substitutes_out=ps.get('substitutes_out'),
-                    substitutes_bench=ps.get('substitutes_bench'),
-                    shots_total=ps.get('shots_total'),
-                    shots_on=ps.get('shots_on'),
-                    goals_total=ps.get('goals_total'),
-                    goals_conceded=ps.get('goals_conceded'),
-                    goals_assists=ps.get('goals_assists'),
-                    goals_saves=ps.get('goals_saves'),
-                    passes_total=ps.get('passes_total'),
-                    passes_key=ps.get('passes_key'),
-                    passes_accuracy=ps.get('passes_accuracy'),
-                    tackles_total=ps.get('tackles_total'),
-                    tackles_blocks=ps.get('tackles_blocks'),
-                    tackles_interceptions=ps.get('tackles_interceptions'),
-                    duels_total=ps.get('duels_total'),
-                    duels_won=ps.get('duels_won'),
-                    dribbles_attempts=ps.get('dribbles_attempts'),
-                    dribbles_success=ps.get('dribbles_success'),
-                    dribbles_past=ps.get('dribbles_past'),
-                    fouls_drawn=ps.get('fouls_drawn'),
-                    fouls_committed=ps.get('fouls_committed'),
-                    cards_yellow=ps.get('cards_yellow'),
-                    cards_yellowred=ps.get('cards_yellowred'),
-                    cards_red=ps.get('cards_red'),
-                    penalty_won=ps.get('penalty_won'),
-                    penalty_committed=ps.get('penalty_committed'),
-                    penalty_scored=ps.get('penalty_scored'),
-                    penalty_missed=ps.get('penalty_missed'),
-                    penalty_saved=ps.get('penalty_saved'),
-                    fbrating=ps.get('fbrating'),
-                    fantarating=ps.get('fantarating')
+                    season_id=ps['season_id']
                 ).on_conflict_do_nothing()
-    
-                # Execute the insert statement
+
+                # Esegui l'inserimento
                 session.execute(stmt)
-    
-                # Fetch the inserted or existing record
-                upserted_player_statistic = session.query(PlayerStatistics).filter_by(
+
+                # Recupera il record inserito o esistente
+                existing_record = session.query(PlayerStatistics).filter_by(
                     player_id=ps['player_id'],
                     team_id=ps['team_id'],
                     season_id=ps['season_id']
                 ).first()
-    
-                # If record already exists, update its fields
-                if upserted_player_statistic:
-                    upserted_player_statistic.position = ps.get('position')
-                    upserted_player_statistic.rating = ps.get('rating')
-                    upserted_player_statistic.captain = ps.get('captain')
-                    upserted_player_statistic.games_appearences = ps.get('games_appearences')
-                    upserted_player_statistic.games_lineups = ps.get('games_lineups')
-                    upserted_player_statistic.games_minutes = ps.get('games_minutes')
-                    upserted_player_statistic.games_number = ps.get('games_number')
-                    upserted_player_statistic.substitutes_in = ps.get('substitutes_in')
-                    upserted_player_statistic.substitutes_out = ps.get('substitutes_out')
-                    upserted_player_statistic.substitutes_bench = ps.get('substitutes_bench')
-                    upserted_player_statistic.shots_total = ps.get('shots_total')
-                    upserted_player_statistic.shots_on = ps.get('shots_on')
-                    upserted_player_statistic.goals_total = ps.get('goals_total')
-                    upserted_player_statistic.goals_conceded = ps.get('goals_conceded')
-                    upserted_player_statistic.goals_assists = ps.get('goals_assists')
-                    upserted_player_statistic.goals_saves = ps.get('goals_saves')
-                    upserted_player_statistic.passes_total = ps.get('passes_total')
-                    upserted_player_statistic.passes_key = ps.get('passes_key')
-                    upserted_player_statistic.passes_accuracy = ps.get('passes_accuracy')
-                    upserted_player_statistic.tackles_total = ps.get('tackles_total')
-                    upserted_player_statistic.tackles_blocks = ps.get('tackles_blocks')
-                    upserted_player_statistic.tackles_interceptions = ps.get('tackles_interceptions')
-                    upserted_player_statistic.duels_total = ps.get('duels_total')
-                    upserted_player_statistic.duels_won = ps.get('duels_won')
-                    upserted_player_statistic.dribbles_attempts = ps.get('dribbles_attempts')
-                    upserted_player_statistic.dribbles_success = ps.get('dribbles_success')
-                    upserted_player_statistic.dribbles_past = ps.get('dribbles_past')
-                    upserted_player_statistic.fouls_drawn = ps.get('fouls_drawn')
-                    upserted_player_statistic.fouls_committed = ps.get('fouls_committed')
-                    upserted_player_statistic.cards_yellow = ps.get('cards_yellow')
-                    upserted_player_statistic.cards_yellowred = ps.get('cards_yellowred')
-                    upserted_player_statistic.cards_red = ps.get('cards_red')
-                    upserted_player_statistic.penalty_won = ps.get('penalty_won')
-                    upserted_player_statistic.penalty_committed = ps.get('penalty_committed')
-                    upserted_player_statistic.penalty_scored = ps.get('penalty_scored')
-                    upserted_player_statistic.penalty_missed = ps.get('penalty_missed')
-                    upserted_player_statistic.penalty_saved = ps.get('penalty_saved')
-                    upserted_player_statistic.fbrating = ps.get('fbrating')
-                    upserted_player_statistic.fantarating = ps.get('fantarating')
-    
-                    # Add the updated player statistic to the list
-                    upserted_player_statistics.append(upserted_player_statistic._to_dict())
-                else:
-                    # If the record did not exist and was not inserted, handle as appropriate
-                    pass
-    
-            # Commit the transaction
+
+                # Se il record esiste
+                if existing_record:
+                    for field, value in ps.items():
+                        if hasattr(existing_record, field):
+                            setattr(existing_record, field, value)
+
+                    # Aggiungi il record aggiornato alla lista
+                    upserted_player_statistics.append(existing_record._to_dict())
+
+            # Commit della transazione
             session.commit()
-    
-            # Return the list of upserted player statistics
+
+            # Restituisci i record aggiornati
             return upserted_player_statistics
-    
+
         except Exception as e:
             print("Error during player statistics upserting:", e)
-            # Rollback the transaction on error
             session.rollback()
-            return []  # Return an empty list or handle error as appropriate
+            return []  # Gestione dell'errore
         finally:
-            # Always close the session to clean up resources
             session.close()
 
     @staticmethod
