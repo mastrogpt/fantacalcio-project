@@ -40,8 +40,8 @@
 					value: playerStats?.fbrating ? playerStats?.fbrating.toFixed(2) : '0'
 				},
 				{
-					label: 'Media Fantavoto',
-					value: playerStats?.fantarating ? playerStats?.fbrating.toFixed(2) : '0'
+					label: 'Fantamedia',
+					value: playerStats?.fantarating ? playerStats?.fantarating.toFixed(2) : '0'
 				},
 				{
 					label: 'Cartellini',

@@ -993,12 +993,12 @@ class Player(Base):
             print(f"Selected Season: {selected_season_id} {selected_season_year}")
 
             # Recupera il numero di round della stagione fino ad oggi
-            count_matches = Fixture.how_many_matches_until_now(session, selected_season_year)
-            print(f"Num. of matches until now: {count_matches}")
+            count_rounds = Fixture.get_last_or_current_round(session, selected_season_year)
+            print(f"Num. of rounds until now: {count_rounds}")
 
             # Logica per gestire `last_n_rounds` e `league_round`
             if not last_n_rounds and not league_round:
-                last_n_rounds = count_matches  # Considera tutta la stagione se entrambi i parametri sono null
+                last_n_rounds = count_rounds  # Considera tutta la stagione se entrambi i parametri sono null
             elif last_n_rounds and league_round:
                 last_n_rounds = None  # Ignora `last_n_rounds` se `league_round` è fornito
 
@@ -1021,8 +1021,8 @@ class Player(Base):
             print(f"Filtered rounds: {', '.join(str(tup[0]) for tup in filtered_rounds)}")
 
             # Conta il numero di match / round
-            count_matches = len(filtered_rounds)
-            matches_minimum_presence = Player.compute_matches_minum_presence(count_matches)
+            count_rounds = len(filtered_rounds)
+            matches_minimum_presence = Player.compute_matches_minum_presence(count_rounds)
             print("Matches minimum presence:", matches_minimum_presence)
 
             # Subquery per ottenere i giocatori che hanno giocato almeno un certo numero di partite
@@ -1201,7 +1201,7 @@ class Player(Base):
                     'penalty_missed': row.penalty_missed,
                     'penalty_saved': row.penalty_saved,
                     'total_matches_played': row.total_matches_played,
-                    'total_season_matches': count_matches,
+                    'total_season_rounds': count_rounds,
                     'season': selected_season_year
                 }
             
