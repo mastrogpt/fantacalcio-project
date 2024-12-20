@@ -771,7 +771,7 @@ class Player(Base):
             and_(home_away_filter == 'away', fixture.away_team_id == CPT.team_id),
             or_(home_away_filter == '', home_away_filter == None)
           ))
-          .filter(FPS.games_minutes > 0)
+          #.filter(FPS.games_minutes > 0)
 
           .filter(or_(fixture.home_team_id == CPT.team_id, fixture.away_team_id == CPT.team_id)) # -- NOTA (1)
 
@@ -993,12 +993,12 @@ class Player(Base):
             print(f"Selected Season: {selected_season_id} {selected_season_year}")
 
             # Recupera il numero di round della stagione fino ad oggi
-            count_matches = Fixture.how_many_matches_until_now(session, selected_season_year)
-            print(f"Num. of matches until now: {count_matches}")
+            count_rounds = Fixture.get_last_or_current_round(session, selected_season_year)
+            print(f"Num. of rounds until now: {count_rounds}")
 
             # Logica per gestire `last_n_rounds` e `league_round`
             if not last_n_rounds and not league_round:
-                last_n_rounds = count_matches  # Considera tutta la stagione se entrambi i parametri sono null
+                last_n_rounds = count_rounds  # Considera tutta la stagione se entrambi i parametri sono null
             elif last_n_rounds and league_round:
                 last_n_rounds = None  # Ignora `last_n_rounds` se `league_round` è fornito
 
@@ -1021,8 +1021,8 @@ class Player(Base):
             print(f"Filtered rounds: {', '.join(str(tup[0]) for tup in filtered_rounds)}")
 
             # Conta il numero di match / round
-            count_matches = len(filtered_rounds)
-            matches_minimum_presence = Player.compute_matches_minum_presence(count_matches)
+            count_rounds = len(filtered_rounds)
+            matches_minimum_presence = Player.compute_matches_minum_presence(count_rounds)
             print("Matches minimum presence:", matches_minimum_presence)
 
             # Subquery per ottenere i giocatori che hanno giocato almeno un certo numero di partite
@@ -1201,7 +1201,7 @@ class Player(Base):
                     'penalty_missed': row.penalty_missed,
                     'penalty_saved': row.penalty_saved,
                     'total_matches_played': row.total_matches_played,
-                    'total_season_matches': count_matches,
+                    'total_season_rounds': count_rounds,
                     'season': selected_season_year
                 }
             
@@ -1325,10 +1325,13 @@ class Player(Base):
                 player = player.strip()  # Rimuove eventuali spazi prima e dopo il nome
                 print("Processing player:", player)
 
+                player_rec = Player.get_players_by_name(session, player, False)
+                print("player_rec")
+
                 # Ricavo la squadra a cui appartiene
                 player_team_info = (session.query(Player.id.label('player_id'), Player.name.label('player_name'), CurrentPlayerTeam.team_id)
                     .join(CurrentPlayerTeam, Player.id == CurrentPlayerTeam.player_id)
-                    .filter(func.unaccent(Player.name).ilike(func.unaccent(f'%{player}%')))
+                    .filter(Player.id == player_rec[0]['id'])
                     .limit(1)  # Assicuriamoci di ottenere solo un risultato
                     .first())
 
@@ -1365,19 +1368,23 @@ class Player(Base):
                 #print("opponent_team_detail", opponent_team_detail)
 
                 # Ricavo le stats delle ultime 5 giornate del player
-                last_player_stats = Player.get_player_fixtures_stats(session, player_name, last_n_rounds=5, home_away_filter=None, season=season['year'])
+                player_fixture_stats = Player.get_player_fixtures_stats(session, player_name, last_n_rounds=5, home_away_filter=None, season=season['year'])
+
+                last_player_stats = player_fixture_stats[0]["players"][0]["stats"]
+                last_5_played_count = player_fixture_stats[0]["players"][0]["played_matches_number"]
                 
                 # Aggrega le statistiche
                 aggregated_player_stats = FixturePlayerStatistics.aggregate_player_stats(last_player_stats)
+
+                aggregated_player_stats.pop("fbrating", None) #il valore di fbrating è associato alla chiave rating 
+                aggregated_player_stats["last_5_played_count"] = last_5_played_count #aggiungo il numero match giocati
 
                 # Ricavo informazioni sulla classifica delle due squadre
                 player_team_standings = Standings.get_by_ids(session, season['id'], player_team_detail['id'])
                 opponent_team_standings = Standings.get_by_ids(session, season['id'], opponent_team_detail['id'])
 
-                print(player_team_standings[0])
-
                 # Aggiungi le informazioni al risultato
-                result[player] = {
+                result[player_name] = {
                     'player_name': player_name,
                     'player_team_name': player_team_detail['name'],
                     'next_fixture': {
