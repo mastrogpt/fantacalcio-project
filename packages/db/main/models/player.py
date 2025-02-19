@@ -6,6 +6,7 @@ from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.orm import aliased
 from models.season import Season
+from models.league import League
 from models.team import Team
 from models.current_player_team import CurrentPlayerTeam
 from models.league import League
@@ -703,6 +704,7 @@ class Player(Base):
         opponent_team = aliased(Team)
         fixture = aliased(Fixture)
         SelectedSeason = aliased(Season)
+        league = aliased(League)
 
         FPS = aliased(FixturePlayerStatistics)
         CPT = aliased(CurrentPlayerTeam)
@@ -732,7 +734,8 @@ class Player(Base):
             player.c.lastname,
             func.concat(player.c.firstname, ' ', player.c.lastname).label('player_full_name'),
             fixture.event_datetime,
-            selected_season_subquery.c.year.label('season'),
+            league.name.label('league'),
+            selected_season_subquery.c.year.label('selected_season'),
             team.name.label('team_name'),
             PS.position.label('ps_position'),
             case(
@@ -743,7 +746,7 @@ class Player(Base):
             fixture.id.label('fixture_id'),
             fixture.goals_home,
             fixture.goals_away,
-            fixture.league_round,
+            fixture.league_round.label('selected_season_played_rounds'),
             FPS,
             func.row_number().over(
               partition_by = player.c.id,
@@ -753,6 +756,10 @@ class Player(Base):
           .join(FPS, FPS.player_id == player.c.id)
           .join(CPT, player.c.id == CPT.player_id)
           .join(fixture, FPS.fixture_id == fixture.id)
+          .join(league, and_(
+            league.name == "Serie A",
+            league.country_name == "Italy",
+          ))
           .join(team, CPT.team_id == team.id)
           .join(PS, and_(
             PS.team_id == team.id,
@@ -769,7 +776,7 @@ class Player(Base):
           .filter(or_(
             and_(home_away_filter == 'home', fixture.home_team_id == CPT.team_id),
             and_(home_away_filter == 'away', fixture.away_team_id == CPT.team_id),
-            or_(home_away_filter == '', home_away_filter == None)
+            and_(home_away_filter != 'home', home_away_filter != 'away')
           ))
           #.filter(FPS.games_minutes > 0)
 
@@ -791,13 +798,14 @@ class Player(Base):
           player_fixtures_subquery.c.firstname.label('player_firstname'),
           player_fixtures_subquery.c.lastname.label('player_lastname'),
           player_fixtures_subquery.c.player_full_name,
-          player_fixtures_subquery.c.season,
+          player_fixtures_subquery.c.selected_season,
           player_fixtures_subquery.c.event_datetime,
           player_fixtures_subquery.c.team_name,
           player_fixtures_subquery.c.ps_position.label('position'),
           player_fixtures_subquery.c.home_or_away,
           player_fixtures_subquery.c.opponent_team,
-          player_fixtures_subquery.c.league_round,
+          player_fixtures_subquery.c.selected_season_played_rounds,
+          player_fixtures_subquery.c.league,
           func.concat(player_fixtures_subquery.c.goals_home, ' - ', player_fixtures_subquery.c.goals_away).label('result'),
 
           case(
@@ -860,15 +868,16 @@ class Player(Base):
         player_statistic = result_query.all()
 
         results = []
-        season_selected = ''
+        selected_season = ''
 
         for row in player_statistic:
           player_dict = {}
           for attr in columns:
             if attr:
-              player_dict[attr] = getattr(row, attr)
-              if attr == 'season':
-                season_selected = player_dict[attr]
+              if attr == 'selected_season':
+                selected_season = getattr(row, attr)
+              else:
+                player_dict[attr] = getattr(row, attr)
 
           results.append(player_dict)
 
@@ -879,13 +888,26 @@ class Player(Base):
           'player_lastname' : '',
           'player_id' : '',
           'team_name' : '',
-          'last_fixture_id': ''
+          'last_fixture_id': '',
+          'league': ''
         }
+
+        current_season = Season.get_current_season(session, 1) # league_id = 1 => 'Serie A'
+
+        last_current_season_round = Fixture.get_last_or_current_round(session, current_season['year'], 1) # league_id = 1 => 'Serie A'
+
+        # potenziale logica da usare quando verranno gestite più leghe
+        # current_seasons_array = session.query(Season).filter_by(current = True)
+        # map_current_season_by_league_id = {}
+        # for row in current_seasons_array.all():
+        #   map_current_season_by_league_id[getattr(row, 'league_id')] = getattr(row,'year')
 
         dict_to_return = {
           # 'last_n_rounds' : int(last_n_rounds) if last_n_rounds else num_all_matches,
           'today_date' : str(date.today()),
-          'season_selected' : season_selected,
+          'selected_season' : selected_season,
+          'current_season' : current_season['year'],
+          'last_current_season_round' : last_current_season_round,
           'players' : []
         }
 
@@ -911,11 +933,15 @@ class Player(Base):
               player_from_map_id[key] = val
               del only_stats_row[key]
 
+            # potenziale logica da usare quando verranno gestite più leghe
+            # if key == 'league_id':
+            #   player_from_map_id['current_season'] = map_current_season_by_league_id[row[key]]
+
           if only_stats_row['games_minutes'] > 0:
 
             if len(map_played_rounds_by_player_id[player_id]) == 0:
               # player_from_map_id['last_played_fixture_id'] = row['fixture_id']
-              player_from_map_id['last_round'] = row['league_round']
+              player_from_map_id['last_selected_season_played_rounds'] = row['selected_season_played_rounds']
 
             map_played_rounds_by_player_id[player_id].append(row['fixture_id'])
 
